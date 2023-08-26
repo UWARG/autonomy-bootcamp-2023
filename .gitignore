@@ -1,0 +1,15 @@
+# IDEs
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+.pytest_cache/
+venv/
+
+# Pytorch and Ultralytics
+*.pt
+*.pth
+
+# Logging
+*log*
