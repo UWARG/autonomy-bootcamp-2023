@@ -1,24 +1,24 @@
 """
 DO NOT MODIFY THIS FILE.
 
-Test simulation with a figure 8.
+Test drone state simulation with a figure 8.
 """
 
 from modules import commands
 from modules import drone_status
-from modules.private.simulation import simulation
+from modules.private.simulation.drone import drone_state
 
 
 def figure8() -> int:
     """
     main.
     """
-    result, simulator = simulation.Simulation.create(0.0, 0.0, (-11.0, -11.0), (11.0, 11.0))
+    result, drone = drone_state.DroneState.create(0.0, 0.0, (-11.0, -11.0), (11.0, 11.0))
     if not result:
         return -1
 
     # Get Pylance to stop complaining
-    assert simulator is not None
+    assert drone is not None
 
     # 0: Top right corner
     # 1: Bottom right corner
@@ -41,7 +41,7 @@ def figure8() -> int:
         commands.Command.create_land_command(),
     ]
 
-    report, step = simulator.run(None)
+    report, step = drone.run(None)
     while report.status != drone_status.DroneStatus.LANDED and step < 1000:
         command = None
         if report.status == drone_status.DroneStatus.HALTED:
@@ -52,7 +52,7 @@ def figure8() -> int:
             command = waypoints[waypoint_index]
             waypoint_index += 1
 
-        report, step = simulator.run(command)
+        report, step = drone.run(command)
 
     print("At: " + str(report.position.location_x) + ", " + str(report.position.location_y))
     print("Steps: " + str(step))

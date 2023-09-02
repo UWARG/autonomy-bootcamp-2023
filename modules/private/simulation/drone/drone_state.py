@@ -6,17 +6,17 @@ Simple simulation of drone in world.
 import math
 
 from . import drone_velocity
-from ... import commands
-from ... import drone_report
-from ... import drone_status
-from ... import location
+from .... import commands
+from .... import drone_report
+from .... import drone_status
+from .... import location
 
 
 # Basically a struct
 # pylint: disable-next=too-many-instance-attributes
-class Simulation:
+class DroneState:
     """
-    Contains simulation state.
+    Contains drone simulation state.
     """
     __create_key = object()
 
@@ -29,7 +29,7 @@ class Simulation:
                initial_x: float,
                initial_y: float,
                boundary1: "tuple[float, float]",
-               boundary2: "tuple[float, float]") -> "tuple[bool, Simulation | None]":
+               boundary2: "tuple[float, float]") -> "tuple[bool, DroneState | None]":
         """
         initial is initial position of drone.
         boundary is xyxy corners of map area.
@@ -49,7 +49,7 @@ class Simulation:
         if initial_y < boundary1[1] or initial_y > boundary2[1]:
             return False, None
 
-        return True, Simulation(
+        return True, DroneState(
             cls.__create_key,
             initial_x,
             initial_y,
@@ -71,7 +71,7 @@ class Simulation:
         """
         Private constructor, use create() method.
         """
-        assert class_private_create_key is Simulation.__create_key, "Use create() method"
+        assert class_private_create_key is DroneState.__create_key, "Use create() method"
 
         # Map area boundary
         self.__boundary_x1 = boundary_x1
@@ -292,7 +292,7 @@ class Simulation:
         if self.__is_arrived():
             self.__update_intent(drone_status.DroneStatus.HALTED, self.__destination)
 
-        # Simulation
+        # Physical simulation
         # Simple implicit Euler approximation
         velocity_x, velocity_y = self.__velocity.get_xy_velocity()
         self.__position.location_x += velocity_x * self.__TIME_STEP_SIZE
