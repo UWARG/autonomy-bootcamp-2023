@@ -8,17 +8,20 @@ import time
 
 import cv2
 
+from modules import location
 from modules.private.simulation.mapping import map_render
 
 
 MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
+LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
+DELAY = 0.01
 
 
-def display(renderer: map_render.MapRender, position_x: float, position_y: float) -> bool:
+def display(renderer: map_render.MapRender, position: location.Location) -> bool:
     """
     Helper function.
     """
-    result, image = renderer.run(position_x, position_y)
+    result, image = renderer.run(position)
     if not result:
         return False
 
@@ -28,7 +31,7 @@ def display(renderer: map_render.MapRender, position_x: float, position_y: float
     # Pylint has issues with OpenCV
     # pylint: disable=no-member
     cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
-    cv2.resizeWindow('Map', 600, 450)
+    cv2.resizeWindow('Map', image.shape[1] // 2, image.shape[0] // 2)
     cv2.imshow("Map", image)
     cv2.waitKey(1)
     # pylint: enable=no-member
@@ -36,105 +39,112 @@ def display(renderer: map_render.MapRender, position_x: float, position_y: float
     return True
 
 
+# Result checking, basic for loops
+# pylint: disable-next=too-many-return-statements,too-many-branches
 def figure8() -> int:
     """
     main.
     """
+    landing_pad_locations = [
+        location.Location(0.0, 0.0),
+        location.Location(-40.0, 0.5),
+    ]
+
     result, renderer = map_render.MapRender.create(
         60,
         1200,
         900,
         MAP_IMAGES_PATH,
+        LANDING_PAD_IMAGES_PATH,
+        landing_pad_locations,
     )
     if not result:
-        print("Attempt")
         return -1
 
     # Get Pylance to stop complaining
     assert renderer is not None
 
-    position_x = 0.0
-    position_y = 0.0
+    position = location.Location(0.0, 0.0)
 
-    result = display(renderer, position_x, position_y)
+    result = display(renderer, position)
     if not result:
         return -1
 
     # Top right corner
     for _ in range(0, 500):
-        position_x += 0.1
-        position_y += 0.075
-        result = display(renderer, position_x, position_y)
+        position.location_x += 0.1
+        position.location_y += 0.075
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Bottom right corner
     for _ in range(0, 500):
-        position_y -= 0.15
-        result = display(renderer, position_x, position_y)
+        position.location_y -= 0.15
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Centre
     for _ in range(0, 500):
-        position_x -= 0.1
-        position_y += 0.075
-        result = display(renderer, position_x, position_y)
+        position.location_x -= 0.1
+        position.location_y += 0.075
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Bottom left corner
     for _ in range(0, 500):
-        position_x -= 0.1
-        position_y -= 0.075
-        result = display(renderer, position_x, position_y)
+        position.location_x -= 0.1
+        position.location_y -= 0.075
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Top left corner
     for _ in range(0, 500):
-        position_y += 0.15
-        result = display(renderer, position_x, position_y)
+        position.location_y += 0.15
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Centre
     for _ in range(0, 500):
-        position_x += 0.1
-        position_y -= 0.075
-        result = display(renderer, position_x, position_y)
+        position.location_x += 0.1
+        position.location_y -= 0.075
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Left
     for _ in range(0, 500):
-        position_x -= 0.1
-        result = display(renderer, position_x, position_y)
+        position.location_x -= 0.1
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     # Centre
     for _ in range(0, 500):
-        position_x += 0.1
-        result = display(renderer, position_x, position_y)
+        position.location_x += 0.1
+        result = display(renderer, position)
         if not result:
             return -1
 
-        time.sleep(0.01)
+        time.sleep(DELAY)
 
     return 0
 

@@ -8,6 +8,100 @@ import pathlib
 import cv2
 import numpy as np
 
+from .... import location
+
+
+# Basically a struct
+# pylint: disable-next=too-few-public-methods
+class LandingPadOnMap:
+    """
+    Information required to draw the landing pad on the combined image.
+    """
+    __create_key = object()
+
+    @classmethod
+    # Better to be explicit with parameters, required by checks
+    # pylint: disable-next=too-many-arguments,too-many-return-statements
+    def create(cls,
+               pad_image: np.ndarray,
+               pad_position: location.Location,
+               pixels_per_metre: int,
+               resolution_x: int,
+               resolution_y: int) -> "tuple[bool, LandingPadOnMap | None]":
+        """
+        Data to draw the landing pad on the combined local map.
+        """
+        if pixels_per_metre < 1:
+            return False, None
+
+        if resolution_x < 1:
+            return False, None
+
+        if resolution_y < 1:
+            return False, None
+
+        if len(pad_image.shape) < 3:
+            return False, None
+
+        # Alpha channel
+        if pad_image.shape[2] != 4:
+            return False, None
+
+        result, pixel_location = MapRender.world_pixel_from_position_coordinates(
+            pad_position,
+            pixels_per_metre,
+        )
+        if not result:
+            return False, None
+
+        # Get Pylance to stop complaining
+        assert pixel_location is not None
+
+        pixel_x, pixel_y = pixel_location
+
+        result, image_location = MapRender.image_from_pixel_coordinates(
+            pixel_x,
+            pixel_y,
+            resolution_x,
+            resolution_y,
+        )
+        if not result:
+            return False, None
+
+        # Get Pylance to stop complaining
+        assert image_location is not None
+
+        image_x, image_y = image_location
+
+        return True, LandingPadOnMap(
+            cls.__create_key,
+            pad_image,
+            image_x,
+            image_y,
+            pixel_x % resolution_x,
+            pixel_y % resolution_y,
+        )
+
+    # Better to be explicit with parameters
+    # pylint: disable-next=too-many-arguments
+    def __init__(self,
+                 class_private_create_key,
+                 pad_image: np.ndarray,
+                 image_x: int,
+                 image_y: int,
+                 centre_pixel_x: int,
+                 centre_pixel_y: int):
+        """
+        Private constructor, use create() method.
+        """
+        assert class_private_create_key is LandingPadOnMap.__create_key, "Use create() method"
+
+        self.pad_image = pad_image
+        self.image_x = image_x
+        self.image_y = image_y
+        self.centre_pixel_x = centre_pixel_x
+        self.centre_pixel_y = centre_pixel_y
+
 
 class CombinedLocalMap:
     """
@@ -19,11 +113,13 @@ class CombinedLocalMap:
     def create(cls,
                centre_image_x: int,
                centre_image_y: int,
-               named_images: "dict[tuple[int, int], np.ndarray]") \
+               named_images: "dict[tuple[int, int], np.ndarray]",
+               landing_pads: "list[LandingPadOnMap]") \
         -> "tuple[bool, CombinedLocalMap | None]":
         """
-        Combines the centre image and the images to the top left.
+        Combines the centre image and the images around it, and draws the landing pads.
         """
+        # Combine images
         columns = []
         for i in range(centre_image_x - 1, centre_image_x + 1 + 1):
             row = []
@@ -38,6 +134,23 @@ class CombinedLocalMap:
             columns.append(column)
 
         combined_image = np.concatenate(tuple(columns), axis=1)
+
+        # Draw landing pads
+        for landing_pad in landing_pads:
+            # Pixel offset = Image corner in pixels + offset inside image
+            offset_x = (landing_pad.image_x - centre_image_x + 1) * combined_image.shape[1] // 3 \
+                + landing_pad.centre_pixel_x - landing_pad.pad_image.shape[1] // 2
+            offset_y = (landing_pad.image_y - centre_image_y + 1) * combined_image.shape[0] // 3 \
+                + landing_pad.centre_pixel_y - landing_pad.pad_image.shape[0] // 2
+
+            result, _ = cls.__add_transparent_image(
+                combined_image,
+                landing_pad.pad_image,
+                offset_x,
+                offset_y,
+            )
+            if not result:
+                return False, None
 
         return True, CombinedLocalMap(
             cls.__create_key,
@@ -59,6 +172,76 @@ class CombinedLocalMap:
         self.centre_image_x = centre_image_x
         self.centre_image_y = centre_image_y
         self.__combined_image = combined_image
+
+    @staticmethod
+    # Original code
+    # pylint: disable-next=too-many-locals
+    def __add_transparent_image(background: np.ndarray,
+                                foreground: np.ndarray,
+                                x_offset: int,
+                                y_offset: int) -> "tuple[bool, bool | None]":
+        """
+        Correctly overlays the possibly transparent foreground image onto the background image.
+        From: https://stackoverflow.com/a/71701023
+        Modified for WARG use.
+
+        background: Image to be mutated.
+
+        Return: Status, whether it was drawn.
+        """
+        bg_h, bg_w, bg_channels = background.shape
+        fg_h, fg_w, fg_channels = foreground.shape
+
+        # Original code
+        # pylint: disable=line-too-long
+        # assert bg_channels == 3, f'background image should have exactly 3 channels (RGB). found:{bg_channels}'
+        # assert fg_channels == 4, f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}'
+        # pylint: enable=line-too-long
+        if bg_channels != 3:
+            print("ERROR: Background does not have 3 colour channels")
+            return False, None
+
+        if fg_channels != 4:
+            print("ERROR: Foreground does not have 4 colour channels")
+            return False, None
+
+        # center by default
+        # if x_offset is None: x_offset = (bg_w - fg_w) // 2
+        # if y_offset is None: y_offset = (bg_h - fg_h) // 2
+
+        # Original code
+        # pylint: disable=invalid-name
+        w: int = min(fg_w, bg_w, fg_w + x_offset, bg_w - x_offset)
+        h: int = min(fg_h, bg_h, fg_h + y_offset, bg_h - y_offset)
+        # pylint: enable=invalid-name
+
+        if w < 1 or h < 1:
+            return True, False
+
+        # clip foreground and background images to the overlapping regions
+        bg_x = max(0, x_offset)
+        bg_y = max(0, y_offset)
+        fg_x = max(0, x_offset * -1)
+        fg_y = max(0, y_offset * -1)
+        foreground = foreground[fg_y:fg_y + h, fg_x:fg_x + w]
+        background_subsection = background[bg_y:bg_y + h, bg_x:bg_x + w]
+
+        # separate alpha and color channels from the foreground image
+        foreground_colors = foreground[:, :, :3]
+        alpha_channel = foreground[:, :, 3] / 255  # 0-255 => 0.0-1.0
+
+        # construct an alpha_mask that matches the image shape
+        # alpha_mask = np.dstack((alpha_channel, alpha_channel, alpha_channel))
+        # Optimization from comment
+        alpha_mask = alpha_channel[:,:,np.newaxis]
+
+        # combine the background with the overlay image weighted by alpha
+        composite = background_subsection * (1 - alpha_mask) + foreground_colors * alpha_mask
+
+        # overwrite the section of the background image that has been updated
+        background[bg_y:bg_y + h, bg_x:bg_x + w] = composite
+
+        return True, True
 
     @staticmethod
     def __is_within_bounds(to_check: int, lower: int, upper: int) -> bool:
@@ -84,10 +267,10 @@ class CombinedLocalMap:
         Window into larger image.
         """
         # Offset from centre
-        top = centre_pixel_y - int(resolution_y / 2) + resolution_y
-        bottom = centre_pixel_y + int((resolution_y + 1) / 2) + resolution_y
-        left = centre_pixel_x - int(resolution_x / 2) + resolution_x
-        right = centre_pixel_x + int((resolution_x + 1) / 2) + resolution_x
+        top = centre_pixel_y - resolution_y // 2 + resolution_y
+        bottom = centre_pixel_y + (resolution_y + 1) // 2 + resolution_y
+        left = centre_pixel_x - resolution_x // 2 + resolution_x
+        right = centre_pixel_x + (resolution_x + 1) // 2 + resolution_x
 
         # Positive y is down
         if top >= bottom:
@@ -111,6 +294,8 @@ class CombinedLocalMap:
         return True, np.array(self.__combined_image[top:bottom,left:right])
 
 
+# Better to be explicit with members
+# pylint: disable-next=too-many-instance-attributes
 class MapRender:
     """
     Loads, concatenats, crops, and displays map images.
@@ -118,53 +303,118 @@ class MapRender:
     """
     __create_key = object()
 
-    __DEFAULT_IMAGE_NAME = "default.png"
+    __DEFAULT_MAP_IMAGE_NAME = "default.png"
+    __LANDING_PAD_IMAGE_NAME = "pad.png"
 
     @classmethod
-    # Required by checks
-    # pylint: disable-next=too-many-return-statements
+    # Better to be explicit with parameters, required by checks, required by checks
+    # pylint: disable-next=too-many-arguments,too-many-return-statements,too-many-branches
     def create(cls,
                pixels_per_metre: int,
                resolution_x: int,
                resolution_y: int,
-               image_directory: pathlib.Path) -> "tuple[bool, MapRender | None]":
+               map_image_directory: pathlib.Path,
+               landing_pad_image_directory: pathlib.Path,
+               landing_pad_locations: "list[location.Location]") -> "tuple[bool, MapRender | None]":
         """
         pixels_per_metre: Number of pixels for each metre of distance.
         resolution is resolution of images in pixels.
-        image_directory: Directory containing the map images.
+        map_image_directory: Directory containing the map images.
         """
         if pixels_per_metre < 1:
+            print("A")
             return False, None
 
         if resolution_x < 1:
+            print("B")
             return False, None
 
         if resolution_y < 1:
+            print("C")
             return False, None
 
-        if not image_directory.is_dir():
+        if not map_image_directory.is_dir():
+            print("D")
             return False, None
 
-        default_image_path = pathlib.PurePosixPath(image_directory, cls.__DEFAULT_IMAGE_NAME)
+        if not landing_pad_image_directory.is_dir():
+            print("E")
+            return False, None
+
+        default_map_image_path = pathlib.PurePosixPath(
+            map_image_directory,
+            cls.__DEFAULT_MAP_IMAGE_NAME,
+        )
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
-        default_image = cv2.imread(str(default_image_path))
-        if default_image is None:
+        default_map_image = cv2.imread(str(default_map_image_path))
+        if default_map_image is None:
+            print("F")
             return False, None
 
         # Get Pylance to stop complaining
-        assert default_image is not None
+        assert default_map_image is not None
 
-        if not cls.__is_image_valid_shape(default_image, (resolution_y, resolution_x, 3)):
+        if not cls.__is_image_valid_shape(default_map_image, (resolution_y, resolution_x, 3)):
+            print("G")
             return False, None
+
+        landing_pad_image_path = pathlib.PurePosixPath(
+            landing_pad_image_directory,
+            cls.__LANDING_PAD_IMAGE_NAME,
+        )
+        # Pylint has issues with OpenCV
+        # pylint: disable-next=no-member
+        landing_pad_image = cv2.imread(str(landing_pad_image_path), cv2.IMREAD_UNCHANGED)
+        if landing_pad_image is None:
+            print("H")
+            return False, None
+
+        # Get Pylance to stop complaining
+        assert landing_pad_image is not None
+
+        if len(landing_pad_image.shape) != 3:
+            print("I")
+            return False, None
+
+        if landing_pad_image.shape[1] > resolution_x // 2:
+            print("J")
+            return False, None
+
+        if landing_pad_image.shape[0] > resolution_y // 2:
+            print("K")
+            return False, None
+
+        if landing_pad_image.shape[2] != 4:
+            print("L")
+            return False, None
+
+        landing_pads = []
+        for landing_pad_location in landing_pad_locations:
+            result, landing_pad_on_map = LandingPadOnMap.create(
+                landing_pad_image,
+                landing_pad_location,
+                pixels_per_metre,
+                resolution_x,
+                resolution_y
+            )
+            if not result:
+                print("M")
+                return False, None
+
+            # Get Pylance to stop complaining
+            assert landing_pad_on_map is not None
+
+            landing_pads.append(landing_pad_on_map)
 
         return True, MapRender(
             cls.__create_key,
             pixels_per_metre,
             resolution_x,
             resolution_y,
-            image_directory,
-            default_image,
+            map_image_directory,
+            default_map_image,
+            landing_pads,
         )
 
     # Better to be explicit with parameters
@@ -174,8 +424,9 @@ class MapRender:
                  pixels_per_metre: int,
                  resolution_x: int,
                  resolution_y: int,
-                 image_directory: pathlib.Path,
-                 default_image: np.ndarray):
+                 map_image_directory: pathlib.Path,
+                 default_map_image: np.ndarray,
+                 landing_pads: "list[LandingPadOnMap]"):
         """
         Private constructor, use create() method.
         """
@@ -185,11 +436,12 @@ class MapRender:
         self.__resolution_x = resolution_x
         self.__resolution_y = resolution_y
 
-        self.__image_directory = image_directory
-        self.__default_image = default_image
+        self.__map_image_directory = map_image_directory
+        self.__default_map_image = default_map_image
 
         self.__cached_images: "dict[tuple[int, int], np.ndarray]" = {}
         self.__current_render: "CombinedLocalMap | None" = None
+        self.__landing_pads = landing_pads
 
     @staticmethod
     def __is_image_valid_shape(image: np.ndarray, shape: "tuple[int, int, int]"):
@@ -199,10 +451,10 @@ class MapRender:
         return image.shape == shape
 
     @staticmethod
-    def __image_from_pixel_coordinates(pixel_x: int,
-                                       pixel_y: int,
-                                       resolution_x: int,
-                                       resolution_y: int) -> "tuple[bool, tuple[int, int] | None]":
+    def image_from_pixel_coordinates(pixel_x: int,
+                                     pixel_y: int,
+                                     resolution_x: int,
+                                     resolution_y: int) -> "tuple[bool, tuple[int, int] | None]":
         """
         Calculates the appropriate image to load.
         """
@@ -219,9 +471,8 @@ class MapRender:
         return True, (image_x, image_y)
 
     @staticmethod
-    def __pixel_from_position_coordinates(position_x: float,
-                                          position_y: float,
-                                          pixels_per_metre: int) \
+    def world_pixel_from_position_coordinates(position: location.Location,
+                                              pixels_per_metre: int) \
         -> "tuple[bool, tuple[int, int] | None]":
         """
         Camera space to pixel space.
@@ -231,13 +482,13 @@ class MapRender:
             return False, None
 
         # In image space, positive y is down
-        pixel_x = int(position_x * pixels_per_metre)
-        pixel_y = int(position_y * pixels_per_metre * -1)
+        pixel_x = int(position.location_x * pixels_per_metre)
+        pixel_y = int(position.location_y * pixels_per_metre * -1)
 
         return True, (pixel_x, pixel_y)
 
     @staticmethod
-    def __generate_default_image_with_coordinates(image: np.ndarray,
+    def __generate_default_map_image_with_coordinates(image: np.ndarray,
                                                   image_x: int,
                                                   image_y: int) -> np.ndarray:
         """
@@ -249,7 +500,7 @@ class MapRender:
         image = cv2.putText(
             np.array(image, dtype=np.uint8),
             text,
-            (int(image.shape[1] / 8), int(image.shape[0] / 2)),
+            (image.shape[1] // 8, image.shape[0] // 2),
             # Pylint has issues with OpenCV
             # pylint: disable-next=no-member
             cv2.FONT_HERSHEY_SIMPLEX,
@@ -279,7 +530,7 @@ class MapRender:
 
         # Cache miss, load from file
         image_name = str(image_x) + "," + str(image_y) + ".png"
-        image_path = pathlib.PurePosixPath(self.__image_directory, image_name)
+        image_path = pathlib.PurePosixPath(self.__map_image_directory, image_name)
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
         image = cv2.imread(str(image_path))
@@ -287,8 +538,8 @@ class MapRender:
             print("Warning: Could not read image file: " + image_path.name)
             print("Warning: Loading default")
             self.__cached_images[(image_x, image_y)] = \
-                self.__generate_default_image_with_coordinates(
-                    self.__default_image,
+                self.__generate_default_map_image_with_coordinates(
+                    self.__default_map_image,
                     image_x,
                     image_y,
                 )
@@ -301,8 +552,8 @@ class MapRender:
             print("Warning: Image has incorrect shape: " + str(image.shape))
             print("Warning: Loading default")
             self.__cached_images[(image_x, image_y)] = \
-                self.__generate_default_image_with_coordinates(
-                    self.__default_image,
+                self.__generate_default_map_image_with_coordinates(
+                    self.__default_map_image,
                     image_x,
                     image_y,
                 )
@@ -310,13 +561,12 @@ class MapRender:
 
         self.__cached_images[(image_x, image_y)] = image
 
-    def run(self, camera_x: float, camera_y: float) -> "tuple[bool, np.ndarray | None]":
+    def run(self, camera_position: location.Location) -> "tuple[bool, np.ndarray | None]":
         """
-        Returns the image to be rendered.
+        Returns the map image seen by the camera.
         """
-        result, pixel_location = self.__pixel_from_position_coordinates(
-            camera_x,
-            camera_y,
+        result, pixel_location = self.world_pixel_from_position_coordinates(
+            camera_position,
             self.__pixels_per_metre,
         )
         if not result:
@@ -328,7 +578,7 @@ class MapRender:
 
         pixel_x, pixel_y = pixel_location
 
-        result, image_to_load = self.__image_from_pixel_coordinates(
+        result, image_to_load = self.image_from_pixel_coordinates(
             pixel_x,
             pixel_y,
             self.__resolution_x,
@@ -397,6 +647,7 @@ class MapRender:
                 centre_image_x,
                 centre_image_y,
                 self.__cached_images,
+                self.__landing_pads,
             )
             if not result:
                 print("ERROR: Could not render map")
@@ -412,6 +663,7 @@ class MapRender:
                 centre_image_x,
                 centre_image_y,
                 self.__cached_images,
+                self.__landing_pads,
             )
             if not result:
                 print("ERROR: Could not render map")

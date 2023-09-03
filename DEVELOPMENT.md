@@ -5,6 +5,8 @@ TODO: Confluence
 
 TODO: Logging (see all print statements)
 
+TODO: Unit tests
+
 TODO: Run tests:
 
 ```bash
