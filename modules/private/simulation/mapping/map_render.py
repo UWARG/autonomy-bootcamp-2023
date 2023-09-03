@@ -322,23 +322,18 @@ class MapRender:
         map_image_directory: Directory containing the map images.
         """
         if pixels_per_metre < 1:
-            print("A")
             return False, None
 
         if resolution_x < 1:
-            print("B")
             return False, None
 
         if resolution_y < 1:
-            print("C")
             return False, None
 
         if not map_image_directory.is_dir():
-            print("D")
             return False, None
 
         if not landing_pad_image_directory.is_dir():
-            print("E")
             return False, None
 
         default_map_image_path = pathlib.PurePosixPath(
@@ -349,14 +344,12 @@ class MapRender:
         # pylint: disable-next=no-member
         default_map_image = cv2.imread(str(default_map_image_path))
         if default_map_image is None:
-            print("F")
             return False, None
 
         # Get Pylance to stop complaining
         assert default_map_image is not None
 
         if not cls.__is_image_valid_shape(default_map_image, (resolution_y, resolution_x, 3)):
-            print("G")
             return False, None
 
         landing_pad_image_path = pathlib.PurePosixPath(
@@ -367,26 +360,21 @@ class MapRender:
         # pylint: disable-next=no-member
         landing_pad_image = cv2.imread(str(landing_pad_image_path), cv2.IMREAD_UNCHANGED)
         if landing_pad_image is None:
-            print("H")
             return False, None
 
         # Get Pylance to stop complaining
         assert landing_pad_image is not None
 
         if len(landing_pad_image.shape) != 3:
-            print("I")
             return False, None
 
         if landing_pad_image.shape[1] > resolution_x // 2:
-            print("J")
             return False, None
 
         if landing_pad_image.shape[0] > resolution_y // 2:
-            print("K")
             return False, None
 
         if landing_pad_image.shape[2] != 4:
-            print("L")
             return False, None
 
         landing_pads = []
@@ -399,7 +387,6 @@ class MapRender:
                 resolution_y
             )
             if not result:
-                print("M")
                 return False, None
 
             # Get Pylance to stop complaining
@@ -585,7 +572,7 @@ class MapRender:
             self.__resolution_y,
         )
         if not result:
-            print("ERROR: Could determine image")
+            print("ERROR: Could not determine image to load")
             return False, None
 
         # Get Pylance to stop complaining

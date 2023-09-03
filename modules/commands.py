@@ -12,6 +12,7 @@ class Command:
 
     Any of the following methods will create a Command object with the correct command:
 
+    * Command.create_null_command()
     * Command.create_set_relative_destination_command()
     * Command.create_halt_command()
     * Command.create_land_command()
@@ -22,11 +23,24 @@ class Command:
         """
         Different types of commands.
         """
-        SET_RELATIVE_DESTINATION = 0  # Move relative to current position
-        HALT                     = 1  # Stop the drone ASAP
-        LAND                     = 2  # Land at current position
+        NULL                     = 0  # Stay the course
+        SET_RELATIVE_DESTINATION = 1  # Move relative to current position
+        HALT                     = 2  # Stop the drone ASAP
+        LAND                     = 3  # Land at current position
 
     __create_key = object()
+
+    @classmethod
+    def create_null_command(cls) -> "Command":
+        """
+        Command that has no effect (default).
+        """
+        return Command(
+            cls.__create_key,
+            Command.CommandType.NULL,
+            0.0,
+            0.0,
+        )
 
     @classmethod
     def create_set_relative_destination_command(cls,

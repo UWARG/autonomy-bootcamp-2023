@@ -6,14 +6,26 @@ Test drone state simulation with a figure 8.
 
 from modules import commands
 from modules import drone_status
+from modules import location
 from modules.private.simulation.drone import drone_state
+
+
+TIME_STEP_SIZE = 0.01  # seconds
 
 
 def figure8() -> int:
     """
     main.
     """
-    result, drone = drone_state.DroneState.create(0.0, 0.0, (-11.0, -11.0), (11.0, 11.0))
+    initial_position = location.Location(0.0, 0.0)
+    boundary_top_left = location.Location(-11.0, -11.0)
+    boundary_bottom_right = location.Location(11.0, 11.0)
+    result, drone = drone_state.DroneState.create(
+        TIME_STEP_SIZE,
+        initial_position,
+        boundary_top_left,
+        boundary_bottom_right,
+    )
     if not result:
         return -1
 
@@ -41,10 +53,11 @@ def figure8() -> int:
         commands.Command.create_land_command(),
     ]
 
-    report, step = drone.run(None)
+    report, step = drone.run(commands.Command.create_null_command())
     while report.status != drone_status.DroneStatus.LANDED and step < 1000:
-        command = None
+        command = commands.Command.create_null_command()
         if report.status == drone_status.DroneStatus.HALTED:
+            print(step)
             print(waypoint_index)
             location_x = report.position.location_x
             location_y = report.position.location_y

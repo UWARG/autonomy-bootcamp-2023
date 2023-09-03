@@ -20,78 +20,88 @@ class DroneState:
     """
     __create_key = object()
 
-    __TIME_STEP_SIZE = 0.01  # \delta t in seconds
     __MAX_SPEED = 5.0  # m/s
     __ACCEPTANCE_RADIUS = 0.1  # Distance within destination before halting in metres
 
     @classmethod
     def create(cls,
-               initial_x: float,
-               initial_y: float,
-               boundary1: "tuple[float, float]",
-               boundary2: "tuple[float, float]") -> "tuple[bool, DroneState | None]":
+               time_step_size: float,
+               initial_position: location.Location,
+               boundary_top_left: location.Location,
+               boundary_bottom_right: location.Location) -> "tuple[bool, DroneState | None]":
         """
-        initial is initial position of drone.
+        time_step_size: \\delta t in seconds.
+        initial_position: Initial position of drone.
         boundary is xyxy corners of map area.
         """
-        if len(boundary1) != 2 or len(boundary2) != 2:
+        if time_step_size <= 0.0:
             return False, None
 
-        if boundary1[0] >= boundary2[0]:
+        if boundary_top_left.location_x >= boundary_bottom_right.location_x:
             return False, None
 
-        if boundary1[1] >= boundary2[0]:
+        if boundary_top_left.location_y >= boundary_bottom_right.location_y:
             return False, None
 
-        if initial_x < boundary1[0] or initial_x > boundary2[0]:
-            return False, None
-
-        if initial_y < boundary1[1] or initial_y > boundary2[1]:
+        if not cls.__is_within_boundary(initial_position, boundary_top_left, boundary_bottom_right):
             return False, None
 
         return True, DroneState(
             cls.__create_key,
-            initial_x,
-            initial_y,
-            boundary1[0],
-            boundary1[1],
-            boundary2[0],
-            boundary2[1])
+            time_step_size,
+            initial_position,
+            boundary_top_left,
+            boundary_bottom_right,
+        )
 
     # Better to be explicit with parameters
     # pylint: disable-next=too-many-arguments
     def __init__(self,
                  class_private_create_key,
-                 initial_x: float,
-                 initial_y: float,
-                 boundary_x1: float,
-                 boundary_y1: float,
-                 boundary_x2: float,
-                 boundary_y2: float):
+                 time_step_size: float,
+                 initial_position: location.Location,
+                 boundary_top_left: location.Location,
+                 boundary_bottom_right: location.Location):
         """
         Private constructor, use create() method.
         """
         assert class_private_create_key is DroneState.__create_key, "Use create() method"
 
         # Map area boundary
-        self.__boundary_x1 = boundary_x1
-        self.__boundary_y1 = boundary_y1
-        self.__boundary_x2 = boundary_x2
-        self.__boundary_y2 = boundary_y2
+        self.__boundary_top_left = boundary_top_left
+        self.__boundary_bottom_right = boundary_bottom_right
 
         # Simulation state
         self.__current_step: int = 0
 
         # Intent state
         self.__status = drone_status.DroneStatus.HALTED
-        self.__destination = location.Location(initial_x, initial_y)  # In world space
+        self.__destination = initial_position
         self.__commands = []  # List of all commands received by the drone
 
         # Physical state
+        self.__time_step_size = time_step_size
         _, velocity = drone_velocity.DroneVelocity.create(0.0, 0.0)
         assert velocity is not None
         self.__velocity: drone_velocity.DroneVelocity = velocity
-        self.__position = location.Location(initial_x, initial_y)
+        self.__position = initial_position
+
+    @staticmethod
+    def __is_within_boundary(position: location.Location,
+                             boundary_top_left: location.Location,
+                             boundary_bottom_right: location.Location) -> bool:
+        """
+        Checks whether position is within bounds.
+        """
+        if position.location_x < boundary_top_left.location_x \
+            or position.location_x > boundary_bottom_right.location_x:
+            return False
+
+        if position.location_y < boundary_top_left.location_y \
+            or position.location_y > boundary_bottom_right.location_y:
+            return False
+
+        return True
 
     def __update_intent(self,
                         status: drone_status.DroneStatus,
@@ -147,15 +157,13 @@ class DroneState:
             relative_y
         )
 
-        destination_x = destination.location_x
-        destination_y = destination.location_y
-
         # Destination is within bounds
-        if destination_x < self.__boundary_x1 or destination_x > self.__boundary_x2:
-            print("ERROR: Could not set destination, out of bounds")
-            return False
-
-        if destination_y < self.__boundary_y1 or destination_y > self.__boundary_y2:
+        is_within_bounds = self.__is_within_boundary(
+            destination,
+            self.__boundary_top_left,
+            self.__boundary_bottom_right,
+        )
+        if not is_within_bounds:
             print("ERROR: Could not set destination, out of bounds")
             return False
 
@@ -275,12 +283,12 @@ class DroneState:
 
         return True, velocity
 
-    def run(self, command: "commands.Command | None") -> "tuple[drone_report.DroneReport, int]":
+    def run(self, command: commands.Command) -> "tuple[drone_report.DroneReport, int]":
         """
         Advance the simulation by 1 timestep.
         """
         # Commands
-        if command is not None:
+        if command.get_command_type() != commands.Command.CommandType.NULL:
             print("Received command")
             self.__commands.append(command)
 
@@ -295,8 +303,8 @@ class DroneState:
         # Physical simulation
         # Simple implicit Euler approximation
         velocity_x, velocity_y = self.__velocity.get_xy_velocity()
-        self.__position.location_x += velocity_x * self.__TIME_STEP_SIZE
-        self.__position.location_y += velocity_y * self.__TIME_STEP_SIZE
+        self.__position.location_x += velocity_x * self.__time_step_size
+        self.__position.location_y += velocity_y * self.__time_step_size
 
         current_step = self.__current_step
         self.__current_step += 1
