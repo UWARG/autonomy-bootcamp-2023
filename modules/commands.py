@@ -1,5 +1,5 @@
 """
-DO NOT MODIFY THIS FILE.
+BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Different commands to send to the drone.
 """

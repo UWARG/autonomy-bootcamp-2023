@@ -1,5 +1,5 @@
 """
-DO NOT MODIFY THIS FILE.
+BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test drone state simulation with a figure 8.
 """

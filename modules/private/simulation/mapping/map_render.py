@@ -1,5 +1,5 @@
 """
-DO NOT MODIFY THIS FILE.
+BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Renders the image seen by the camera.
 """

@@ -1,5 +1,5 @@
 
-You can safely ignore `DO NOT MODIFY THIS FILE` if you are maintaining the bootcamp. The message is for bootcampers.
+You can safely ignore `BOOTCAMPERS DO NOT MODIFY THIS FILE` if you are maintaining the bootcamp. The message is for bootcampers.
 
 TODO: Confluence
 
