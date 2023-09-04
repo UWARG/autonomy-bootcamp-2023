@@ -18,6 +18,8 @@ python -m modules.private.tests.test_simulation_worker
 python -m modules.private.tests.test_detect_landing_pad_worker
 python -m modules.private.tests.test_geolocation_worker
 pytest modules/private/tests/test_geolocation.py
+python -m modules.private.tests.test_display_worker
+python -m modules.private.tests.test_display
 
 # Bootcamp
 pytest modules/bootcamp/tests/test_detect_landing_pad.py
