@@ -15,4 +15,7 @@ TODO: Run tests:
 python -m modules.private.tests.test_drone_state_figure_8
 python -m modules.private.tests.test_map_render_figure_8
 python -m modules.private.tests.test_simulation_worker
+
+# Bootcamp
+pytest modules/bootcamp/tests/test_detect_landing_pad.py
 ```
