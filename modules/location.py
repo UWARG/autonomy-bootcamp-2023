@@ -16,3 +16,18 @@ class Location:
         """
         self.location_x = location_x
         self.location_y = location_y
+
+    def __eq__(self, other: "Location"):
+        """
+        Required for comparison.
+        """
+        if not isinstance(other, Location):
+            return False
+
+        return self.location_x == other.location_x and self.location_y == other.location_y
+
+    def __hash__(self):
+        """
+        Required for dictionaries and sets.
+        """
+        return hash((self.location_x, self.location_y))

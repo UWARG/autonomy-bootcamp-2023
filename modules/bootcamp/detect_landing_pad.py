@@ -33,15 +33,15 @@ class DetectLandingPad:
     # ============
 
     @classmethod
-    def create(cls, model_directory_path: pathlib.Path):
+    def create(cls, model_directory: pathlib.Path):
         """
-        model_directory_path: Directory to models.
+        model_directory: Directory to models.
         """
-        if not model_directory_path.is_dir():
+        if not model_directory.is_dir():
             return False, None
 
         model_path = pathlib.PurePosixPath(
-            model_directory_path,
+            model_directory,
             cls.__MODEL_NAME,
         )
 
