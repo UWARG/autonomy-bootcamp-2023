@@ -16,6 +16,8 @@ python -m modules.private.tests.test_drone_state_figure_8
 python -m modules.private.tests.test_map_render_figure_8
 python -m modules.private.tests.test_simulation_worker
 python -m modules.private.tests.test_detect_landing_pad_worker
+python -m modules.private.tests.test_geolocation_worker
+pytest modules/private/tests/test_geolocation.py
 
 # Bootcamp
 pytest modules/bootcamp/tests/test_detect_landing_pad.py
