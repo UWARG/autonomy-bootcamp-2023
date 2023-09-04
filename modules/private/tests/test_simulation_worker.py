@@ -21,6 +21,9 @@ from modules.private.utilities import worker_manager
 
 QUEUE_MAX_SIZE = 1
 
+PIXELS_PER_METRE = 60
+IMAGE_RESOLUTION_X = 1200
+IMAGE_RESOLUTION_Y = 900
 MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
 LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
 
@@ -62,9 +65,9 @@ def main() -> int:
             drone_initial_position,
             location.Location(-51.0, -38.5),
             location.Location(51.0, 38.5),
-            60,
-            1200,
-            900,
+            PIXELS_PER_METRE,
+            IMAGE_RESOLUTION_X,
+            IMAGE_RESOLUTION_Y,
             MAP_IMAGES_PATH,
             LANDING_PAD_IMAGES_PATH,
             landing_pad_locations,
@@ -112,7 +115,7 @@ def main() -> int:
         # Pylint has issues with OpenCV
         # pylint: disable=no-member
         cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
-        cv2.resizeWindow('Map', camera_image.shape[1] // 2, camera_image.shape[0] // 2)
+        cv2.resizeWindow("Map", camera_image.shape[1] // 2, camera_image.shape[0] // 2)
         cv2.imshow("Map", camera_image)
         cv2.waitKey(1)
         # pylint: enable=no-member

@@ -47,7 +47,7 @@ def report():
     return drone
 
 
-# Pylint requires the parameter and fixture names to be identical
+# Pytest requires the parameter and fixture names to be identical
 # pylint: disable=redefined-outer-name
 
 

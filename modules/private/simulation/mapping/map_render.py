@@ -23,9 +23,9 @@ class LandingPadOnMap:
     # Better to be explicit with parameters, required by checks
     # pylint: disable-next=too-many-arguments,too-many-return-statements
     def create(cls,
+               pixels_per_metre: int,
                pad_image: np.ndarray,
                pad_position: location.Location,
-               pixels_per_metre: int,
                resolution_x: int,
                resolution_y: int) -> "tuple[bool, LandingPadOnMap | None]":
         """
@@ -380,9 +380,9 @@ class MapRender:
         landing_pads = []
         for landing_pad_location in landing_pad_locations:
             result, landing_pad_on_map = LandingPadOnMap.create(
+                pixels_per_metre,
                 landing_pad_image,
                 landing_pad_location,
-                pixels_per_metre,
                 resolution_x,
                 resolution_y
             )
@@ -476,8 +476,8 @@ class MapRender:
 
     @staticmethod
     def __generate_default_map_image_with_coordinates(image: np.ndarray,
-                                                  image_x: int,
-                                                  image_y: int) -> np.ndarray:
+                                                      image_x: int,
+                                                      image_y: int) -> np.ndarray:
         """
         Writes the coordinates on the image.
         """

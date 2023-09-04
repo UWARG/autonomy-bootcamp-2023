@@ -12,6 +12,9 @@ from modules import location
 from modules.private.simulation.mapping import map_render
 
 
+PIXELS_PER_METRE = 60
+IMAGE_RESOLUTION_X = 1200
+IMAGE_RESOLUTION_Y = 900
 MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
 LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
 DELAY = 0.01
@@ -51,9 +54,9 @@ def figure8() -> int:
     ]
 
     result, renderer = map_render.MapRender.create(
-        60,
-        1200,
-        900,
+        PIXELS_PER_METRE,
+        IMAGE_RESOLUTION_X,
+        IMAGE_RESOLUTION_Y,
         MAP_IMAGES_PATH,
         LANDING_PAD_IMAGES_PATH,
         landing_pad_locations,
