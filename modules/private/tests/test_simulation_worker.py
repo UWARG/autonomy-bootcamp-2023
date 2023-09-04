@@ -34,11 +34,11 @@ def main() -> int:
 
     mp_manager = mp.Manager()
 
-    decision_commands_to_drone_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    decision_to_simulation_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
         QUEUE_MAX_SIZE,
     )
-    drone_information_to_geolocation_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    simulation_to_detect_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
         QUEUE_MAX_SIZE,
     )
@@ -68,8 +68,8 @@ def main() -> int:
             MAP_IMAGES_PATH,
             LANDING_PAD_IMAGES_PATH,
             landing_pad_locations,
-            decision_commands_to_drone_queue,
-            drone_information_to_geolocation_queue,
+            decision_to_simulation_queue,
+            simulation_to_detect_queue,
             simulation_worker_status_queue,
             controller,
         ),
@@ -105,9 +105,9 @@ def main() -> int:
     )
     counter = 0
     while counter < 11000:
-        data: "tuple[drone_report.DroneReport, np.ndarray]" = \
-            drone_information_to_geolocation_queue.queue.get()
-        report, camera_image = data
+        output_data: "tuple[drone_report.DroneReport, np.ndarray]" = \
+            simulation_to_detect_queue.queue.get()
+        report, camera_image = output_data
 
         # Pylint has issues with OpenCV
         # pylint: disable=no-member
@@ -129,20 +129,21 @@ def main() -> int:
         elif report.status == drone_status.DroneStatus.LANDED:
             break
 
-        decision_commands_to_drone_queue.queue.put(command)
+        decision_to_simulation_queue.queue.put(command)
 
         counter += 1
 
     # Teardown
     controller.request_exit()
 
-    decision_commands_to_drone_queue.fill_and_drain_queue()
-    drone_information_to_geolocation_queue.fill_and_drain_queue()
+    decision_to_simulation_queue.fill_and_drain_queue()
+    simulation_to_detect_queue.fill_and_drain_queue()
 
     simulation_worker_status_queue.fill_and_drain_queue()
 
     simulation_manager.join_workers()
 
+    # Test
     print("At: " + str(report.position.location_x) + ", " + str(report.position.location_y))
     print("Steps: " + str(counter))
 

@@ -39,7 +39,7 @@ def run_simulator(command: commands.Command,
     return True, (report, camera_image)
 
 
-# Extra parameters required for worker communication
+# Extra parameters required for worker communication, extra variables required for management
 # pylint: disable-next=too-many-arguments,too-many-locals
 def simulation_worker(drone_initial_position: location.Location,
                       boundary_top_left: location.Location,
@@ -58,6 +58,7 @@ def simulation_worker(drone_initial_position: location.Location,
     Worker process.
 
     input_queue and output_queue are data queues.
+    status_queue is how this worker process communicates to the main process.
     controller is how the main process communicates to this worker process.
     """
     result, drone = drone_state.DroneState.create(
