@@ -59,6 +59,15 @@ def simulation_worker(time_step_size: float,
     status_queue is how this worker process communicates to the main process.
     controller is how the main process communicates to this worker process.
     """
+    previous = (
+        drone_report.DroneReport(
+            drone_status.DroneStatus.HALTED,
+            drone_initial_position,
+            drone_initial_position,
+        ),
+        np.zeros((image_resolution_y, image_resolution_x, 3)),
+    )
+
     result, drone = drone_state.DroneState.create(
         time_step_size,
         drone_initial_position,
@@ -67,7 +76,7 @@ def simulation_worker(time_step_size: float,
     )
     if not result:
         print("WORKER ERROR: Could not create drone state")
-        status_queue.queue.put(drone_status.DroneStatus.LANDED)
+        status_queue.queue.put(previous[0])
         return
 
     # Get Pylance to stop complaining
@@ -82,21 +91,12 @@ def simulation_worker(time_step_size: float,
         landing_pad_locations,
     )
     if not result:
-        status_queue.queue.put(-1)
+        status_queue.queue.put(previous[0])
         print("WORKER ERROR: Could not create map renderer")
         return
 
     # Get Pylance to stop complaining
     assert renderer is not None
-
-    previous = (
-        drone_report.DroneReport(
-            drone_status.DroneStatus.HALTED,
-            drone_initial_position,
-            drone_initial_position,
-        ),
-        np.zeros((image_resolution_y, image_resolution_x, 3)),
-    )
 
     # Run once
     input_data = commands.Command.create_null_command()
@@ -136,8 +136,8 @@ def simulation_worker(time_step_size: float,
         previous = current
 
         # Request main to request exit
-        if current[0].status == drone_status.DroneStatus.LANDED:
-            status_queue.queue.put(drone_status.DroneStatus.LANDED)
+        if previous[0].status == drone_status.DroneStatus.LANDED:
+            status_queue.queue.put(previous[0])
             print("WORKER: Drone has landed, exiting")
             return
 

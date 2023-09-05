@@ -15,10 +15,11 @@ class BaseDecision:
     """
     Required to enforce different decision behaviour in tests.
     """
-    def __init__(self):
+    def __init__(self, waypoint: location.Location):
         """
         Nothing to do.
         """
+        raise NotImplementedError
 
     def run(self,
             report: drone_report.DroneReport,

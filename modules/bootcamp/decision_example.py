@@ -15,16 +15,19 @@ from ..private.decision import base_decision
 # pylint: disable=unused-argument,line-too-long
 
 
-# All logic in the run() method
+# All logic around the run() method
 # pylint: disable-next=too-few-public-methods
 class DecisionExample(base_decision.BaseDecision):
     """
     Example of sending commands to the drone.
     """
-    def __init__(self):
+    def __init__(self, waypoint: location.Location):
         """
         Initialize all persistent variables here with self.
         """
+        self.waypoint = waypoint
+        print("Waypoint: " + str(waypoint))
+
         self.command_index = 0
         self.commands = [
             commands.Command.create_set_relative_destination_command( 50.0,  37.5),
@@ -63,9 +66,7 @@ class DecisionExample(base_decision.BaseDecision):
             # Print some information for debugging
             print(self.counter)
             print(self.command_index)
-            location_x = report.position.location_x
-            location_y = report.position.location_y
-            print("Halted at: " + str(location_x) + ", " + str(location_y))
+            print("Halted at: " + str(report.position))
 
             command = self.commands[self.command_index]
             self.command_index += 1

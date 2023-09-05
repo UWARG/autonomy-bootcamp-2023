@@ -8,10 +8,12 @@ Do not modify anything else.
 """
 import multiprocessing as mp
 import pathlib
+import time
 
 from modules import location
 from modules.bootcamp import decision_example
 from modules.private import detect_landing_pad_worker
+from modules.private import generate_destination
 from modules.private.decision import decision_worker
 from modules.private.display import display_worker
 from modules.private.geolocation import geolocation_worker
@@ -23,12 +25,14 @@ from modules.private.utilities import worker_manager
 
 QUEUE_MAX_SIZE = 1
 TIMEOUT = 1000  # seconds
+LOG_FILE_DIRECTORY = pathlib.Path("log")
 
 # ============
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
 
-# Ideally, it takes 12.5 seconds to reach the 1st command
+# Ideally, it takes 12.5 seconds of wall clock time
+# to reach the 1st command
 # Increase the step size if your computer is lagging
 # Larger step size is smaller FPS
 TIME_STEP_SIZE = 0.1  # seconds
@@ -37,6 +41,11 @@ TIME_STEP_SIZE = 0.1  # seconds
 # so if the window is too small or too large,
 # change this value (between 0.0 and 1.0)
 DISPLAY_SCALE = 0.8
+
+# Seed for randomly generating the waypoint and landing pad
+# Change to a constant for reproducibility (e.g. debugging)
+# Change back to = time.time_ns() to test robustness
+SEED = time.time_ns()
 
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -54,8 +63,8 @@ LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/asset
 MODEL_DIRECTORY_PATH = pathlib.Path("models")
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
+# Extra variables required for management, extra statements required for management
+# pylint: disable-next=too-many-locals,too-many-statements
 def main() -> int:
     """
     main.
@@ -104,10 +113,32 @@ def main() -> int:
         mp_manager,
     )
 
+    # Variables
+    result, data = generate_destination.generate_destination(
+        DRONE_INITIAL_POSITION,
+        BOUNDARY_BOTTOM_LEFT,
+        BOUNDARY_TOP_RIGHT,
+        PIXELS_PER_METRE,
+        IMAGE_RESOLUTION_X,
+        IMAGE_RESOLUTION_Y,
+        SEED,
+    )
+    if not result:
+        print("ERROR: Could not generate waypoint and landing pads")
+        return -1
+
+    # Get Pylance to stop complaining
+    assert data is not None
+
+    waypoint, landing_pad_locations = data
+
+    # Override in the example to show landing pads
     landing_pad_locations = [
         location.Location(0.0, 0.0),
         location.Location(-40.0, 0.5),
     ]
+
+    decider = decision_example.DecisionExample(waypoint)
 
     # Managers
     simulation_manager = worker_manager.WorkerManager()
@@ -166,14 +197,13 @@ def main() -> int:
         display_worker.display_worker,
         (
             DISPLAY_SCALE,
+            SEED,
             geolocation_to_display_queue,
             display_to_decision_queue,
             display_worker_status_queue,
             controller,
         ),
     )
-
-    decider = decision_example.DecisionExample()
 
     decision_manager = worker_manager.WorkerManager()
     decision_manager.create_workers(
@@ -194,11 +224,25 @@ def main() -> int:
     display_manager.start_workers()
     decision_manager.start_workers()
 
-    simulation_worker_status_queue.queue.get(timeout=TIMEOUT)
+    report = simulation_worker_status_queue.queue.get(timeout=TIMEOUT)
 
     print("main is requesting exit")
 
     controller.request_exit()
+
+    # Log results
+    results_text = \
+        str(report) + "\n"\
+        + "Seed: " + str(SEED) + "\n"\
+        + "Waypoint: " + str(waypoint) + "\n"\
+
+    for landing_pad_location in landing_pad_locations:
+        results_text += "Landing pad: " + str(landing_pad_location) + "\n"
+
+    file_name = str(int(time.time())) + "_results.txt"
+    file_path = pathlib.Path(LOG_FILE_DIRECTORY, file_name)
+    with open(file_path, "w", encoding="utf-8") as file:
+        file.write(results_text)
 
     # Teardown
     print("Start teardown")

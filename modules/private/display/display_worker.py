@@ -12,6 +12,7 @@ from ..utilities import worker_controller
 # Extra parameters required for worker communication
 # pylint: disable-next=too-many-arguments
 def display_worker(display_scale: float,
+                   seed: int,
                    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
                    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
                    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
@@ -23,7 +24,7 @@ def display_worker(display_scale: float,
     status_queue is how this worker process communicates to the main process.
     controller is how the main process communicates to this worker process.
     """
-    result, displayer = display.Display.create(display_scale)
+    result, displayer = display.Display.create(display_scale, seed)
     if not result:
         print("WORKER ERROR: Could not create displayer")
         status_queue.queue.put(-1)

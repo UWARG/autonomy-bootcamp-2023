@@ -144,7 +144,7 @@ class DroneState:
 
         Returns whether successful.
         """
-        print("Setting relative destination: " + str(relative_x) + ", " + str(relative_y))
+        print("Setting relative destination: " + str(relative_x) + "," + str(relative_y))
 
         # Drone is halted
         if self.__status != drone_status.DroneStatus.HALTED:

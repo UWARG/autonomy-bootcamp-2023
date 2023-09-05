@@ -26,11 +26,12 @@ class DetectLandingPad:
 
     # Chooses the GPU if it exists, otherwise runs on the CPU
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
-    __MODEL_NAME = "best-2n.pt"
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
     # ============
+
+    __MODEL_NAME = "best-2n.pt"
 
     @classmethod
     def create(cls, model_directory: pathlib.Path):
@@ -80,12 +81,13 @@ class DetectLandingPad:
         # Use the model's predict() method to run inference
         # Parameters of interest:
         # * source
+        # * conf
         # * device
         # * verbose
-        results = ...
+        predictions = ...
 
         # Get the Result object
-        result = ...
+        prediction = ...
 
         # Plot the annotated image from the Result object
         # Include the confidence value

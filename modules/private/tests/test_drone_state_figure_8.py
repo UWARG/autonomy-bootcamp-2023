@@ -59,15 +59,13 @@ def figure8() -> int:
         if report.status == drone_status.DroneStatus.HALTED:
             print(step)
             print(waypoint_index)
-            location_x = report.position.location_x
-            location_y = report.position.location_y
-            print("Halt: " + str(location_x) + ", " + str(location_y))
+            print("Halt: " + str(report.position))
             command = waypoints[waypoint_index]
             waypoint_index += 1
 
         report, step = drone.run(command)
 
-    print("At: " + str(report.position.location_x) + ", " + str(report.position.location_y))
+    print("At: " + str(report.position))
     print("Steps: " + str(step))
 
     if report.status != drone_status.DroneStatus.LANDED:

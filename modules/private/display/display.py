@@ -24,18 +24,19 @@ class Display:
     __LANDING_IMAGE_NAME = "landing_screenshot.png"
 
     @classmethod
-    def create(cls, display_scale: float) -> "tuple[bool, Display | None]":
+    def create(cls, display_scale: float, seed: int) -> "tuple[bool, Display | None]":
         """
         display_scale: Scale of the displayed image from 0 to 1.
+        seed: Seed of the simulation generator.
         """
         if display_scale <= 0.0:
             return False, None
 
         cls.__IMAGE_SAVE_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-        return True, Display(cls.__create_key, display_scale)
+        return True, Display(cls.__create_key, display_scale, seed)
 
-    def __init__(self, class_private_create_key, display_scale: float):
+    def __init__(self, class_private_create_key, display_scale: float, seed: int):
         """
         Private constructor, use create() method.
         """
@@ -43,6 +44,8 @@ class Display:
 
         self.__display_scale = display_scale
         self.__has_saved_landing_image = False
+
+        self.__seed = seed
 
     @staticmethod
     def __display(image: np.ndarray, display_scale: float):
@@ -66,7 +69,8 @@ class Display:
     # pylint: disable-next=too-many-locals
     def __generate_information_pane(resolution_x: int,
                                     resolution_y: int,
-                                    report: drone_report.DroneReport) -> np.ndarray:
+                                    report: drone_report.DroneReport,
+                                    seed: int) -> np.ndarray:
         """
         Draws the information pane from the drone report.
         """
@@ -97,6 +101,10 @@ class Display:
             destination_text = "Destination:"
             destination_x_text = f"x: {report.destination.location_x:7.3f}"
             destination_y_text = f"y: {report.destination.location_y:7.3f}"
+
+        seed_text = "Seed:"
+        seed_value_text = str(seed)
+        seed_colour = (255, 255, 255)  # White
 
         text_x = 45
         text_line_y = 45
@@ -183,6 +191,30 @@ class Display:
             destination_colour,
             2,
         )
+        text_line_counter += 1
+        text_line_counter += 1
+
+        _ = cv2.putText(
+            image,
+            seed_text,
+            (text_x, text_line_y * text_line_counter),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            text_size,
+            seed_colour,
+            2,
+        )
+        text_line_counter += 1
+
+        _ = cv2.putText(
+            image,
+            seed_value_text,
+            (0, text_line_y * text_line_counter),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            text_size,
+            seed_colour,
+            2,
+        )
+        text_line_counter += 1
         # pylint: enable=no-member
 
         return image
@@ -201,6 +233,7 @@ class Display:
             self.__PANE_RESOLUTION_X,
             map_image.shape[0],
             report,
+            self.__seed,
         )
 
         display_image = np.concatenate((map_image, pane_image), axis=1)

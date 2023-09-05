@@ -25,7 +25,7 @@ class DroneReport:
         self.destination = destination
         self.position = position
 
-    def __eq__(self, other: "DroneReport"):
+    def __eq__(self, other: "DroneReport") -> bool:
         """
         Required for comparison.
         """
@@ -43,8 +43,20 @@ class DroneReport:
 
         return True
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """
         Required for dictionaries and sets.
         """
         return hash((self.status, self.destination, self.position))
+
+    def __repr__(self) -> str:
+        """
+        To string.
+        """
+        representation = \
+            "DRONE REPORT:\n" \
+            + "Status: " + str(self.status) + "\n"\
+            + "Position: " + str(self.position) + "\n"\
+            + "Destination: " + str(self.destination) + "\n"
+
+        return representation

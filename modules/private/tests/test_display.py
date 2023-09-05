@@ -16,13 +16,14 @@ from modules.private.display import display
 
 
 DISPLAY_SCALE = 0.8
+SEED = time.time_ns()
 IMAGE_PATH = pathlib.Path("modules/private/simulation/mapping/world/default.png")
 
 DELAY = 0.01  # seconds
 
 
 if __name__ == "__main__":
-    _, displayer = display.Display.create(DISPLAY_SCALE)
+    _, displayer = display.Display.create(DISPLAY_SCALE, SEED)
     assert displayer is not None
 
     assert IMAGE_PATH.exists()

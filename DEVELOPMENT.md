@@ -7,6 +7,10 @@ TODO: Logging (see all print statements)
 
 TODO: Worker process error handling
 
+TODO: More graceful logging of final state (get the image from Display)
+
+TODO: Remove generate_destination() image exclusion zone when we have a more reliable model
+
 TODO: Unit tests
 
 TODO: Run tests:

@@ -23,6 +23,7 @@ from modules.private.utilities import worker_manager
 QUEUE_MAX_SIZE = 1
 
 DISPLAY_SCALE = 0.8
+SEED = time.time_ns()
 IMAGE_PATH = pathlib.Path("modules/private/simulation/mapping/world/default.png")
 
 DELAY = 0.01  # seconds
@@ -58,6 +59,7 @@ def main() -> int:
         display_worker.display_worker,
         (
             DISPLAY_SCALE,
+            SEED,
             input_queue,
             display_to_decision_queue,
             display_worker_status_queue,

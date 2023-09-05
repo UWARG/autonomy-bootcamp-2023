@@ -17,7 +17,7 @@ class Location:
         self.location_x = location_x
         self.location_y = location_y
 
-    def __eq__(self, other: "Location"):
+    def __eq__(self, other: "Location") -> bool:
         """
         Required for comparison.
         """
@@ -26,8 +26,14 @@ class Location:
 
         return self.location_x == other.location_x and self.location_y == other.location_y
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """
         Required for dictionaries and sets.
         """
         return hash((self.location_x, self.location_y))
+
+    def __repr__(self) -> str:
+        """
+        To string
+        """
+        return f"{self.location_x},{self.location_y}"
