@@ -29,4 +29,5 @@ python -m modules.private.tests.test_display
 pytest modules/bootcamp/tests/test_detect_landing_pad.py
 python -m modules.bootcamp.tests.run_decision_example
 python -m modules.bootcamp.tests.run_decision_simple_waypoint
+python -m modules.bootcamp.tests.run_decision_waypoint_landing_pads
 ```
