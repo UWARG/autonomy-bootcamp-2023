@@ -85,8 +85,8 @@ class Display:
             status_colour = (0, 255, 0)  # Green
 
         position_text = "Position:"
-        position_x_text = "x: " + str(report.position.location_x)
-        position_y_text = "y: " + str(report.position.location_y)
+        position_x_text = f"x: {report.position.location_x:7.3f}"
+        position_y_text = f"y: {report.position.location_y:7.3f}"
         position_colour = (255, 255, 255)  # White
 
         destination_text = "Destination: None"
@@ -95,8 +95,8 @@ class Display:
         destination_colour = (255, 255, 0)  # Cyan
         if report.status == drone_status.DroneStatus.MOVING:
             destination_text = "Destination:"
-            destination_x_text = "x: " + str(report.destination.location_x)
-            destination_y_text = "y: " + str(report.destination.location_y)
+            destination_x_text = f"x: {report.destination.location_x:7.3f}"
+            destination_y_text = f"y: {report.destination.location_y:7.3f}"
 
         text_x = 45
         text_line_y = 45

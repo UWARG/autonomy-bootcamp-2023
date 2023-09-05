@@ -67,7 +67,7 @@ def simulation_worker(time_step_size: float,
     )
     if not result:
         print("WORKER ERROR: Could not create drone state")
-        status_queue.queue.put(-1)
+        status_queue.queue.put(drone_status.DroneStatus.LANDED)
         return
 
     # Get Pylance to stop complaining
@@ -134,5 +134,11 @@ def simulation_worker(time_step_size: float,
         output_queue.queue.put(output_data)
 
         previous = current
+
+        # Request main to request exit
+        if current[0].status == drone_status.DroneStatus.LANDED:
+            status_queue.queue.put(drone_status.DroneStatus.LANDED)
+            print("WORKER: Drone has landed, exiting")
+            return
 
         time.sleep(time_step_size)

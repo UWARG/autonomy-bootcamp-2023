@@ -81,6 +81,7 @@ class DetectLandingPad:
         # Parameters of interest:
         # * source
         # * device
+        # * verbose
         results = ...
 
         # Get the Result object
