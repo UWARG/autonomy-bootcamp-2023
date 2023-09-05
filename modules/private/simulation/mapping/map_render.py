@@ -336,10 +336,13 @@ class MapRender:
         if not landing_pad_image_directory.is_dir():
             return False, None
 
-        default_map_image_path = pathlib.PurePosixPath(
+        default_map_image_path = pathlib.Path(
             map_image_directory,
             cls.__DEFAULT_MAP_IMAGE_NAME,
         )
+        if not default_map_image_path.exists():
+            return False, None
+
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
         default_map_image = cv2.imread(str(default_map_image_path))
@@ -352,10 +355,13 @@ class MapRender:
         if not cls.__is_image_valid_shape(default_map_image, (resolution_y, resolution_x, 3)):
             return False, None
 
-        landing_pad_image_path = pathlib.PurePosixPath(
+        landing_pad_image_path = pathlib.Path(
             landing_pad_image_directory,
             cls.__LANDING_PAD_IMAGE_NAME,
         )
+        if not landing_pad_image_path.exists():
+            return False, None
+
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
         landing_pad_image = cv2.imread(str(landing_pad_image_path), cv2.IMREAD_UNCHANGED)
@@ -517,11 +523,12 @@ class MapRender:
 
         # Cache miss, load from file
         image_name = str(image_x) + "," + str(image_y) + ".png"
-        image_path = pathlib.PurePosixPath(self.__map_image_directory, image_name)
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
-        image = cv2.imread(str(image_path))
-        if image is None:
+        image_path = pathlib.Path(self.__map_image_directory, image_name)
+        if image_path.exists():
+            # Pylint has issues with OpenCV
+            # pylint: disable-next=no-member
+            image = cv2.imread(str(image_path))
+        else:
             print("Warning: Could not read image file: " + image_path.name)
             print("Warning: Loading default")
             self.__cached_images[(image_x, image_y)] = \

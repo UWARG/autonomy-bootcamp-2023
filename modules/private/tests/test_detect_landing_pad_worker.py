@@ -68,7 +68,8 @@ def main() -> int:
     camera_images = []
     for i in range(0, 3):
         input_image_path = \
-            pathlib.PurePosixPath(INPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
+            pathlib.Path(INPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
+        assert input_image_path.exists()
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
         camera_image = cv2.imread(str(input_image_path))

@@ -4,6 +4,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 Test display.
 """
 import math
+import pathlib
 import time
 
 import cv2
@@ -15,6 +16,7 @@ from modules.private.display import display
 
 
 DISPLAY_SCALE = 0.8
+IMAGE_PATH = pathlib.Path("modules/private/simulation/mapping/world/default.png")
 
 DELAY = 0.01  # seconds
 
@@ -23,7 +25,9 @@ if __name__ == "__main__":
     _, displayer = display.Display.create(DISPLAY_SCALE)
     assert displayer is not None
 
-    image = cv2.imread("modules/private/simulation/mapping/world/default.png")
+    assert IMAGE_PATH.exists()
+
+    image = cv2.imread(str(IMAGE_PATH))
     assert image is not None
 
     report = drone_report.DroneReport(

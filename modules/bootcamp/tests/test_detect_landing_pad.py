@@ -44,8 +44,9 @@ def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     """
     # Setup
     image_name = "map_1_landing_pad.png"
-    input_path = pathlib.PurePosixPath(INPUT_IMAGES_PATH, image_name)
-    output_path = pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, image_name)
+    input_path = pathlib.Path(INPUT_IMAGES_PATH, image_name)
+    assert input_path.exists()
+    output_path = pathlib.Path(OUTPUT_IMAGES_PATH, image_name)
 
     # Pylint has issues with OpenCV
     # pylint: disable-next=no-member
@@ -79,8 +80,9 @@ def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     """
     # Setup
     image_name = "map_2_landing_pad.png"
-    input_path = pathlib.PurePosixPath(INPUT_IMAGES_PATH, image_name)
-    output_path = pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, image_name)
+    input_path = pathlib.Path(INPUT_IMAGES_PATH, image_name)
+    assert input_path.exists()
+    output_path = pathlib.Path(OUTPUT_IMAGES_PATH, image_name)
 
     # Pylint has issues with OpenCV
     # pylint: disable-next=no-member
@@ -116,8 +118,9 @@ def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     """
     # Setup
     image_name = "map_0_landing_pad.png"
-    input_path = pathlib.PurePosixPath(INPUT_IMAGES_PATH, image_name)
-    output_path = pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, image_name)
+    input_path = pathlib.Path(INPUT_IMAGES_PATH, image_name)
+    assert input_path.exists()
+    output_path = pathlib.Path(OUTPUT_IMAGES_PATH, image_name)
 
     # Pylint has issues with OpenCV
     # pylint: disable-next=no-member

@@ -5,6 +5,7 @@ Test display worker.
 """
 import math
 import multiprocessing as mp
+import pathlib
 import time
 
 import cv2
@@ -22,6 +23,7 @@ from modules.private.utilities import worker_manager
 QUEUE_MAX_SIZE = 1
 
 DISPLAY_SCALE = 0.8
+IMAGE_PATH = pathlib.Path("modules/private/simulation/mapping/world/default.png")
 
 DELAY = 0.01  # seconds
 
@@ -66,9 +68,13 @@ def main() -> int:
     display_manager.start_workers()
 
     input_list = []
+
+    assert IMAGE_PATH.exists()
+
     # Pylint has issues with OpenCV
     # pylint: disable-next=no-member
-    input_image = cv2.imread("modules/private/simulation/mapping/world/default.png")
+    input_image = cv2.imread(str(IMAGE_PATH))
+    assert input_image is not None
 
     input_report = drone_report.DroneReport(
         drone_status.DroneStatus.HALTED,
