@@ -21,12 +21,14 @@ class DecisionExample(base_decision.BaseDecision):
     """
     Example of sending commands to the drone.
     """
-    def __init__(self, waypoint: location.Location):
+    def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
+
+        self.acceptance_radius = acceptance_radius
 
         self.command_index = 0
         self.commands = [

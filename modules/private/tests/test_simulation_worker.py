@@ -24,6 +24,7 @@ QUEUE_MAX_SIZE = 1
 # Increase the step size if your computer is lagging
 # Larger step size is smaller FPS
 TIME_STEP_SIZE = 0.01  # seconds
+ACCEPTANCE_RADIUS = 0.1  # metres
 PIXELS_PER_METRE = 60
 IMAGE_RESOLUTION_X = 1200
 IMAGE_RESOLUTION_Y = 900
@@ -70,6 +71,7 @@ def main() -> int:
             drone_initial_position,
             location.Location(-51.0, -38.5),
             location.Location(51.0, 38.5),
+            ACCEPTANCE_RADIUS,
             PIXELS_PER_METRE,
             IMAGE_RESOLUTION_X,
             IMAGE_RESOLUTION_Y,

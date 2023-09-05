@@ -15,7 +15,7 @@ class BaseDecision:
     """
     Required to enforce different decision behaviour in tests.
     """
-    def __init__(self, waypoint: location.Location):
+    def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Nothing to do.
         """

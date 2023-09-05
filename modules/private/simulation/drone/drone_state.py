@@ -21,18 +21,20 @@ class DroneState:
     __create_key = object()
 
     __MAX_SPEED = 5.0  # m/s
-    __ACCEPTANCE_RADIUS = 0.1  # Distance within destination before halting in metres
+    __MAX_ACCEPTANCE_RADIUS = 1.0
 
     @classmethod
     def create(cls,
                time_step_size: float,
                initial_position: location.Location,
                boundary_bottom_left: location.Location,
-               boundary_top_right: location.Location) -> "tuple[bool, DroneState | None]":
+               boundary_top_right: location.Location,
+               acceptance_radius: float) -> "tuple[bool, DroneState | None]":
         """
         time_step_size: \\delta t in seconds.
         initial_position: Initial position of drone.
         boundary is xyxy corners of map area.
+        acceptance_radius: Distance within destination drone is considered to have arrived.
         """
         if time_step_size <= 0.0:
             return False, None
@@ -46,12 +48,19 @@ class DroneState:
         if not cls.__is_within_boundary(initial_position, boundary_bottom_left, boundary_top_right):
             return False, None
 
+        if acceptance_radius <= 0.0:
+            return False, None
+
+        if acceptance_radius > cls.__MAX_ACCEPTANCE_RADIUS:
+            return False, None
+
         return True, DroneState(
             cls.__create_key,
             time_step_size,
             initial_position,
             boundary_bottom_left,
             boundary_top_right,
+            acceptance_radius,
         )
 
     # Better to be explicit with parameters
@@ -61,7 +70,8 @@ class DroneState:
                  time_step_size: float,
                  initial_position: location.Location,
                  boundary_bottom_left: location.Location,
-                 boundary_top_right: location.Location):
+                 boundary_top_right: location.Location,
+                 acceptance_radius: float):
         """
         Private constructor, use create() method.
         """
@@ -77,6 +87,7 @@ class DroneState:
         # Intent state
         self.__status = drone_status.DroneStatus.HALTED
         self.__destination = initial_position
+        self.__acceptance_radius = acceptance_radius
         self.__commands = []  # List of all commands received by the drone
 
         # Physical state
@@ -254,10 +265,10 @@ class DroneState:
         destination_x = self.__destination.location_x
         destination_y = self.__destination.location_y
 
-        if not self.__is_close(position_x, destination_x, self.__ACCEPTANCE_RADIUS):
+        if not self.__is_close(position_x, destination_x, self.__acceptance_radius):
             return False
 
-        if not self.__is_close(position_y, destination_y, self.__ACCEPTANCE_RADIUS):
+        if not self.__is_close(position_y, destination_y, self.__acceptance_radius):
             return False
 
         return True

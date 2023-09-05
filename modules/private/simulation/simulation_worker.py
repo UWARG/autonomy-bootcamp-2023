@@ -42,6 +42,7 @@ def simulation_worker(time_step_size: float,
                       drone_initial_position: location.Location,
                       boundary_bottom_left: location.Location,
                       boundary_top_right: location.Location,
+                      acceptance_radius: float,
                       pixels_per_metre: int,
                       image_resolution_x: int,
                       image_resolution_y: int,
@@ -73,6 +74,7 @@ def simulation_worker(time_step_size: float,
         drone_initial_position,
         boundary_bottom_left,
         boundary_top_right,
+        acceptance_radius,
     )
     if not result:
         print("WORKER ERROR: Could not create drone state")

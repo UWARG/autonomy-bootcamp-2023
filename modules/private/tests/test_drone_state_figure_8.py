@@ -11,6 +11,7 @@ from modules.private.simulation.drone import drone_state
 
 
 TIME_STEP_SIZE = 0.01  # seconds
+ACCEPTANCE_RADIUS = 0.1  # metres
 
 
 def figure8() -> int:
@@ -25,6 +26,7 @@ def figure8() -> int:
         initial_position,
         boundary_bottom_left,
         boundary_top_right,
+        ACCEPTANCE_RADIUS,
     )
     if not result:
         return -1
