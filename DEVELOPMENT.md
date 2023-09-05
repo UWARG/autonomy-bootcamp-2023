@@ -23,4 +23,5 @@ python -m modules.private.tests.test_display
 
 # Bootcamp
 pytest modules/bootcamp/tests/test_detect_landing_pad.py
+python -m modules.bootcamp.tests.run_decision_example
 ```
