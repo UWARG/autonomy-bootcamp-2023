@@ -265,13 +265,22 @@ class DroneState:
         destination_x = self.__destination.location_x
         destination_y = self.__destination.location_y
 
-        if not self.__is_close(position_x, destination_x, self.__acceptance_radius):
-            return False
+        velocity_x, velocity_y = self.__velocity.get_xy_velocity()
 
-        if not self.__is_close(position_y, destination_y, self.__acceptance_radius):
-            return False
+        # Closeness
+        if self.__is_close(position_x, destination_x, self.__acceptance_radius) \
+            and self.__is_close(position_y, destination_y, self.__acceptance_radius):
+            # Required for separation
+            return True
 
-        return True
+        # Overshoot
+        # If same sign, drone is still on the way
+        if (destination_x - position_x) * velocity_x <= 0.0 \
+            and (destination_y - position_y) * velocity_y <= 0.0:
+            # Required for separation
+            return True
+
+        return False
 
     @staticmethod
     def __set_course(speed: float,
@@ -309,6 +318,8 @@ class DroneState:
 
         # Sensors
         if self.__is_arrived():
+            # Force drone into correct position in case of numerical approximation errors
+            self.__position = self.__destination
             self.__update_intent(drone_status.DroneStatus.HALTED, self.__destination)
 
         # Physical simulation
