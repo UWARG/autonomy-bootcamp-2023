@@ -18,13 +18,13 @@ def figure8() -> int:
     main.
     """
     initial_position = location.Location(0.0, 0.0)
-    boundary_top_left = location.Location(-11.0, -11.0)
-    boundary_bottom_right = location.Location(11.0, 11.0)
+    boundary_bottom_left = location.Location(-11.0, -11.0)
+    boundary_top_right = location.Location(11.0, 11.0)
     result, drone = drone_state.DroneState.create(
         TIME_STEP_SIZE,
         initial_position,
-        boundary_top_left,
-        boundary_bottom_right,
+        boundary_bottom_left,
+        boundary_top_right,
     )
     if not result:
         return -1

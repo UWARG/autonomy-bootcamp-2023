@@ -48,7 +48,6 @@ def main() -> int:
 
     detect_landing_pad_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
-        QUEUE_MAX_SIZE,
     )
 
     detect_landing_pad_manager = worker_manager.WorkerManager()
@@ -87,7 +86,7 @@ def main() -> int:
 
     for i, camera_image in enumerate(camera_images):
         # Run
-        input_data = (input_report, camera_image)
+        input_data = (input_report, [], camera_image)
         simulation_to_detect_queue.queue.put(input_data)
 
         # Test

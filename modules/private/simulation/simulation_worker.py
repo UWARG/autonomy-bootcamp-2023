@@ -18,9 +18,6 @@ from ... import drone_status
 from ... import location
 
 
-TIME_STEP_SIZE = 0.01  # seconds
-
-
 def run_simulator(command: commands.Command,
                   drone: drone_state.DroneState,
                   renderer: map_render.MapRender) \
@@ -41,9 +38,10 @@ def run_simulator(command: commands.Command,
 
 # Extra parameters required for worker communication, extra variables required for management
 # pylint: disable-next=too-many-arguments,too-many-locals
-def simulation_worker(drone_initial_position: location.Location,
-                      boundary_top_left: location.Location,
-                      boundary_bottom_right: location.Location,
+def simulation_worker(time_step_size: float,
+                      drone_initial_position: location.Location,
+                      boundary_bottom_left: location.Location,
+                      boundary_top_right: location.Location,
                       pixels_per_metre: int,
                       image_resolution_x: int,
                       image_resolution_y: int,
@@ -62,10 +60,10 @@ def simulation_worker(drone_initial_position: location.Location,
     controller is how the main process communicates to this worker process.
     """
     result, drone = drone_state.DroneState.create(
-        TIME_STEP_SIZE,
+        time_step_size,
         drone_initial_position,
-        boundary_top_left,
-        boundary_bottom_right,
+        boundary_bottom_left,
+        boundary_top_right,
     )
     if not result:
         print("WORKER ERROR: Could not create drone state")
@@ -107,7 +105,12 @@ def simulation_worker(drone_initial_position: location.Location,
         print("WORKER ERROR: Simulation step failed")
         current = previous
 
-    output_queue.queue.put(current)
+    # Get Pylance to stop complaining
+    assert current is not None
+
+    output_data = (current[0], [], current[1])
+
+    output_queue.queue.put(output_data)
 
     previous = current
 
@@ -123,8 +126,13 @@ def simulation_worker(drone_initial_position: location.Location,
             print("WORKER ERROR: Simulation step failed")
             current = previous
 
-        output_queue.queue.put(current)
+        # Get Pylance to stop complaining
+        assert current is not None
+
+        output_data = (current[0], [], current[1])
+
+        output_queue.queue.put(output_data)
 
         previous = current
 
-        time.sleep(TIME_STEP_SIZE)
+        time.sleep(time_step_size)

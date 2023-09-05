@@ -22,7 +22,6 @@ from modules.private.utilities import worker_manager
 QUEUE_MAX_SIZE = 1
 
 DISPLAY_SCALE = 0.8
-ENABLE_LOGGING = False
 
 DELAY = 0.01  # seconds
 
@@ -49,7 +48,6 @@ def main() -> int:
 
     display_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
-        QUEUE_MAX_SIZE,
     )
 
     display_manager = worker_manager.WorkerManager()
@@ -58,7 +56,6 @@ def main() -> int:
         display_worker.display_worker,
         (
             DISPLAY_SCALE,
-            ENABLE_LOGGING,
             input_queue,
             display_to_decision_queue,
             display_worker_status_queue,

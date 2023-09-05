@@ -38,7 +38,7 @@ def detect_landing_pad_worker(model_directory: pathlib.Path,
         if input_data is None:
             break
 
-        report, camera_image = input_data
+        report, _, camera_image = input_data
 
         try:
             bounding_boxes, annotated_image = detector.run(camera_image)

@@ -27,8 +27,8 @@ class DroneState:
     def create(cls,
                time_step_size: float,
                initial_position: location.Location,
-               boundary_top_left: location.Location,
-               boundary_bottom_right: location.Location) -> "tuple[bool, DroneState | None]":
+               boundary_bottom_left: location.Location,
+               boundary_top_right: location.Location) -> "tuple[bool, DroneState | None]":
         """
         time_step_size: \\delta t in seconds.
         initial_position: Initial position of drone.
@@ -37,21 +37,21 @@ class DroneState:
         if time_step_size <= 0.0:
             return False, None
 
-        if boundary_top_left.location_x >= boundary_bottom_right.location_x:
+        if boundary_bottom_left.location_x >= boundary_top_right.location_x:
             return False, None
 
-        if boundary_top_left.location_y >= boundary_bottom_right.location_y:
+        if boundary_bottom_left.location_y >= boundary_top_right.location_y:
             return False, None
 
-        if not cls.__is_within_boundary(initial_position, boundary_top_left, boundary_bottom_right):
+        if not cls.__is_within_boundary(initial_position, boundary_bottom_left, boundary_top_right):
             return False, None
 
         return True, DroneState(
             cls.__create_key,
             time_step_size,
             initial_position,
-            boundary_top_left,
-            boundary_bottom_right,
+            boundary_bottom_left,
+            boundary_top_right,
         )
 
     # Better to be explicit with parameters
@@ -60,16 +60,16 @@ class DroneState:
                  class_private_create_key,
                  time_step_size: float,
                  initial_position: location.Location,
-                 boundary_top_left: location.Location,
-                 boundary_bottom_right: location.Location):
+                 boundary_bottom_left: location.Location,
+                 boundary_top_right: location.Location):
         """
         Private constructor, use create() method.
         """
         assert class_private_create_key is DroneState.__create_key, "Use create() method"
 
         # Map area boundary
-        self.__boundary_top_left = boundary_top_left
-        self.__boundary_bottom_right = boundary_bottom_right
+        self.__boundary_top_left = boundary_bottom_left
+        self.__boundary_bottom_right = boundary_top_right
 
         # Simulation state
         self.__current_step: int = 0
@@ -88,17 +88,17 @@ class DroneState:
 
     @staticmethod
     def __is_within_boundary(position: location.Location,
-                             boundary_top_left: location.Location,
-                             boundary_bottom_right: location.Location) -> bool:
+                             boundary_bottom_left: location.Location,
+                             boundary_top_right: location.Location) -> bool:
         """
         Checks whether position is within bounds.
         """
-        if position.location_x < boundary_top_left.location_x \
-            or position.location_x > boundary_bottom_right.location_x:
+        if position.location_x < boundary_bottom_left.location_x \
+            or position.location_x > boundary_top_right.location_x:
             return False
 
-        if position.location_y < boundary_top_left.location_y \
-            or position.location_y > boundary_bottom_right.location_y:
+        if position.location_y < boundary_bottom_left.location_y \
+            or position.location_y > boundary_top_right.location_y:
             return False
 
         return True

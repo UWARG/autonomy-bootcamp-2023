@@ -21,6 +21,9 @@ from modules.private.utilities import worker_manager
 
 QUEUE_MAX_SIZE = 1
 
+# Increase the step size if your computer is lagging
+# Larger step size is smaller FPS
+TIME_STEP_SIZE = 0.01  # seconds
 PIXELS_PER_METRE = 60
 IMAGE_RESOLUTION_X = 1200
 IMAGE_RESOLUTION_Y = 900
@@ -28,6 +31,8 @@ MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
 LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
 
 
+# Extra variables required for management
+# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -48,7 +53,6 @@ def main() -> int:
 
     simulation_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
-        QUEUE_MAX_SIZE,
     )
 
     drone_initial_position = location.Location(0.0, 0.0)
@@ -62,6 +66,7 @@ def main() -> int:
         1,
         simulation_worker.simulation_worker,
         (
+            TIME_STEP_SIZE,
             drone_initial_position,
             location.Location(-51.0, -38.5),
             location.Location(51.0, 38.5),
@@ -108,9 +113,9 @@ def main() -> int:
     )
     counter = 0
     while counter < 11000:
-        output_data: "tuple[drone_report.DroneReport, np.ndarray]" = \
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = \
             simulation_to_detect_queue.queue.get()
-        report, camera_image = output_data
+        report, _, camera_image = output_data
 
         # Pylint has issues with OpenCV
         # pylint: disable=no-member

@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Displays the map and drone information.
 """
+import pathlib
 import time
 
 import cv2
@@ -19,26 +20,29 @@ class Display:
     __create_key = object()
 
     __PANE_RESOLUTION_X = 400
+    __IMAGE_SAVE_DIRECTORY = pathlib.Path("log")
     __LANDING_IMAGE_NAME = "landing_screenshot.png"
 
     @classmethod
-    def create(cls, display_scale: float, enable_logging: bool) -> "tuple[bool, Display | None]":
+    def create(cls, display_scale: float) -> "tuple[bool, Display | None]":
         """
         display_scale: Scale of the displayed image from 0 to 1.
         """
         if display_scale <= 0.0:
             return False, None
 
-        return True, Display(cls.__create_key, display_scale, enable_logging)
+        cls.__IMAGE_SAVE_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-    def __init__(self, class_private_create_key, display_scale: float, enable_logging: bool):
+        return True, Display(cls.__create_key, display_scale)
+
+    def __init__(self, class_private_create_key, display_scale: float):
         """
         Private constructor, use create() method.
         """
         assert class_private_create_key is Display.__create_key, "Use create() method"
 
         self.__display_scale = display_scale
-        self.__has_saved_landing_image = not enable_logging
+        self.__has_saved_landing_image = False
 
     @staticmethod
     def __display(image: np.ndarray, display_scale: float):
@@ -99,7 +103,7 @@ class Display:
         text_line_counter = 2
         text_size = 1.0
 
-        image = np.zeros((resolution_y, resolution_x, 3))
+        image = np.zeros((resolution_y, resolution_x, 3), dtype=np.uint8)
 
         # Pylint has issues with OpenCV
         # pylint: disable=no-member
@@ -204,9 +208,11 @@ class Display:
         # Save landing image
         if not self.__has_saved_landing_image and report.status == drone_status.DroneStatus.LANDED:
             prefix_text = str(int(time.time()))
+            image_name = prefix_text + "_" + self.__LANDING_IMAGE_NAME
+            image_path = pathlib.PurePosixPath(self.__IMAGE_SAVE_DIRECTORY, image_name)
             # Pylint has issues with OpenCV
             # pylint: disable-next=no-member
-            cv2.imwrite(prefix_text + "_" + self.__LANDING_IMAGE_NAME, display_image)
+            cv2.imwrite(str(image_path), display_image)
 
             self.__has_saved_landing_image = True
 

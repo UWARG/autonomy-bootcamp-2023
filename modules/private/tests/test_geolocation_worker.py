@@ -46,7 +46,6 @@ def main() -> int:
 
     geolocation_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
-        QUEUE_MAX_SIZE,
     )
 
     geolocation_manager = worker_manager.WorkerManager()

@@ -15,13 +15,12 @@ from modules.private.display import display
 
 
 DISPLAY_SCALE = 0.8
-ENABLE_LOGGING = False
 
 DELAY = 0.01  # seconds
 
 
 if __name__ == "__main__":
-    _, displayer = display.Display.create(DISPLAY_SCALE, ENABLE_LOGGING)
+    _, displayer = display.Display.create(DISPLAY_SCALE)
     assert displayer is not None
 
     image = cv2.imread("modules/private/simulation/mapping/world/default.png")
