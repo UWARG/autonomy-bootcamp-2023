@@ -46,7 +46,7 @@ def main() -> int:
         QUEUE_MAX_SIZE,
     )
 
-    detect_landing_pad_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
     )
 
@@ -58,7 +58,7 @@ def main() -> int:
             MODEL_DIRECTORY_PATH,
             simulation_to_detect_queue,
             detect_to_geolocation_queue,
-            detect_landing_pad_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -109,7 +109,7 @@ def main() -> int:
     simulation_to_detect_queue.fill_and_drain_queue()
     detect_to_geolocation_queue.fill_and_drain_queue()
 
-    detect_landing_pad_worker_status_queue.fill_and_drain_queue()
+    worker_status_queue.fill_and_drain_queue()
 
     detect_landing_pad_manager.join_workers()
 

@@ -7,6 +7,9 @@ import pathlib
 
 from .utilities import queue_proxy_wrapper
 from .utilities import worker_controller
+from .. import drone_report
+from .. import drone_status
+from .. import location
 from ..bootcamp import detect_landing_pad
 
 
@@ -22,10 +25,16 @@ def detect_landing_pad_worker(model_directory: pathlib.Path,
     status_queue is how this worker process communicates to the main process.
     controller is how the main process communicates to this worker process.
     """
+    report = drone_report.DroneReport(
+        drone_status.DroneStatus.HALTED,
+        location.Location(0.0, 0.0),
+        location.Location(0.0, 0.0),
+    )
+
     result, detector = detect_landing_pad.DetectLandingPad.create(model_directory)
     if not result:
         print("WORKER ERROR: Could not create landing pad detector")
-        status_queue.queue.put(-1)
+        status_queue.queue.put(report)
         return
 
     # Get Pylance to stop complaining
@@ -46,7 +55,8 @@ def detect_landing_pad_worker(model_directory: pathlib.Path,
         # pylint: disable-next=broad-exception-caught
         except Exception:
             print("WORKER ERROR: DetectLandingPad.run() exception")
-            bounding_boxes = [], annotated_image = camera_image
+            status_queue.queue.put(report)
+            return
 
         output_data = (report, bounding_boxes, annotated_image)
 

@@ -52,7 +52,7 @@ def main() -> int:
         QUEUE_MAX_SIZE,
     )
 
-    simulation_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
     )
 
@@ -80,7 +80,7 @@ def main() -> int:
             landing_pad_locations,
             decision_to_simulation_queue,
             simulation_to_detect_queue,
-            simulation_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -147,7 +147,7 @@ def main() -> int:
     decision_to_simulation_queue.fill_and_drain_queue()
     simulation_to_detect_queue.fill_and_drain_queue()
 
-    simulation_worker_status_queue.fill_and_drain_queue()
+    worker_status_queue.fill_and_drain_queue()
 
     simulation_manager.join_workers()
 

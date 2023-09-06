@@ -49,7 +49,7 @@ def main() -> int:
         QUEUE_MAX_SIZE,
     )
 
-    display_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
     )
 
@@ -62,7 +62,7 @@ def main() -> int:
             SEED,
             input_queue,
             display_to_decision_queue,
-            display_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -147,7 +147,7 @@ def main() -> int:
     input_queue.fill_and_drain_queue()
     display_to_decision_queue.fill_and_drain_queue()
 
-    display_worker_status_queue.fill_and_drain_queue()
+    worker_status_queue.fill_and_drain_queue()
 
     display_manager.join_workers()
 

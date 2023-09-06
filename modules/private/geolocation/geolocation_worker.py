@@ -7,6 +7,9 @@ Geolocation worker process.
 from . import geolocation
 from ..utilities import queue_proxy_wrapper
 from ..utilities import worker_controller
+from ... import drone_report
+from ... import drone_status
+from ... import location
 
 
 # Extra parameters required for worker communication
@@ -25,10 +28,16 @@ def geolocation_worker(pixels_per_metre: int,
     status_queue is how this worker process communicates to the main process.
     controller is how the main process communicates to this worker process.
     """
+    report = drone_report.DroneReport(
+        drone_status.DroneStatus.HALTED,
+        location.Location(0.0, 0.0),
+        location.Location(0.0, 0.0),
+    )
+
     result, locator = geolocation.Geolocation.create(resolution_x, resolution_y, pixels_per_metre)
     if not result:
         print("WORKER ERROR: Could not create locator")
-        status_queue.queue.put(-1)
+        status_queue.queue.put(report)
         return
 
     # Get Pylance to stop complaining

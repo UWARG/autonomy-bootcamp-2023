@@ -3,7 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Test decision simple waypoint.
 
-You can change the timestep and display scale settings if you wish.
+You can change the timestep, display scale, and seed, if you wish.
 Do not modify anything else.
 """
 import multiprocessing as mp
@@ -87,13 +87,7 @@ def main() -> int:
     )
 
     # Status queues
-    simulation_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-    display_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-    decision_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
     )
 
@@ -140,7 +134,7 @@ def main() -> int:
             landing_pad_locations,
             decision_to_simulation_queue,
             simulation_to_display_queue,
-            simulation_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -154,7 +148,7 @@ def main() -> int:
             SEED,
             simulation_to_display_queue,
             display_to_decision_queue,
-            display_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -167,7 +161,7 @@ def main() -> int:
             decider,
             display_to_decision_queue,
             decision_to_simulation_queue,
-            decision_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -176,7 +170,7 @@ def main() -> int:
     display_manager.start_workers()
     decision_manager.start_workers()
 
-    report = simulation_worker_status_queue.queue.get(timeout=TIMEOUT)
+    report = worker_status_queue.queue.get(timeout=TIMEOUT)
 
     # Log results
     results_text = \
@@ -206,9 +200,7 @@ def main() -> int:
     display_to_decision_queue.fill_and_drain_queue()
     decision_to_simulation_queue.fill_and_drain_queue()
 
-    simulation_worker_status_queue.fill_and_drain_queue()
-    display_worker_status_queue.fill_and_drain_queue()
-    decision_worker_status_queue.fill_and_drain_queue()
+    worker_status_queue.fill_and_drain_queue()
 
     simulation_manager.join_workers()
     display_manager.join_workers()

@@ -99,19 +99,7 @@ def main() -> int:
     )
 
     # Status queues
-    simulation_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-    detect_landing_pad_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-    geolocation_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-    display_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-    decision_worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
+    worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
         mp_manager,
     )
 
@@ -134,7 +122,10 @@ def main() -> int:
 
     waypoint, landing_pad_locations = data
 
-    decider = decision_waypoint_landing_pads.DecisionWaypointLandingPads(waypoint, ACCEPTANCE_RADIUS)
+    decider = decision_waypoint_landing_pads.DecisionWaypointLandingPads(
+        waypoint,
+        ACCEPTANCE_RADIUS,
+    )
 
     # Managers
     simulation_manager = worker_manager.WorkerManager()
@@ -155,7 +146,7 @@ def main() -> int:
             landing_pad_locations,
             decision_to_simulation_queue,
             simulation_to_detect_queue,
-            simulation_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -168,7 +159,7 @@ def main() -> int:
             MODEL_DIRECTORY_PATH,
             simulation_to_detect_queue,
             detect_to_geolocation_queue,
-            detect_landing_pad_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -183,7 +174,7 @@ def main() -> int:
             IMAGE_RESOLUTION_Y,
             detect_to_geolocation_queue,
             geolocation_to_display_queue,
-            geolocation_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -197,7 +188,7 @@ def main() -> int:
             SEED,
             geolocation_to_display_queue,
             display_to_decision_queue,
-            display_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -210,7 +201,7 @@ def main() -> int:
             decider,
             display_to_decision_queue,
             decision_to_simulation_queue,
-            decision_worker_status_queue,
+            worker_status_queue,
             controller,
         ),
     )
@@ -221,7 +212,7 @@ def main() -> int:
     display_manager.start_workers()
     decision_manager.start_workers()
 
-    report = simulation_worker_status_queue.queue.get(timeout=TIMEOUT)
+    report = worker_status_queue.queue.get(timeout=TIMEOUT)
 
     # Log results
     results_text = \
@@ -253,11 +244,7 @@ def main() -> int:
     display_to_decision_queue.fill_and_drain_queue()
     decision_to_simulation_queue.fill_and_drain_queue()
 
-    simulation_worker_status_queue.fill_and_drain_queue()
-    detect_landing_pad_worker_status_queue.fill_and_drain_queue()
-    geolocation_worker_status_queue.fill_and_drain_queue()
-    display_worker_status_queue.fill_and_drain_queue()
-    decision_worker_status_queue.fill_and_drain_queue()
+    worker_status_queue.fill_and_drain_queue()
 
     simulation_manager.join_workers()
     detect_landing_pad_manager.join_workers()

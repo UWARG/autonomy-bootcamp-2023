@@ -7,7 +7,6 @@ Decision worker process.
 from . import base_decision
 from ..utilities import queue_proxy_wrapper
 from ..utilities import worker_controller
-from ... import commands
 
 
 def decision_worker(decider: base_decision.BaseDecision,
@@ -42,6 +41,7 @@ def decision_worker(decider: base_decision.BaseDecision,
         # pylint: disable-next=broad-exception-caught
         except Exception:
             print("WORKER ERROR: BaseDecision.run() exception")
-            command = commands.Command.create_null_command()
+            status_queue.queue.put(report)
+            return
 
         output_queue.queue.put(command)

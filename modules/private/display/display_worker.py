@@ -7,6 +7,9 @@ Display worker process.
 from . import display
 from ..utilities import queue_proxy_wrapper
 from ..utilities import worker_controller
+from ... import drone_report
+from ... import drone_status
+from ... import location
 
 
 # Extra parameters required for worker communication
@@ -24,10 +27,16 @@ def display_worker(display_scale: float,
     status_queue is how this worker process communicates to the main process.
     controller is how the main process communicates to this worker process.
     """
+    report = drone_report.DroneReport(
+        drone_status.DroneStatus.HALTED,
+        location.Location(0.0, 0.0),
+        location.Location(0.0, 0.0),
+    )
+
     result, displayer = display.Display.create(display_scale, seed)
     if not result:
         print("WORKER ERROR: Could not create displayer")
-        status_queue.queue.put(-1)
+        status_queue.queue.put(report)
         return
 
     # Get Pylance to stop complaining
