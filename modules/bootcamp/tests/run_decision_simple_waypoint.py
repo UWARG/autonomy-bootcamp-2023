@@ -110,8 +110,11 @@ def main() -> int:
 
     waypoint, landing_pad_locations = data
 
-    # Override as the landing pads are not needed here
-    landing_pad_locations = []
+    # Override as randomized landing pads are not needed here
+    landing_pad_locations = [
+        waypoint,
+        DRONE_INITIAL_POSITION,
+    ]
 
     decider = decision_simple_waypoint.DecisionSimpleWaypoint(waypoint, ACCEPTANCE_RADIUS)
 

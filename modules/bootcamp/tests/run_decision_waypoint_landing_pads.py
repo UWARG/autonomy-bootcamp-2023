@@ -122,6 +122,9 @@ def main() -> int:
 
     waypoint, landing_pad_locations = data
 
+    # Add landing pad at initial position
+    landing_pad_locations.append(DRONE_INITIAL_POSITION)
+
     decider = decision_waypoint_landing_pads.DecisionWaypointLandingPads(
         waypoint,
         ACCEPTANCE_RADIUS,
