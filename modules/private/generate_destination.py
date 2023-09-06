@@ -184,16 +184,37 @@ def generate_destination(drone_initial_position: location.Location,
     # Landing pads
     landing_pad_count = random.randint(1, 3)
 
-    landing_pads = []
+    landing_pads: "list[location.Location]" = []
     for _ in range(0, landing_pad_count):
-        result, landing_pad_position = __generate_landing_pad(
-            waypoint_position,
-            pixels_per_metre,
-            resolution_x,
-            resolution_y,
-        )
-        if not result:
-            return False, None
+        default_landing_pad_position = location.Location(0.0, 0.0)
+        landing_pad_position = default_landing_pad_position
+
+        is_non_overlap = False
+        while not is_non_overlap:
+            result, landing_pad_position = __generate_landing_pad(
+                waypoint_position,
+                pixels_per_metre,
+                resolution_x,
+                resolution_y,
+            )
+            if not result:
+                return False, None
+
+            # Get Pylance to stop complaining
+            assert landing_pad_position is not None
+
+            # Exclusion zone with other landing pads
+            is_non_overlap = True
+            for landing_pad in landing_pads:
+                if abs(landing_pad_position.location_x - landing_pad.location_x) < 1.0:
+                    is_non_overlap = False
+                    break
+
+                if abs(landing_pad_position.location_y - landing_pad.location_y) < 1.0:
+                    is_non_overlap = False
+                    break
+
+        assert landing_pad_position is not default_landing_pad_position
 
         landing_pads.append(landing_pad_position)
 

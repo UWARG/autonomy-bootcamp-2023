@@ -22,6 +22,7 @@ python -m modules.private.tests.test_geolocation_worker
 pytest modules/private/tests/test_geolocation.py
 python -m modules.private.tests.test_display_worker
 python -m modules.private.tests.test_display
+python -m modules.prviate.tests.test_generate_destination
 
 # Bootcamp
 pytest modules/bootcamp/tests/test_detect_landing_pad.py
