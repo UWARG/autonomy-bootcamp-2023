@@ -19,6 +19,9 @@ def __log_seed(seed: "int | None"):
     """
     seed_text = str(seed)
     print("Log seed: " + seed_text)
+
+    LOG_FILE_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
     file_name = str(int(time.time())) + "_seed.txt"
     file_path = pathlib.Path(LOG_FILE_DIRECTORY, file_name)
     with open(file_path, "w", encoding="utf-8") as file:
