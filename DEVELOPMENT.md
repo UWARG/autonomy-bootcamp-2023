@@ -1,3 +1,6 @@
+# Bootcamp Maintainers
+
+Information for maintainers of the bootcamp.
 
 You can safely ignore `BOOTCAMPERS DO NOT MODIFY THIS FILE` if you are maintaining the bootcamp. The message is for bootcampers.
 
@@ -22,7 +25,7 @@ python -m modules.private.tests.test_geolocation_worker
 pytest modules/private/tests/test_geolocation.py
 python -m modules.private.tests.test_display_worker
 python -m modules.private.tests.test_display
-python -m modules.prviate.tests.test_generate_destination
+python -m modules.private.tests.test_generate_destination
 
 # Bootcamp
 pytest modules/bootcamp/tests/test_detect_landing_pad.py

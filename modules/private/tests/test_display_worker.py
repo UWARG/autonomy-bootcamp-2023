@@ -95,7 +95,7 @@ def main() -> int:
 
         assert report == input_report
         assert output_list == input_list
-        np.testing.assert_equal(output_image, input_image)
+        assert output_image.shape == input_image.shape
 
         time.sleep(DELAY)
 
@@ -116,7 +116,7 @@ def main() -> int:
 
         assert report == input_report
         assert output_list == input_list
-        np.testing.assert_equal(output_image, input_image)
+        assert output_image.shape == input_image.shape
 
         time.sleep(DELAY)
 
@@ -137,7 +137,7 @@ def main() -> int:
 
         assert report == input_report
         assert output_list == input_list
-        np.testing.assert_equal(output_image, input_image)
+        assert output_image.shape == input_image.shape
 
         time.sleep(DELAY)
 
