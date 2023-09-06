@@ -34,7 +34,7 @@ def geolocation_worker(pixels_per_metre: int,
         location.Location(0.0, 0.0),
     )
 
-    result, locator = geolocation.Geolocation.create(resolution_x, resolution_y, pixels_per_metre)
+    result, locator = geolocation.Geolocation.create(pixels_per_metre, resolution_x, resolution_y)
     if not result:
         print("WORKER ERROR: Could not create locator")
         status_queue.queue.put(report)
