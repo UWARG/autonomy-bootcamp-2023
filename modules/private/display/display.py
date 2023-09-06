@@ -219,6 +219,27 @@ class Display:
 
         return image
 
+    @staticmethod
+    def __draw_map_ui_elements(map_image: np.ndarray):
+        """
+        Draws map UI elements on the provided image.
+
+        map_image: Image to be mutated.
+        """
+        centre_circle_radius = 30
+        centre_circle_colour = (0, 255, 0)  # Green, BGR
+        centre_circle_line_thickness = 2
+
+        # Pylint has issues with OpenCV
+        # pylint: disable-next=no-member
+        cv2.circle(
+            map_image,
+            (map_image.shape[1] // 2, map_image.shape[0] // 2),
+            centre_circle_radius,
+            centre_circle_colour,
+            centre_circle_line_thickness,
+        )
+
     def run(self, report: drone_report.DroneReport, map_image: np.ndarray) -> bool:
         """
         Display.
@@ -235,6 +256,8 @@ class Display:
             report,
             self.__seed,
         )
+
+        self.__draw_map_ui_elements(map_image)
 
         display_image = np.concatenate((map_image, pane_image), axis=1)
 
