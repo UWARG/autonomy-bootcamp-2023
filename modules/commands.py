@@ -108,3 +108,14 @@ class Command:
         Getter.
         """
         return self.__relative_x, self.__relative_y
+
+    def __repr__(self) -> str:
+        """
+        To string.
+        """
+        representation = "Command: " + str(self.__command_type)
+
+        if self.__command_type == Command.CommandType.SET_RELATIVE_DESTINATION:
+            representation += " " + str(self.get_relative_destination())
+
+        return representation

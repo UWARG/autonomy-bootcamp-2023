@@ -80,3 +80,11 @@ class BoundingBox:
         centre_x = (self.x1 + self.x2) / 2
         centre_y = (self.y1 + self.y2) / 2
         return centre_x, centre_y
+
+    def __repr__(self) -> str:
+        """
+        To string.
+        """
+        representation = "Bounding box: " + str((self.x1, self.y1)) + "," + str((self.x2, self.y2))
+
+        return representation
