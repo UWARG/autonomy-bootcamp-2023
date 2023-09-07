@@ -25,7 +25,7 @@ class DetectLandingPad:
     # ============
 
     # Chooses the GPU if it exists, otherwise runs on the CPU
-    __DEVICE = 0 if torch.cuda.is_available() else "cpu"
+    __DEVICE = "0" if torch.cuda.is_available() else "cpu"
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
