@@ -69,12 +69,25 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
+        if report.status == drone_status.DroneStatus.HALTED:
+            # If the drone is halted, send it to the waypoint.
+            if self.getRelativeDistance(report) > self.acceptance_radius:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
+            else:
+                command = commands.Command.create_land_command()
+        elif report.status == drone_status.DroneStatus.MOVING:
+            # If the drone is moving, check if it is close enough to the waypoint.
+            if self.getRelativeDistance(report) < self.acceptance_radius:
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def getRelativeDistance(self, report: drone_report.DroneReport) -> float:
+        """
+        Returns the distance between the drone and the waypoint.
+        """
+        return ((self.waypoint.location_x - report.position.location_x)**2 + (self.waypoint.location_y - report.position.location_y)**2)**0.5
