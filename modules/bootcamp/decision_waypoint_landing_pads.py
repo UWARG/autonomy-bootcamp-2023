@@ -115,9 +115,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if self.landing_pad is not None and report.position == self.landing_pad:
             command = commands.Command.create_land_command()
 
-        # Remove this when done
-        # raise NotImplementedError
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

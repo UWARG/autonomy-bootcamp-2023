@@ -87,9 +87,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             # Create land command
             command = commands.Command.create_land_command()
 
-        # Remove this when done
-        # raise NotImplementedError
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
