@@ -75,14 +75,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             if report.status == drone_status.DroneStatus.HALTED:
                 # If the drone is halted, send it to the landing pad.
-                if self.getRelativeDistance(position, landing_pad) > self.acceptance_radius:
+                if landing_pad > self.acceptance_radius:
                     report.destination = landing_pad
                     command = commands.Command.create_set_relative_destination_command(landing_pad.location_x - position.location_x, landing_pad.location_y - position.location_y)
                 else:
                     command = commands.Command.create_land_command()
             elif report.status == drone_status.DroneStatus.MOVING:
                 # If the drone is moving, check if it is close enough to the landing pad.
-                if self.getRelativeDistance(position, landing_pad) < self.acceptance_radius:
+                if self.getRelativeDistanceSquared(position, landing_pad) < self.acceptance_radius:
                     command = commands.Command.create_halt_command()
         else:
             # Travel to waypoint
@@ -90,11 +90,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             if report.status == drone_status.DroneStatus.HALTED:
                 # If the drone is halted, send it to the waypoint.
-                if self.getRelativeDistance(position, self.waypoint) > self.acceptance_radius:
+                if self.getRelativeDistanceSquared(position, self.waypoint) > self.acceptance_radius:
                     command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - position.location_x, self.waypoint.location_y - position.location_y)
             elif report.status == drone_status.DroneStatus.MOVING:
                 # If the drone is moving, check if it is close enough to the waypoint.
-                if self.getRelativeDistance(position, self.waypoint) < self.acceptance_radius:
+                if self.getRelativeDistanceSquared(position, self.waypoint) < self.acceptance_radius:
                     command = commands.Command.create_halt_command()
                     self.waypointComplete = True
 
@@ -109,16 +109,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Returns the nearest landing pad to the drone.
         """
         nearestLandingPad = landing_pad_locations[0]
-        nearestDistance = self.getRelativeDistance(position, nearestLandingPad)
+        nearestDistance = float("inf")
         for landingPad in landing_pad_locations:
-            distance = self.getRelativeDistance(position, landingPad)
+            distance = self.getRelativeDistanceSquared(position, landingPad)
             if distance < nearestDistance:
                 nearestLandingPad = landingPad
                 nearestDistance = distance
         return nearestLandingPad
 
-    def getRelativeDistance(self, position: location.Location, destination: location.Location) -> float:
+    def getRelativeDistanceSquared(self, position: location.Location, destination: location.Location) -> float:
         """
         Returns the distance between the drone and the waypoint.
         """
-        return ((position.location_x - destination.location_x)**2 + (position.location_y - destination.location_y)**2)**0.5
+        return ((position.location_x - destination.location_x)**2 + (position.location_y - destination.location_y)**2)
