@@ -69,16 +69,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # When drone is HALTED and the drone is not at the waypoint then move towards waypoint
         if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
+            # Get relative x and y position of waypoint to drone
             waypoint_relative_to_drone_x = self.waypoint.location_x - report.position.location_x
             waypoint_relative_to_drone_y = self.waypoint.location_y - report.position.location_y
 
+            # Create relative destination command
             command = commands.Command.create_set_relative_destination_command(
                 waypoint_relative_to_drone_x,
                 waypoint_relative_to_drone_y,
             )
 
+        # When drone is HALTED and the drone is at the desired waypoint then land
         if report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
+            # Create land command
             command = commands.Command.create_land_command()
 
         # Remove this when done

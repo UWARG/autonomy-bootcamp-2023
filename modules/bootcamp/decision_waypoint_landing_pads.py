@@ -38,6 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+
+        # Class variable to store landing pad location
         self.landing_pad = None
 
         # ============
@@ -70,6 +72,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        
+        # When drone is HALTED and the drone is not at the waypoint then move towards waypoint
         if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
             waypoint_relative_to_drone_x = self.waypoint.location_x - report.position.location_x
             waypoint_relative_to_drone_y = self.waypoint.location_y - report.position.location_y
@@ -79,6 +83,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 waypoint_relative_to_drone_y,
             )
 
+        # When drone is HALTED and the drone is at the desired waypoint then find closest landing pad
+        # and move towards selected landing pad location 
         if report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
             landing_pad_distances = []
             for i in range(0, len(landing_pad_locations)):
@@ -105,6 +111,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             self.landing_pad = closest_landing_pad_location
 
+        # When drone is HALTED and the drone is at the desired landing pad then land
         if self.landing_pad is not None and report.position == self.landing_pad:
             command = commands.Command.create_land_command()
 
