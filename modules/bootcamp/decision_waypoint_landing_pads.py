@@ -5,7 +5,7 @@ Travel to designated waypoint and then land at a nearby landing pad.
 """
 # Disable for bootcamp use
 # pylint: disable=unused-import
-
+import math
 
 from .. import commands
 from .. import drone_report
@@ -38,6 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,12 +70,59 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
+            waypoint_relative_to_drone_x = self.waypoint.location_x - report.position.location_x
+            waypoint_relative_to_drone_y = self.waypoint.location_y - report.position.location_y
+
+            command = commands.Command.create_set_relative_destination_command(
+                waypoint_relative_to_drone_x,
+                waypoint_relative_to_drone_y,
+            )
+
+        if report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
+            landing_pad_distances = []
+            for i in range(0, len(landing_pad_locations)):
+                distance = self.distance_to_landing_pad(landing_pad_locations[i], report.position)
+                landing_pad_distances.append(distance)
+
+            shortest_distance = landing_pad_distances[0]
+            closest_landing_pad_index = 0
+
+            for i in range(1, len(landing_pad_distances)):
+                if landing_pad_distances[i] < shortest_distance:
+                    shortest_distance = landing_pad_distances[i]
+                    closest_landing_pad_index = i
+
+            closest_landing_pad_location = landing_pad_locations[closest_landing_pad_index]
+
+            closest_pad_relative_to_drone_x = closest_landing_pad_location.location_x - report.position.location_x
+            closest_pad_relative_to_drone_y = closest_landing_pad_location.location_y - report.position.location_y
+
+            command = commands.Command.create_set_relative_destination_command(
+                closest_pad_relative_to_drone_x,
+                closest_pad_relative_to_drone_y,
+            )
+
+            self.landing_pad = closest_landing_pad_location
+
+        if self.landing_pad is not None and report.position == self.landing_pad:
+            command = commands.Command.create_land_command()
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def distance_to_landing_pad(self,
+                                landing_pad_location: location.Location,
+                                drone_location: location.Location) -> float:
+        pad_relative_to_drone_x = landing_pad_location.location_x - drone_location.location_x
+        pad_relative_to_drone_y = landing_pad_location.location_y - drone_location.location_y
+
+        distance = math.sqrt(pad_relative_to_drone_x ** 2 + pad_relative_to_drone_y ** 2)
+
+        return distance
