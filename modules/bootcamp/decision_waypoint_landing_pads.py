@@ -39,10 +39,23 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
+        self.waypoint.location_x = waypoint.location_x
+        self.waypoint.location_y = waypoint.location_y
+
+        self.waypoint_flag = False 
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    
+
+    def dist_sq_between_locations(self, landing_pad_location: location.Location): 
+        distance_x = landing_pad_location.location_x - self.waypoint.location_x
+        distance_y = landing_pad_location.location_y - self.waypoint.location_y
+
+        return pow(distance_x, 2) + pow(distance_y, 2)
+    
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -70,8 +83,42 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+     
+        
+        if report.status == drone_status.DroneStatus.HALTED: 
+            current_x = report.position.location_x
+            current_y = report.position.location_y
+
+           
+            relative_y = self.waypoint.location_y - current_y
+            relative_x = self.waypoint.location_x - current_x
+          
+            radius_sq = pow(relative_y, 2) + pow(relative_x, 2) 
+
+            if radius_sq <= pow(self.acceptance_radius, 2): 
+                if self.waypoint_flag == True: 
+                    command = commands.Command.create_land_command()
+                else: 
+                    closest_pad = 100000000
+                    closest_pad_idx = -1 
+
+                    for i, landing_pad_location in enumerate(landing_pad_locations):
+
+                        current_pad = self.dist_sq_between_locations(landing_pad_location)
+                        if current_pad < closest_pad: 
+                            closest_pad = current_pad
+                            closest_pad_idx = i
+                    
+                    self.waypoint = landing_pad_locations[closest_pad_idx]
+                    self.waypoint_flag = True
+
+            else: 
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            
+         
+           
+
         # Remove this when done
-        raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

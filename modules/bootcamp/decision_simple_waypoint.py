@@ -14,6 +14,9 @@ from .. import location
 from ..private.decision import base_decision
 
 
+
+
+
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
@@ -37,7 +40,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        
+        self.waypoint.location_x = waypoint.location_x
+        self.waypoint.location_y = waypoint.location_y
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,10 +73,24 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        if report.status == drone_status.DroneStatus.HALTED: 
+            current_x = report.position.location_x
+            current_y = report.position.location_y
+            relative_y = self.waypoint.location_y - current_y
+            relative_x = self.waypoint.location_x - current_x
+
+            radius_sq = pow(relative_y, 2) + pow(relative_x, 2) 
+
+            if radius_sq <= pow(self.acceptance_radius, 2): 
+                command = commands.Command.create_land_command()
+            else: 
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+         
+           
         # Do something based on the report and the state of this class...
 
         # Remove this when done
-        raise NotImplementedError
+     
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
