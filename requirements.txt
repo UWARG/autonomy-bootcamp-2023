@@ -1,3 +1,7 @@
+# BOOTCAMPERS TO COMPLETE.
+
+# This file lists the required Python packages to install.
+
 # Packages listed in alphabetical order
 numpy
 opencv-python
@@ -5,6 +9,20 @@ pytest
 
 # PyTorch
 --extra-index-url https://download.pytorch.org/whl/cu117
+
+# ============
+# ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+# ============
+
+# Based on: https://pytorch.org/get-started/previous-versions/#wheel-1
+# If you are on MacOS, remove +cu117
+# Otherwise, you can keep as is, or use +cpu if you
+# have a CUDA capable GPU but don't want to use it
 torch==1.13.1+cu117
 torchvision==0.14.1+cu117
+
+# ============
+# ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+# ============
+
 ultralytics

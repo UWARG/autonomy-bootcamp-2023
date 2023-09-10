@@ -25,6 +25,8 @@ class DetectLandingPad:
     # ============
 
     # Chooses the GPU if it exists, otherwise runs on the CPU
+    # If you have a CUDA capable GPU but want to force it to
+    # run on the CPU instead, replace the right side with "cpu"
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
     # ============

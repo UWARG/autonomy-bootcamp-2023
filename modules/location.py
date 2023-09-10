@@ -36,4 +36,4 @@ class Location:
         """
         To string
         """
-        return f"{self.location_x},{self.location_y}"
+        return f"({self.location_x},{self.location_y})"
