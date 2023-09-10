@@ -39,6 +39,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
 
+        # Variable to check if the drone has left the initial position
+        self.has_left = False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -68,10 +71,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        # Check if the drone has left the initial position and if it has not, send a command to go to the waypoint
+        if report.status == drone_status.DroneStatus.HALTED and self.has_left == False:
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+            self.has_left = True
+
+        # Check if the drone has reached the waypoint and if it has, send a command to land
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_left == True:
+            command = commands.Command.create_land_command()
+
+
         # Do something based on the report and the state of this class...
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
