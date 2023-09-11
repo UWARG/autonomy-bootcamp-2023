@@ -37,7 +37,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.command_index = 0
+        # self.commands = [
+        #     commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y),
+        # ]
+
+        self.has_sent_landing_command = False
+
+        self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -64,17 +71,39 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index == 0:
+            # Print some information for debugging
+            print(self.counter)
+            # print(self.command_index)
+            print("Halted at: " + str(report.position))
 
-        # Do something based on the report and the state of this class...
+            command=commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
 
-        # Remove this when done
-        raise NotImplementedError
+            # command = self.commands[self.command_index]
+            self.command_index += 1
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            pad_to_land=get_closest_pad(self.waypoint.location_x, self.waypoint.location_y, landing_pad_locations)
+            # command = commands.Command.create_land_command()
+            command=commands.Command.create_set_relative_destination_command(landing_pad_locations[pad_to_land].location_x, landing_pad_locations[pad_to_land].location_y)
+            self.command_index == 0
+            # self.has_sent_landing_command = True
+
+        self.counter += 1
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+def get_closest_pad(self, x: float, y: float, landing_pad_locations: "list[location.Location]")->int:
+    pad_to_land=0
+    min = ((landing_pad_locations[0].location_x-x)<<2+(landing_pad_locations[1].location_y-y)<<2)>>2
+    for i in 1, len(landing_pad_locations):
+        distance_temp= ((landing_pad_locations[i].location_x-x)<<2+(landing_pad_locations[i].location_y-y)<<2)>>2
+        if  distance_temp < min: 
+            min=distance_temp
+            pad_to_land=i
+
+    return i

@@ -37,11 +37,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.command_index = 0
+        # self.commands = [
+        #     commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y),
+        # ]
 
+        self.has_sent_landing_command = False
+
+        self.counter = 0
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+        # ========= ===
 
     def run(self,
             report: drone_report.DroneReport,
@@ -64,14 +70,33 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index == 0:
+            # Print some information for debugging
+            print(self.counter)
+            # print(self.command_index)
+            print("Halted at: " + str(report.position))
+
+            command=commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+
+            # command = self.commands[self.command_index]
+            self.command_index += 1
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            command = commands.Command.create_land_command()
+
+            self.has_sent_landing_command = True
+
+        self.counter += 1
+
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Do something based on the report and the state of this class...
 
+
+
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
