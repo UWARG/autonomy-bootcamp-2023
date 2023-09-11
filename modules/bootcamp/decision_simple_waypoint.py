@@ -43,6 +43,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    @staticmethod
+    def getDistance(a: location.Location, b: location.Location) -> float:
+        """
+        Get the distance between two locations.
+        """
+        return ((a.location_x-b.location_x)**2 + (a.location_y-b.location_y)**2)**0.5
+
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -67,11 +74,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
+        if (report.status == drone_status.DroneStatus.MOVING):
+            if (DecisionSimpleWaypoint.getDistance(report.position,self.waypoint)<self.acceptance_radius):
+                command = commands.Command.create_halt_command()
+        elif (report.status == drone_status.DroneStatus.HALTED):
+            if (DecisionSimpleWaypoint.getDistance(report.position,self.waypoint)<self.acceptance_radius):
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y)
+        else:
+             command = commands.Command.create_null_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
