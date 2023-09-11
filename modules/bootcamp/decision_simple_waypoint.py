@@ -6,6 +6,7 @@ Travel to designated waypoint.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
+import math
 
 from .. import commands
 from .. import drone_report
@@ -37,7 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.timeline = "initial"
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,10 +69,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        x1, y1 = report.position.location_x, report.position.location_y
+        x2, y2 = self.waypoint.location_x, self.waypoint.location_y
 
-        # Remove this when done
-        raise NotImplementedError
+        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.timeline == "initial":
+                relative_x = x2 - x1
+                relative_y = y2 - y1
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+
+                self.timeline = "moving"
+            else:
+                command = commands.Command.create_land_command()
+
+                self.timeline = "landed"
+
+        elif report.status == drone_status.DroneStatus.MOVING:
+            dist = math.dist([x1, y1], [x2, y2])
+
+            if dist <= self.acceptance_radius:
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
