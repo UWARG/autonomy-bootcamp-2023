@@ -111,7 +111,7 @@ class DetectLandingPad:
             if result:
                 bounding_boxes.append(box)
             else:
-                break
+                return []
 
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
