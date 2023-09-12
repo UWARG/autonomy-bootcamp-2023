@@ -107,7 +107,7 @@ class DetectLandingPad:
 
         for i in range(boxes_cpu.shape[0]):
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            if box is not result: 
+            if result: 
                 bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
@@ -116,10 +116,11 @@ class DetectLandingPad:
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
+
         
 
-        # Remove this when done
-        raise NotImplementedError
+
+      
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
