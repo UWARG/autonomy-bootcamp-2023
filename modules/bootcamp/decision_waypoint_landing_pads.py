@@ -39,9 +39,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
-        self.waypoint.location_x = waypoint.location_x
-        self.waypoint.location_y = waypoint.location_y
-
         self.waypoint_flag = False 
 
         # ============
@@ -49,7 +46,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
     
-
     def dist_sq_between_locations(self, landing_pad_location: location.Location): 
         distance_x = landing_pad_location.location_x - self.waypoint.location_x
         distance_y = landing_pad_location.location_y - self.waypoint.location_y

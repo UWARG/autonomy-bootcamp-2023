@@ -40,9 +40,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        
-        self.waypoint.location_x = waypoint.location_x
-        self.waypoint.location_y = waypoint.location_y
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
