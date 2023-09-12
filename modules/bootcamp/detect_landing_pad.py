@@ -70,7 +70,7 @@ class DetectLandingPad:
         Converts an image into a list of bounding boxes.
 
         image: The image to run on.
-
+predict
         Return: A tuple of (list of bounding boxes, annotated image) .
             The list of bounding boxes can be empty.
         """
@@ -87,29 +87,32 @@ class DetectLandingPad:
         # * device
         # * verbose
         predictions = self.__model.predict(image, conf=0.7, device="cpu")
-        print(predictions)
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
+        print("PREDICT", prediction.boxes)
 
         # Plot the annotated image from the Result object
         # Include the confidence value
         image_annotated = ...
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.cpu()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
+        for box in boxes_cpu:
+            bounding_boxes.append(bounding_box.BoundingBox.create(box))
             # Create BoundingBox object and append to list
             # result, box = ...
+
+        print(bounding_boxes)
 
         # Remove this when done
         raise NotImplementedError
