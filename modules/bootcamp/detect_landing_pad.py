@@ -90,7 +90,6 @@ predict
 
         # Get the Result object
         prediction = predictions[0]
-        print("PREDICT", prediction.boxes)
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -111,8 +110,6 @@ predict
             # Create BoundingBox object and append to list
             # result, box = ...
             bounding_boxes.append(bounding_box.BoundingBox.create(box)[1])
-
-        print(bounding_boxes)
 
         return (bounding_boxes, image_annotated)
 
