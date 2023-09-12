@@ -94,7 +94,7 @@ predict
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -105,17 +105,16 @@ predict
         boxes_cpu = boxes_xyxy.cpu()
 
         # Loop over the boxes list and create a list of bounding boxes
-        bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
+        bounding_boxes = []
         for box in boxes_cpu:
-            bounding_boxes.append(bounding_box.BoundingBox.create(box))
             # Create BoundingBox object and append to list
             # result, box = ...
+            bounding_boxes.append(bounding_box.BoundingBox.create(box)[1])
 
         print(bounding_boxes)
 
-        # Remove this when done
-        raise NotImplementedError
+        return (bounding_boxes, image_annotated)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
