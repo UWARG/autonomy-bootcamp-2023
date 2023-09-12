@@ -93,19 +93,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # If the drone is not at the waypoint, move to the waypoint
         if report.status == drone_status.DroneStatus.HALTED and self.has_left_home == False and self.has_left_waypoint == False:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.has_left_home = True
 
         # If the drone is at the waypoint, move to the nearest landing pad
         elif report.status == drone_status.DroneStatus.HALTED and self.has_left_home == True and self.has_left_waypoint == False:
             closest_landing_pad = landing_pad_locations[0]
+            closest_pad_dist = distance_between_points(self.waypoint, closest_landing_pad)
 
-            for landing_pad in landing_pad_locations:
-                if distance_between_points(self.waypoint, landing_pad) < distance_between_points(self.waypoint, closest_landing_pad):
+            # Check if the below works
+            for landing_pad in landing_pad_locations[1:]:
+                if distance_between_points(self.waypoint, landing_pad) < closest_pad_dist:
                     closest_landing_pad = landing_pad
+                    closest_pad_dist = distance_between_points(self.waypoint, landing_pad)
             
-            command = commands.Command.create_set_relative_destination_command(relative_destination(report.position, closest_landing_pad).location_x, relative_destination(report.position, closest_landing_pad).location_y)
-
+            destination_to_landing_pad = relative_destination(report.position, closest_landing_pad)
+            command = commands.Command.create_set_relative_destination_command(destination_to_landing_pad.location_x, destination_to_landing_pad.location_y)
             self.has_left_waypoint = True
 
         # If the drone is at the landing pad, land

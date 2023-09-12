@@ -72,12 +72,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Check if the drone has left the initial position and if it has not, send a command to go to the waypoint
-        if report.status == drone_status.DroneStatus.HALTED and self.has_left == False:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_left:
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.has_left = True
 
         # Check if the drone has reached the waypoint and if it has, send a command to land
-        elif report.status == drone_status.DroneStatus.HALTED and self.has_left == True:
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_left:
             command = commands.Command.create_land_command()
 
 
