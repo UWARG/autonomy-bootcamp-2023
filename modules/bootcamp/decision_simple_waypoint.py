@@ -37,11 +37,42 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.action_dict = dict(zip(("MOVE", "HALT", "LAND"), range(3,6)))
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def distance_between_waypoint(self, given_location:location.Location) -> bool:
+        """
+        Returns the distance between the given location and waypoint.
+        """
+        given_loc_from_waypoint_location_x = self.waypoint.location_x - given_location.location_x 
+        given_loc_from_waypoint_location_y = self.waypoint.location_y - given_location.location_y
+        return (given_loc_from_waypoint_location_x, given_loc_from_waypoint_location_y)
+    
+    def check_if_near_waypoint(self, given_location:location.Location) -> bool:
+        """
+        Checks if the given location is on the waypoint by an acceptance radius.
+        """
+        absolute_acceptance_radius = abs(self.acceptance_radius)
+        difference_location_x, difference_location_y = self.distance_between_waypoint(given_location)
+        if abs(difference_location_x) < absolute_acceptance_radius and abs(difference_location_y) < absolute_acceptance_radius:
+            return True
+        return False
+    
+    def next_relative_coordinates_to_waypoint(self, given_location:location.Location) -> "tuple[float]":
+        """
+        Returns the relative x and y coordinates for drone to be sent to.
+        """
+        relative_x, relative_y = self.distance_between_waypoint(given_location)
+        divider = 1
+        if abs(relative_x) > abs(relative_y):
+            return (relative_x/divider, relative_y)
+        elif abs(relative_x) < abs(relative_y):
+            return (relative_x, relative_y/divider)
+        else:
+            return (relative_x/divider, relative_y/divider)
 
     def run(self,
             report: drone_report.DroneReport,
@@ -67,11 +98,33 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+     
+        action = None
+        report_status = report.status
+        report_position = report.position
 
-        # Do something based on the report and the state of this class...
+        if report_status == drone_status.DroneStatus.LANDED:
+            action = None
+        elif report_status == drone_status.DroneStatus.HALTED:
+            if self.check_if_near_waypoint(report_position):
+                action = self.action_dict["LAND"]
+            else:
+                action = self.action_dict["MOVE"]
+        """ elif report_status == drone_status.DroneStatus.MOVING:
+            action = self.action_dict["HALT"] """
+
+        if action is None:
+            pass
+        elif action == self.action_dict["MOVE"]:
+            relative_x, relative_y = self.next_relative_coordinates_to_waypoint(report_position)
+            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+        elif action == self.action_dict["HALT"]:
+            command = commands.Command.create_halt_command()
+        elif action == self.action_dict["LAND"]:
+            command = commands.Command.create_land_command()
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
