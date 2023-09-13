@@ -11,7 +11,7 @@ from .. import commands
 from .. import drone_report
 from .. import drone_status
 from .. import location
-from ..private.decision import base_decision
+from .. private.decision import base_decision
 
 
 # Disable for bootcamp use
@@ -36,13 +36,14 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Add your own
+        
+        self.has_taken_off = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+        
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -68,13 +69,29 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        # Do something based on the report and the state of this class...\
+       
+        # actions for once drone has reached destination
+        if report.position.__eq__(report.destination) and self.has_taken_off:
+            if report.status == drone_status.DroneStatus.MOVING:  # halt if previously moving
+                command = commands.Command.create_halt_command()
+            if report.status == drone_status.DroneStatus.HALTED:  # land if previously halted
+                command = commands.Command.create_land_command()
+
+
+        # set destination to waypoint before drone takes off, and set take off status
+        # to allow setting destination to waypoint before checking 
+        if not self.has_taken_off:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y  - report.position.location_y)
+                self.has_taken_off = True
+        
 
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
