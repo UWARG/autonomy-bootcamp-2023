@@ -304,7 +304,7 @@ class MapRender:
     __create_key = object()
 
     __DEFAULT_MAP_IMAGE_NAME = "default.png"
-    __LANDING_PAD_IMAGE_NAME = "pad.png"
+    __LANDING_PAD_IMAGE_NAME = "landing_pad.png"
 
     @classmethod
     # Better to be explicit with parameters, required by checks, required by checks
