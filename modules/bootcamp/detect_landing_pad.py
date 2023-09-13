@@ -86,7 +86,7 @@ predict
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.7, device="cpu")
+        predictions = self.__model.predict(source=image, conf=0.7, device="cpu", verbose=False)
 
         # Get the Result object
         prediction = predictions[0]
@@ -101,15 +101,18 @@ predict
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         # Hint: .shape gets the dimensions of the numpy array
+        print("TENSOR SHAPE", np.shape(boxes_cpu))
         bounding_boxes = []
-        for box in boxes_cpu:
+        for i in range(np.shape(boxes_cpu)[0]):
             # Create BoundingBox object and append to list
             # result, box = ...
-            bounding_boxes.append(bounding_box.BoundingBox.create(box)[1])
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            if result:
+                bounding_boxes.append(box)
 
         return (bounding_boxes, image_annotated)
 
