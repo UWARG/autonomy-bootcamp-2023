@@ -92,12 +92,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return location.Location(x2 - x1, y2 - y1)
 
         # If the drone is not at the waypoint, move to the waypoint
-        if report.status == drone_status.DroneStatus.HALTED and self.has_left_home == False and self.has_left_waypoint == False:
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_left_home and not self.has_left_waypoint:
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.has_left_home = True
 
         # If the drone is at the waypoint, move to the nearest landing pad
-        elif report.status == drone_status.DroneStatus.HALTED and self.has_left_home == True and self.has_left_waypoint == False:
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_left_home and not self.has_left_waypoint:
             closest_landing_pad = landing_pad_locations[0]
             closest_pad_dist = distance_between_points(self.waypoint, closest_landing_pad)
 
@@ -112,7 +112,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.has_left_waypoint = True
 
         # If the drone is at the landing pad, land
-        elif report.status == drone_status.DroneStatus.HALTED and self.has_left_home == True and self.has_left_waypoint == True:
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_left_home and self.has_left_waypoint:
             command = commands.Command.create_land_command()
 
         # Remove this when done
