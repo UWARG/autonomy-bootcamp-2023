@@ -37,12 +37,68 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.action_dict = dict(zip(("MOVE", "HALT", "LAND"), range(3,6)))
+        self.origin = location.Location(0,0)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def relative_coordinates_of_target(self, target_location:location.Location, given_location:location.Location) -> bool:
+        """
+        Returns the relative coordinates of target w.r.t given location.
+        """
+        relative_location_x = target_location.location_x - given_location.location_x 
+        relative_location_y = target_location.location_y - given_location.location_y
+        return (relative_location_x, relative_location_y)
+    
+    def check_if_near_target(self, target_location:location.Location, given_location:location.Location) -> bool:
+        """
+        Checks if the given location is near the target by an acceptance radius.
+        """
+        absolute_acceptance_radius = abs(self.acceptance_radius)
+        difference_location_x, difference_location_y = self.relative_coordinates_of_target(target_location, given_location)
+        if abs(difference_location_x) < absolute_acceptance_radius and abs(difference_location_y) < absolute_acceptance_radius:
+            return True
+        return False
+    
+    def next_relative_coordinates_to_target(self, 
+                                            target_location:location.Location, 
+                                            given_location:location.Location) -> "tuple[float]":
+        """
+        Returns the relative x and y coordinates for drone to be sent to.
+        """
+        relative_x, relative_y = self.relative_coordinates_of_target(target_location, given_location)
+        divider = 1
+        if abs(relative_x) > abs(relative_y):
+            return (relative_x/divider, relative_y)
+        elif abs(relative_x) < abs(relative_y):
+            return (relative_x, relative_y/divider)
+        else:
+            return (relative_x/divider, relative_y/divider)
+
+    def closest_landing_pad(self, 
+                            given_location:location.Location, 
+                            landing_pad_locations: "list[location.Location]") -> location.Location:
+        """
+        Finds out the closest landing pad from the given location by checking out their distances.
+        """
+        def shortest_distance(target_location:location.Location, given_location:location.Location) -> float:
+            """
+            Finds out the shortest distance between two given locations.
+            """
+            x_1, y_1 = given_location.location_x, given_location.location_y
+            x_2, y_2 = target_location.location_x, target_location.location_y
+            x_square = (x_2 - x_1) ** 2
+            y_square = (y_2 - y_1) ** 2
+            return (x_square + y_square) ** 0.5
+        landing_pad_distances = list(map(lambda loc: shortest_distance(loc, given_location), landing_pad_locations))
+        landing_pad_hashmap = dict(zip(landing_pad_locations, landing_pad_distances))
+        landing_pad_hashmap = tuple(sorted(list(landing_pad_hashmap.items()), key=lambda i: i[1]))
+        return landing_pad_hashmap[0][0]
+    
+
+    
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -68,10 +124,52 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        def shortest_distance(target_location:location.Location, given_location:location.Location) -> float:
+            """
+            Finds out the shortest distance between two given locations.
+            """
+            x_1, y_1 = given_location.location_x, given_location.location_y
+            x_2, y_2 = target_location.location_x, target_location.location_y
+            x_square = (x_2 - x_1) ** 2
+            y_square = (y_2 - y_1) ** 2
+            return (x_square + y_square) ** 0.5
+        
+        action = None
+        report_status = report.status
+        report_position = report.position
+        target = self.waypoint
+
+        if report_status in (drone_status.DroneStatus.LANDED, drone_status.DroneStatus.MOVING):
+            pass
+        elif report_status == drone_status.DroneStatus.HALTED:
+            landing_pad = self.closest_landing_pad(self.waypoint, landing_pad_locations)
+            action = self.action_dict["MOVE"]
+            if self.check_if_near_target(self.waypoint, report_position):
+                target = landing_pad
+            if (self.check_if_near_target(landing_pad, report_position)
+                and (shortest_distance(self.waypoint, report_position) - shortest_distance(self.waypoint, landing_pad) < 0.1)
+                and (
+                    (self.check_if_near_target(landing_pad, self.origin) and self.check_if_near_target(self.waypoint, self.origin))
+                    or (not self.check_if_near_target(report_position, self.origin))
+                )):
+                    """ if (
+                        (self.check_if_near_target(landing_pad, self.origin) and self.check_if_near_target(self.waypoint, self.origin)) 
+                        or (not self.check_if_near_target(report_position, self.origin))
+                    ): """
+                    action = self.action_dict["LAND"]
+
+        if action is None:
+            pass
+        elif action == self.action_dict["MOVE"]:
+            relative_x, relative_y = self.next_relative_coordinates_to_target(target, report_position)
+            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+        elif action == self.action_dict["HALT"]:
+            command = commands.Command.create_halt_command()
+        elif action == self.action_dict["LAND"]:
+            command = commands.Command.create_land_command()
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
