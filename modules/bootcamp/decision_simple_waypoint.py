@@ -43,6 +43,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def has_arrived(self, postition: location.Location, destination: location.Location) -> bool:
+        """
+        To determine if postion of the drone is within the acceptable radius of its destination.
+        """
+        # check in x direction
+        if abs(destination.location_x - postition.location_x) > self.acceptance_radius:
+             return False
+
+        # check in y direction
+        if abs(destination.location_y - postition.location_y) > self.acceptance_radius:
+             return False
+        
+        return True
         
     def run(self,
             report: drone_report.DroneReport,
@@ -72,7 +85,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...\
        
         # actions for once drone has reached destination
-        if report.position.__eq__(report.destination) and self.has_taken_off:
+        if self.has_arrived(report.position, report.destination) and self.has_taken_off:
             if report.status == drone_status.DroneStatus.MOVING:  # halt if previously moving
                 command = commands.Command.create_halt_command()
             if report.status == drone_status.DroneStatus.HALTED:  # land if previously halted
@@ -84,14 +97,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if not self.has_taken_off:
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y  - report.position.location_y)
                 self.has_taken_off = True
-        
-
-        # Remove this when done
-        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
-    

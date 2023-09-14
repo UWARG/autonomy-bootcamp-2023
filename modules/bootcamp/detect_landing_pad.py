@@ -96,7 +96,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot(conf=self.__CONFIDENCE_THRESHOLD)
+        image_annotated = prediction.plot()
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -104,7 +104,8 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy() 
+        boxes_cpu = boxes_xyxy.cpu()
+        boxes_cpu = boxes_cpu.numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -117,9 +118,6 @@ class DetectLandingPad:
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
-
-        # Remove this when done
-        #raise NotImplementedError
 
         return (bounding_boxes, image_annotated)
         # ============
