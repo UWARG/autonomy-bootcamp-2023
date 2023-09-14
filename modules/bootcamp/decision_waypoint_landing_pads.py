@@ -95,7 +95,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if self.waypoint_flag == True: 
                     command = commands.Command.create_land_command()
                 else: 
-                    closest_pad = float('inf')
+                    closest_pad = float("inf")
                     closest_pad_idx = -1 
 
                     for i, landing_pad_location in enumerate(landing_pad_locations):
