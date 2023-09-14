@@ -47,10 +47,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         Returns the distance between the given location and waypoint.
         """
-        given_loc_from_waypoint_location_x = self.waypoint.location_x - given_location.location_x 
+        given_loc_from_waypoint_location_x = self.waypoint.location_x - given_location.location_x
         given_loc_from_waypoint_location_y = self.waypoint.location_y - given_location.location_y
         return (given_loc_from_waypoint_location_x, given_loc_from_waypoint_location_y)
-    
+
     def check_if_near_waypoint(self, given_location:location.Location) -> bool:
         """
         Checks if the given location is on the waypoint by an acceptance radius.
@@ -60,7 +60,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if abs(difference_location_x) < absolute_acceptance_radius and abs(difference_location_y) < absolute_acceptance_radius:
             return True
         return False
-    
+
     def next_relative_coordinates_to_waypoint(self, given_location:location.Location) -> "tuple[float]":
         """
         Returns the relative x and y coordinates for drone to be sent to.
@@ -98,7 +98,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-     
+
         action = None
         report_status = report.status
         report_position = report.position

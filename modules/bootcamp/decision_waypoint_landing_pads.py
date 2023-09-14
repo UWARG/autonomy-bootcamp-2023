@@ -48,10 +48,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Returns the relative coordinates of target w.r.t given location.
         """
-        relative_location_x = target_location.location_x - given_location.location_x 
+        relative_location_x = target_location.location_x - given_location.location_x
         relative_location_y = target_location.location_y - given_location.location_y
         return (relative_location_x, relative_location_y)
-    
+
     def check_if_near_target(self, target_location:location.Location, given_location:location.Location) -> bool:
         """
         Checks if the given location is near the target by an acceptance radius.
@@ -61,9 +61,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if abs(difference_location_x) < absolute_acceptance_radius and abs(difference_location_y) < absolute_acceptance_radius:
             return True
         return False
-    
-    def next_relative_coordinates_to_target(self, 
-                                            target_location:location.Location, 
+
+    def next_relative_coordinates_to_target(self,
+                                            target_location:location.Location,
                                             given_location:location.Location) -> "tuple[float]":
         """
         Returns the relative x and y coordinates for drone to be sent to.
@@ -77,8 +77,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         else:
             return (relative_x/divider, relative_y/divider)
 
-    def closest_landing_pad(self, 
-                            given_location:location.Location, 
+    def closest_landing_pad(self,
+                            given_location:location.Location,
                             landing_pad_locations: "list[location.Location]") -> location.Location:
         """
         Finds out the closest landing pad from the given location by checking out their distances.
@@ -96,9 +96,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         landing_pad_hashmap = dict(zip(landing_pad_locations, landing_pad_distances))
         landing_pad_hashmap = tuple(sorted(list(landing_pad_hashmap.items()), key=lambda i: i[1]))
         return landing_pad_hashmap[0][0]
-    
 
-    
+
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -133,7 +132,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             x_square = (x_2 - x_1) ** 2
             y_square = (y_2 - y_1) ** 2
             return (x_square + y_square) ** 0.5
-        
+
         action = None
         report_status = report.status
         report_position = report.position
@@ -152,11 +151,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     (self.check_if_near_target(landing_pad, self.origin) and self.check_if_near_target(self.waypoint, self.origin))
                     or (not self.check_if_near_target(report_position, self.origin))
                 )):
-                    """ if (
-                        (self.check_if_near_target(landing_pad, self.origin) and self.check_if_near_target(self.waypoint, self.origin)) 
-                        or (not self.check_if_near_target(report_position, self.origin))
-                    ): """
-                    action = self.action_dict["LAND"]
+                """ 
+                self.check_if_near_target(landing_pad, self.origin) - if nearest landing pad is origin
+                self.check_if_near_target(self.waypoint, self.origin) - if waypoint is origin
+                self.check_if_near_target(report_position, self.origin) - if current position is origin
+                """
+                action = self.action_dict["LAND"]
 
         if action is None:
             pass
