@@ -90,7 +90,7 @@ class DetectLandingPad:
             source=image,
             conf=0.7,
             device=self.__DEVICE,
-            verbose=True,
+            verbose=False,
         )
 
         # Get the Result object
@@ -118,7 +118,7 @@ class DetectLandingPad:
             if noerr:
                 bounding_boxes.append(res)
             else:
-                raise Exception("Error creating bounding box")
+                return []
 
         # Remove this when done
         return bounding_boxes, image_annotated
