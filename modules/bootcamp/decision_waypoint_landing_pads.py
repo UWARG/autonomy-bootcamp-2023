@@ -5,7 +5,7 @@ Travel to designated waypoint and then land at a nearby landing pad.
 """
 # Disable for bootcamp use
 # pylint: disable=unused-import
-import math
+
 
 from .. import commands
 from .. import drone_report
@@ -38,9 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-
-        # Class variable to store landing pad location
-        self.landing_pad = None
+        self.state = 0
+        self.destination = self.waypoint
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -72,48 +71,47 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        
-        # When drone is HALTED and the drone is not at the waypoint then move towards waypoint
-        if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
-            waypoint_relative_to_drone_x = self.waypoint.location_x - report.position.location_x
-            waypoint_relative_to_drone_y = self.waypoint.location_y - report.position.location_y
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.state == 0:
+                # If the drone is near the destination then set destination to closest landing pad
+                if self.distance_between_points(self.destination, report.position) <= self.acceptance_radius:
+                    # Calculate the distances of the detected landing pad
+                    landing_pad_distances = []
+                    for landing_pad_location in landing_pad_locations:
+                        distance = self.distance_between_points(landing_pad_location, report.position)
+                        landing_pad_distances.append(distance)
 
-            command = commands.Command.create_set_relative_destination_command(
-                waypoint_relative_to_drone_x,
-                waypoint_relative_to_drone_y,
-            )
+                    # Find the landing pad closest to the drone
+                    shortest_distance = landing_pad_distances[0]
+                    closest_landing_pad_index = 0
 
-        # When drone is HALTED and the drone is at the desired waypoint then find closest landing pad
-        # and move towards selected landing pad location 
-        if report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
-            landing_pad_distances = []
-            for i in range(0, len(landing_pad_locations)):
-                distance = self.distance_to_landing_pad(landing_pad_locations[i], report.position)
-                landing_pad_distances.append(distance)
+                    for i in range(1, len(landing_pad_distances)):
+                        if landing_pad_distances[i] < shortest_distance:
+                            shortest_distance = landing_pad_distances[i]
+                            closest_landing_pad_index = i
 
-            shortest_distance = landing_pad_distances[0]
-            closest_landing_pad_index = 0
+                    # Set the destination to the closest landing pad
+                    self.destination = landing_pad_locations[closest_landing_pad_index]
+                    self.state = 1
+                # If the drone is not near the destination the travel to destination
+                else:
+                    destination_relative_to_drone_x = self.destination.location_x - report.position.location_x
+                    destination_relative_to_drone_y = self.destination.location_y - report.position.location_y
+                    command = commands.Command.create_set_relative_destination_command(
+                        destination_relative_to_drone_x,
+                        destination_relative_to_drone_y
+                    )
 
-            for i in range(1, len(landing_pad_distances)):
-                if landing_pad_distances[i] < shortest_distance:
-                    shortest_distance = landing_pad_distances[i]
-                    closest_landing_pad_index = i
-
-            closest_landing_pad_location = landing_pad_locations[closest_landing_pad_index]
-
-            closest_pad_relative_to_drone_x = closest_landing_pad_location.location_x - report.position.location_x
-            closest_pad_relative_to_drone_y = closest_landing_pad_location.location_y - report.position.location_y
-
-            command = commands.Command.create_set_relative_destination_command(
-                closest_pad_relative_to_drone_x,
-                closest_pad_relative_to_drone_y,
-            )
-
-            self.landing_pad = closest_landing_pad_location
-
-        # When drone is HALTED and the drone is at the desired landing pad then land
-        if self.landing_pad is not None and report.position == self.landing_pad:
-            command = commands.Command.create_land_command()
+            if self.state == 1:
+                if self.distance_between_points(self.destination, report.position) <= self.acceptance_radius:
+                    command = commands.Command.create_land_command()
+                else:
+                    destination_relative_to_drone_x = self.destination.location_x - report.position.location_x
+                    destination_relative_to_drone_y = self.destination.location_y - report.position.location_y
+                    command = commands.Command.create_set_relative_destination_command(
+                        destination_relative_to_drone_x,
+                        destination_relative_to_drone_y
+                    )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -121,12 +119,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
-    def distance_to_landing_pad(self,
-                                landing_pad_location: location.Location,
-                                drone_location: location.Location) -> float:
-        pad_relative_to_drone_x = landing_pad_location.location_x - drone_location.location_x
-        pad_relative_to_drone_y = landing_pad_location.location_y - drone_location.location_y
+    @staticmethod
+    def distance_between_points(point_1: location.Location, point_2: location.Location) -> float:
+        distance_x = point_1.location_x - point_2.location_x
+        distance_y = point_1.location_y - point_2.location_y
 
-        distance = math.sqrt(pad_relative_to_drone_x ** 2 + pad_relative_to_drone_y ** 2)
-
-        return distance
+        return max(abs(distance_x), abs(distance_y))
