@@ -70,8 +70,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        # When drone is HALTED and the drone is not at the waypoint then move towards waypoint
-        if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
+        distance_to_waypoint = self.distance_between_points(self.waypoint, report.position)
+
+        if report.status == drone_status.DroneStatus.HALTED and distance_to_waypoint > self.acceptance_radius:
+            # When drone is HALTED and the drone is not near the waypoint then move towards waypoint
+
             # Get relative x and y position of waypoint to drone
             waypoint_relative_to_drone_x = self.waypoint.location_x - report.position.location_x
             waypoint_relative_to_drone_y = self.waypoint.location_y - report.position.location_y
@@ -82,13 +85,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 waypoint_relative_to_drone_y,
             )
 
-        # When drone is HALTED and the drone is at the desired waypoint then land
-        if report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
+        elif report.status == drone_status.DroneStatus.HALTED and distance_to_waypoint <= self.acceptance_radius:
+            # When drone is HALTED and the drone is near the desired waypoint then land
+
             # Create land command
             command = commands.Command.create_land_command()
+
+        elif report.status == drone_status.DroneStatus.MOVING and distance_to_waypoint <= self.acceptance_radius:
+            # When drone is MOVING and the drone is near the desired waypoint then halt
+
+            # Create halt command
+            command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    @staticmethod
+    def distance_between_points(point_1: location.Location, point_2: location.Location) -> float:
+        distance_x = point_1.location_x - point_2.location_x
+        distance_y = point_1.location_y - point_2.location_y
+
+        return max(abs(distance_x), abs(distance_y))
