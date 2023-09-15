@@ -32,7 +32,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         print("Waypoint: " + str(waypoint))
 
         self.waypoint_reached = False
-        self.target_set = False
         self.target = waypoint
         self.acceptance_radius = acceptance_radius
 
@@ -87,15 +86,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if distance_from_target < self.acceptance_radius:
                 if not self.waypoint_reached:
                     self.waypoint_reached = True
-                    closest_target = None
-                    for target in landing_pad_locations:
-                        if closest_target is None:
-                            closest_target = target
-                        elif DecisionWaypointLandingPads.get_distance(report.position, target) < DecisionWaypointLandingPads.get_distance(report.position, closest_target):
-                            closest_target = target
-                    self.target = closest_target
-                    self.target_set = True
+                    landing_pad_locations = [(DecisionWaypointLandingPads.get_distance(report.position, target), target) for target in landing_pad_locations]
+                    landing_pad_locations.sort(key=lambda x: x[0])
+                    
+                    # There aren't any instructions for what to do if there are no landing pads, so just land and exit the simulation
+                    if len(landing_pad_locations) == 0:
+                        return commands.Command.create_land_command()
 
+                    self.target = landing_pad_locations[0]
                     command = commands.Command.create_set_relative_destination_command(self.target.location_x - report.position.location_x, self.target.location_y - report.position.location_y)
                 else:
                     command = commands.Command.create_land_command()

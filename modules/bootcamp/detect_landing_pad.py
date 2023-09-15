@@ -118,7 +118,7 @@ class DetectLandingPad:
             if noerr:
                 bounding_boxes.append(res)
             else:
-                return []
+                continue
 
         # Remove this when done
         return bounding_boxes, image_annotated
