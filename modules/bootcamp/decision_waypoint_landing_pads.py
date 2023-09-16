@@ -133,9 +133,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         report_position = report.position
         target = self.waypoint
 
-        if report_status in (drone_status.DroneStatus.LANDED, drone_status.DroneStatus.MOVING):
-            pass
-        elif report_status == drone_status.DroneStatus.HALTED:
+        if report_status == drone_status.DroneStatus.HALTED:
             landing_pad = self.closest_landing_pad(self.waypoint, landing_pad_locations)
             action = self.action_dict["MOVE"]
             if self.check_if_near_target(self.waypoint, report_position):
