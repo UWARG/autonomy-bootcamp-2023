@@ -73,7 +73,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
             if self.state == 0:
-                # If the drone is near the destination then set destination to closest landing pad
+                # If the drone is near the current destination then set the next destination to closest landing pad
                 if self.distance_between_points(self.destination, report.position) <= self.acceptance_radius:
                     # Calculate the distances of the detected landing pad
                     landing_pad_distances = []
@@ -83,15 +83,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                     # Find the landing pad closest to the drone
                     shortest_distance = landing_pad_distances[0]
-                    closest_landing_pad_index = 0
 
-                    for i in range(1, len(landing_pad_distances)):
-                        if landing_pad_distances[i] < shortest_distance:
-                            shortest_distance = landing_pad_distances[i]
-                            closest_landing_pad_index = i
+                    for i, landing_pad_distance in enumerate(landing_pad_distances[1:]):
+                        if landing_pad_distance < shortest_distance:
+                            shortest_distance = landing_pad_distance
+                            self.destination = landing_pad_locations[i]
 
-                    # Set the destination to the closest landing pad
-                    self.destination = landing_pad_locations[closest_landing_pad_index]
                     self.state = 1
                 # If the drone is not near the destination the travel to destination
                 else:
@@ -99,7 +96,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     destination_relative_to_drone_y = self.destination.location_y - report.position.location_y
                     command = commands.Command.create_set_relative_destination_command(
                         destination_relative_to_drone_x,
-                        destination_relative_to_drone_y
+                        destination_relative_to_drone_y,
                     )
 
             if self.state == 1:
@@ -110,7 +107,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     destination_relative_to_drone_y = self.destination.location_y - report.position.location_y
                     command = commands.Command.create_set_relative_destination_command(
                         destination_relative_to_drone_x,
-                        destination_relative_to_drone_y
+                        destination_relative_to_drone_y,
                     )
 
         # ============
@@ -124,4 +121,4 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         distance_x = point_1.location_x - point_2.location_x
         distance_y = point_1.location_y - point_2.location_y
 
-        return max(abs(distance_x), abs(distance_y))
+        return (distance_x ** 2 + distance_y ** 2) ** 0.5
