@@ -44,6 +44,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    @staticmethod
+    def shortest_distance(target_location:location.Location, given_location:location.Location) -> float:
+            """
+            Finds out the shortest distance between two given locations.
+            """
+            x_1, y_1 = given_location.location_x, given_location.location_y
+            x_2, y_2 = target_location.location_x, target_location.location_y
+            x_square = (x_2 - x_1) ** 2
+            y_square = (y_2 - y_1) ** 2
+            return (x_square + y_square) ** 0.5
+    
     def relative_coordinates_of_target(self, target_location:location.Location, given_location:location.Location) -> bool:
         """
         Returns the relative coordinates of target w.r.t given location.
@@ -83,19 +94,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Finds out the closest landing pad from the given location by checking out their distances.
         """
-        def shortest_distance(target_location:location.Location, given_location:location.Location) -> float:
-            """
-            Finds out the shortest distance between two given locations.
-            """
-            x_1, y_1 = given_location.location_x, given_location.location_y
-            x_2, y_2 = target_location.location_x, target_location.location_y
-            x_square = (x_2 - x_1) ** 2
-            y_square = (y_2 - y_1) ** 2
-            return (x_square + y_square) ** 0.5
-        landing_pad_distances = list(map(lambda loc: shortest_distance(loc, given_location), landing_pad_locations))
-        landing_pad_hashmap = dict(zip(landing_pad_locations, landing_pad_distances))
-        landing_pad_hashmap = tuple(sorted(list(landing_pad_hashmap.items()), key=lambda i: i[1]))
-        return landing_pad_hashmap[0][0]
+        closest_location = landing_pad_locations[0]
+        for landing_pad in landing_pad_locations[1:]:
+            distance_from_given_location = DecisionWaypointLandingPads.shortest_distance(landing_pad, given_location)
+            distance_from_closest_location = DecisionWaypointLandingPads.shortest_distance(closest_location, given_location)
+            if distance_from_given_location < distance_from_closest_location:
+                closest_location = landing_pad
+        return closest_location
 
 
     def run(self,
@@ -123,16 +128,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def shortest_distance(target_location:location.Location, given_location:location.Location) -> float:
-            """
-            Finds out the shortest distance between two given locations.
-            """
-            x_1, y_1 = given_location.location_x, given_location.location_y
-            x_2, y_2 = target_location.location_x, target_location.location_y
-            x_square = (x_2 - x_1) ** 2
-            y_square = (y_2 - y_1) ** 2
-            return (x_square + y_square) ** 0.5
-
         action = None
         report_status = report.status
         report_position = report.position
@@ -146,7 +141,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if self.check_if_near_target(self.waypoint, report_position):
                 target = landing_pad
             if (self.check_if_near_target(landing_pad, report_position)
-                and (shortest_distance(self.waypoint, report_position) - shortest_distance(self.waypoint, landing_pad) < 0.1)
+                and (DecisionWaypointLandingPads.shortest_distance(self.waypoint, report_position) - DecisionWaypointLandingPads.shortest_distance(self.waypoint, landing_pad) < 0.1)
                 and (
                     (self.check_if_near_target(landing_pad, self.origin) and self.check_if_near_target(self.waypoint, self.origin))
                     or (not self.check_if_near_target(report_position, self.origin))
