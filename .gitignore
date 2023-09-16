@@ -9,3 +9,6 @@ venv/
 
 # Logging
 *log*
+
+# pyenv
+.python-version
