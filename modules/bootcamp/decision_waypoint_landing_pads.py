@@ -40,8 +40,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.destination = self.waypoint #preset destination to waypoint so drone has intial direction
         self.has_taken_off = False
-        #self.change_destination = False
-        #self.prev_num_landing_pads = 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -132,38 +130,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if not self.has_taken_off:
                 command = commands.Command.create_set_relative_destination_command(self.destination.location_x - report.position.location_x, self.destination.location_y  - report.position.location_y)
                 self.has_taken_off = True
-
-        # # actions for once drone has taken off and is flying
-        # if self.has_taken_off:
-            
-        #     # update destination to closest landing pad to waypoint
-        #     # only updates closest landing pad once there is a change in the number of landing pads available
-        #     # prevents drone from going back to origin, looking for landing pads when none are visible, and repeatedly searching for new closest when same pads are on screen
-        #     num_landing_pads = len(landing_pad_locations)
-        #     if num_landing_pads > 0 and not self.prev_num_landing_pads == num_landing_pads:
-        #         index = self.find_nearest_landing_pad(self.waypoint, landing_pad_locations)
-        #         self.destination = landing_pad_locations[index]  # update destination to indexed location in list
-        #         command = commands.Command.create_halt_command()
-        #         self.change_destination = True  # sets staus to change destination mode
-
-        #     # actions once drone has reached destination
-        #     if self.has_arrived(report.position, report.destination):  
-        #         if report.status == drone_status.DroneStatus.MOVING:  # halt if previously moving
-        #             command = commands.Command.create_halt_command()
-        #         if report.status == drone_status.DroneStatus.HALTED:  # land if previously halted, and prepare status for next takeoff
-        #             command = commands.Command.create_land_command()
-        #             self.has_taken_off = False
-            
-                
-        # # sets drones initial destination to waypoint and destinations to landing pads as they become visible
-        # # updates drone flight and direction changing status
-        # if report.status == drone_status.DroneStatus.HALTED and (not self.has_taken_off or self.change_destination) and not self.has_arrived(report.position, self.destination):
-        #     command = commands.Command.create_set_relative_destination_command(self.destination.location_x - report.position.location_x, self.destination.location_y - report.position.location_y)
-        #     self.has_taken_off = True
-        #     self.change_destination = False
-
-        # self.prev_num_landing_pads = len(landing_pad_locations)  # update number of landing pads from the previous frame
-    
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
