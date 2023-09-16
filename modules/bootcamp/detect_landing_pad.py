@@ -115,8 +115,6 @@ class DetectLandingPad:
             if result:
                 bounding_boxes.append(box)
 
-        # Remove this when done
-        # raise NotImplementedError
         return (bounding_boxes, image_annotated)
 
         # ============
