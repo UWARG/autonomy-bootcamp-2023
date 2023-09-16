@@ -43,7 +43,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def distance_between_waypoint(self, given_location:location.Location) -> bool:
+    def distance_between_waypoint(self, given_location:location.Location) -> "tuple[float, float]":
         """
         Returns the distance between the given location and waypoint.
         """
@@ -61,18 +61,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             return True
         return False
 
-    def next_relative_coordinates_to_waypoint(self, given_location:location.Location) -> "tuple[float]":
+    def next_relative_coordinates_to_waypoint(self, given_location:location.Location) -> "tuple[float, float]":
         """
         Returns the relative x and y coordinates for drone to be sent to.
         """
         relative_x, relative_y = self.distance_between_waypoint(given_location)
-        divider = 1
-        if abs(relative_x) > abs(relative_y):
-            return (relative_x/divider, relative_y)
-        elif abs(relative_x) < abs(relative_y):
-            return (relative_x, relative_y/divider)
-        else:
-            return (relative_x/divider, relative_y/divider)
+        return (relative_x, relative_y)
 
     def run(self,
             report: drone_report.DroneReport,
@@ -110,8 +104,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 action = self.action_dict["LAND"]
             else:
                 action = self.action_dict["MOVE"]
-        """ elif report_status == drone_status.DroneStatus.MOVING:
-            action = self.action_dict["HALT"] """
 
         if action is None:
             pass
