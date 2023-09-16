@@ -92,7 +92,7 @@ class DetectLandingPad:
                                            verbose=False)
 
         # Get the Result object
-        prediction = predictions.__getitem__(0)
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
