@@ -55,7 +55,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             y_square = (y_2 - y_1) ** 2
             return (x_square + y_square) ** 0.5
     
-    def relative_coordinates_of_target(self, target_location:location.Location, given_location:location.Location) -> bool:
+    def relative_coordinates_of_target(self, target_location:location.Location, given_location:location.Location) -> "tuple[float, float]":
         """
         Returns the relative coordinates of target w.r.t given location.
         """
@@ -75,7 +75,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     def next_relative_coordinates_to_target(self,
                                             target_location:location.Location,
-                                            given_location:location.Location) -> "tuple[float]":
+                                            given_location:location.Location) -> "tuple[float, float]":
         """
         Returns the relative x and y coordinates for drone to be sent to.
         """
