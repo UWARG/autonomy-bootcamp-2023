@@ -168,8 +168,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif action == self.action_dict["LAND"]:
             command = commands.Command.create_land_command()
 
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
