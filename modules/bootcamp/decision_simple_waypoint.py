@@ -102,4 +102,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         distance_x = point_1.location_x - point_2.location_x
         distance_y = point_1.location_y - point_2.location_y
 
+        """
+        This formula is used since it not computationally expensive to calculate and it is less restrictive
+        than sqrt(sum of (component^2)) as it uses a unit square as opposed to a unit circle.
+        """
+
         return max(abs(distance_x), abs(distance_y))
