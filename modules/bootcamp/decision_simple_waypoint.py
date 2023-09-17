@@ -41,7 +41,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def has_arrived(self, postition: location.Location, destination: location.Location) -> bool:
+    def is_same(self, postition: location.Location, destination: location.Location) -> bool:
         """
         To determine if postion of the drone is within the acceptable radius of its destination.
         """
@@ -83,7 +83,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...\
        
         # actions for once drone has reached destination
-        if self.has_arrived(report.position, report.destination) and self.has_taken_off:
+        if self.is_same(report.position, report.destination) and self.has_taken_off:
             if report.status == drone_status.DroneStatus.MOVING:  # halt if previously moving
                 command = commands.Command.create_halt_command()
             if report.status == drone_status.DroneStatus.HALTED:  # land if previously halted
