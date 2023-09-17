@@ -90,7 +90,7 @@ class DetectLandingPad:
             source=image,
             conf=0.7,
             device=self.__DEVICE,
-            verbose=True
+            verbose=False
         )
 
         # Get the Result object
@@ -120,9 +120,6 @@ class DetectLandingPad:
                 bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

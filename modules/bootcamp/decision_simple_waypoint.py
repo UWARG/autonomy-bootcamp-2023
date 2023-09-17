@@ -95,9 +95,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.counter += 1
 
-        # Remove this when done
-        # raise NotImplementedError
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

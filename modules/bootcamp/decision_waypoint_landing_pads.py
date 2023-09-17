@@ -12,14 +12,13 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-import math
 
 
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
-def euclidean_distance(a: location.Location, b: location.Location):
-    return math.sqrt((a.location_x - b.location_x)**2 + (a.location_y - b.location_y)**2)
+def euclidean_distance_squared(a: location.Location, b: location.Location) -> float:
+    return (a.location_x - b.location_x)**2 + (a.location_y - b.location_y)**2
 
 
 # All logic around the run() method
@@ -94,11 +93,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Then, need to find the nearest landing pad and go there
         elif report.status == drone_status.DroneStatus.HALTED and self.stage == 1:
             # Find closest landing pad
-            min_dist = euclidean_distance(report.position, landing_pad_locations[0])
+            min_dist = euclidean_distance_squared(report.position, landing_pad_locations[0])
             closest_landing_pad = landing_pad_locations[0]
 
             for landing_pad_location in landing_pad_locations[1:]:
-                new_dist = euclidean_distance(report.position, landing_pad_location)
+                new_dist = euclidean_distance_squared(report.position, landing_pad_location)
+                # Since a < b => sqrt(a) < sqrt(b), no need to square root
                 if new_dist < min_dist:
                     closest_landing_pad = landing_pad_location
                     min_dist = new_dist
@@ -116,9 +116,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = commands.Command.create_land_command()
             # Finish (won't run anymore commands)
             self.stage += 1
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
