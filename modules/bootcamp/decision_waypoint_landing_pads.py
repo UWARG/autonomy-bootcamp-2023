@@ -53,7 +53,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         
         # setting intial shortest values
-        shortest_distance = float('inf')
+        shortest_distance = float("inf")
         shortest_index = None 
 
         for i, pad in enumerate(landing_pad_locations):
