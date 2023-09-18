@@ -116,7 +116,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if report.status == drone_status.DroneStatus.HALTED:  # actions once halted
                 # if at waypoint, find nearest landing pad and set new destination
                 # otherwise land, since drone will be at landing pad
-                if self.is_same(self.destination, self.waypoint):
+                if self.is_same(report.destination, self.waypoint):
                     index = self.find_nearest_landing_pad(self.waypoint, landing_pad_locations)
                     self.destination = landing_pad_locations[index]
                     self.has_taken_off = False
