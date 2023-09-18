@@ -11,7 +11,7 @@ from .. import commands
 from .. import drone_report
 from .. import drone_status
 from .. import location
-from .. private.decision import base_decision
+from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
