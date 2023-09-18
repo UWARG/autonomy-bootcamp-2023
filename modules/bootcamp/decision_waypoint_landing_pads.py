@@ -76,13 +76,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_destination:
             pad_to_land=get_closest_pad(self.waypoint, landing_pad_locations)
-            command=commands.Command.create_set_relative_destination_command(landing_pad_locations[pad_to_land].location_x-report.position.location_x, landing_pad_locations[pad_to_land].location_y-report.position.location_y)
+            command=commands.Command.create_set_relative_destination_command(pad_to_land.location_x-report.position.location_x, pad_to_land.location_y-report.position.location_y)
             self.command_index += 1
             self.has_sent_destination = True
 
         elif report.status == drone_status.DroneStatus.HALTED and self.has_sent_destination and not self.has_sent_landing_command:
             command = commands.Command.create_land_command()
-            self.command_index == 0
             self.has_sent_landing_command = True
 
 
@@ -92,15 +91,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
-def get_closest_pad(waypoint: location.Location, landing_pad_locations: "list[location.Location]")->int:
-    print(*landing_pad_locations)
-    pad_to_land=0
+def get_closest_pad(waypoint: location.Location, landing_pad_locations: "list[location.Location]")->location.Location:
+    print(landing_pad_locations)
+    pad_to_land=landing_pad_locations[0]
     min = abs(landing_pad_locations[0].location_x-waypoint.location_x)+abs(landing_pad_locations[1].location_y-waypoint.location_x)
     print("number of landing pads: "+str(len(landing_pad_locations)))
-    for i in range(1, len(landing_pad_locations)):
-        distance_temp= abs(landing_pad_locations[i].location_x-waypoint.location_x)+abs(landing_pad_locations[i].location_y-waypoint.location_x)
+    for landing_pad in landing_pad_locations[1:]:
+        distance_temp= abs(landing_pad.location_x-waypoint.location_x)+abs(landing_pad.location_y-waypoint.location_x)
         if  distance_temp < min: 
             min=distance_temp
-            pad_to_land=i
+            pad_to_land=landing_pad
     print("closest: "+str(pad_to_land))
     return pad_to_land

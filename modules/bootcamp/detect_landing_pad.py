@@ -26,7 +26,7 @@ class DetectLandingPad:
 
     # Chooses the GPU if it exists, otherwise runs on the CPU
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
-    __CONF = 0.7
+    __CONFIDENCE = 0.7
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -85,7 +85,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source=image, conf=self.__CONF, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(source=image, conf=self.__CONFIDENCE, device=self.__DEVICE, verbose=False)
 
         # Get the Result object
         prediction = predictions[0]
@@ -111,15 +111,12 @@ class DetectLandingPad:
             if result:
                 bounding_boxes.append(box)
             else:
-                return []
+                return [], image_annotated
 
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
-
-        # Remove this when done
-        #raise NotImplementedError
 
         return bounding_boxes, image_annotated
 
