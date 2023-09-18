@@ -5,7 +5,6 @@ Detects landing pads.
 """
 import pathlib
 
-import cv2
 import numpy as np
 import torch
 import ultralytics
@@ -93,9 +92,6 @@ class DetectLandingPad:
         prediction = predictions[0]
         boxes = prediction.boxes
 
-        confidences = boxes.conf
-        confidences_cpu = confidences.cpu().numpy()
-
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = boxes.xyxy
 
@@ -107,17 +103,7 @@ class DetectLandingPad:
         # Plot the annotated image from the Result object
         # Include the confidence value
 
-        image_annotated = image
-
-        for i in range(0, boxes_cpu.shape[0]):
-            box = tuple(boxes_cpu[i])
-            x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
-
-            image_annotated = cv2.rectangle(image_annotated, (x1, y1), (x2, y2), (36,255,12), 1)
-
-            confidence = confidences_cpu[i]
-
-            image_annotated = cv2.putText(image_annotated, str(confidence), (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36,255,12), 2)
+        image_annotated = prediction.plot()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -126,7 +112,9 @@ class DetectLandingPad:
             # Create BoundingBox object and append to list
             bounds = boxes_cpu[i]
             result, box = bounding_box.BoundingBox.create(bounds)
-            assert(result)
+            
+            if not result:
+                [], image_annotated
 
             bounding_boxes.append(box)
     

@@ -6,8 +6,6 @@ Travel to designated waypoint.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
-import math
-
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -18,6 +16,8 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
+def distance(x1: float, y1: float, x2: float, y2: float) -> float:
+    return (x2 - x1)**2 + (y2 - y1)**2
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -86,9 +86,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 self.timeline = "landed"
 
         elif report.status == drone_status.DroneStatus.MOVING:
-            dist = math.dist([x1, y1], [x2, y2])
+            dist = distance(x1, y1, x2, y2)
 
-            if dist <= self.acceptance_radius:
+            if dist <= self.acceptance_radius**2:
                 command = commands.Command.create_halt_command()
 
         # ============

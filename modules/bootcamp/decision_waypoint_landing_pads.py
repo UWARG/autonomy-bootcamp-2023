@@ -6,8 +6,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
-import math
-
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -18,6 +16,8 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
+def distance(x1: float, y1: float, x2: float, y2: float) -> float:
+    return (x2 - x1)**2 + (y2 - y1)**2
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -39,6 +39,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.timeline = "initial"
+        self.landing_x = waypoint.location_x
+        self.landing_y = waypoint.location_y
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -84,11 +86,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.timeline = "initial-moving"
             elif self.timeline == "initial-moving":
                 closest_x, closest_y = landing_pad_locations[0].location_x, landing_pad_locations[0].location_y
-                closest_dist = math.dist([x1, y1], [closest_x, closest_y])
+                closest_dist = distance(x1, y1, closest_x, closest_y)
 
                 for i in range(1, len(landing_pad_locations)):
                     new_x, new_y = landing_pad_locations[i].location_x, landing_pad_locations[i].location_y
-                    new_dist = math.dist([x1, y1], [new_x, new_y])
+                    new_dist = distance(x1, y1, new_x, new_y)
 
                     if new_dist < closest_dist:
                         closest_dist = new_dist
@@ -111,16 +113,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif report.status == drone_status.DroneStatus.MOVING:
             if self.timeline == "initial-moving":
                 x2, y2 = self.waypoint.location_x, self.waypoint.location_y
-                dist = math.dist([x1, y1], [x2, y2])
+                dist = distance(x1, y1, x2, y2)
 
-                if dist <= self.acceptance_radius:
+                if dist <= self.acceptance_radius**2:
                     command = commands.Command.create_halt_command()
 
             else:
                 x2, y2 = self.landing_x, self.landing_y
-                dist = math.dist([x1, y1], [x2, y2])
+                dist = distance(x1, y1, x2, y2)
 
-                if dist <= self.acceptance_radius:
+                if dist <= self.acceptance_radius**2:
                     command = commands.Command.create_halt_command()
 
         # ============
