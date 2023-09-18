@@ -86,10 +86,12 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        
+        model = self.model
 
         # Get the Result object
-        prediction = ...
+        
+        results = model.predict(image, stream=True, conf=0.7)  
 
         # Plot the annotated image from the Result object
         # Include the confidence value
