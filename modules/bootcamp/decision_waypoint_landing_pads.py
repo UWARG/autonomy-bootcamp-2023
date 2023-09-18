@@ -58,7 +58,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         for i, pad in enumerate(landing_pad_locations):
             # use distance formula to find distance between pad and waypoint
-            distance = float(((waypoint.location_x - pad.location_x)**2 + (waypoint.location_y - pad.location_y)**2)**0.5)
+            distance = ((waypoint.location_x - pad.location_x)**2 + (waypoint.location_y - pad.location_y)**2)**0.5
 
             #check if pad is closest to waypoint and update values
             if distance < shortest_distance:
