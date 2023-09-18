@@ -36,35 +36,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        self.destination = self.waypoint #preset destination to waypoint so drone has intial direction
+        
         self.has_taken_off = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-   
-    @staticmethod
-    def find_nearest_landing_pad(waypoint: location.Location, landing_pad_locations: "list[location.Location]") -> int:
-        """
-        To determine closest landing pad in frame to waypoint and return it's index.
-        Index is returned instead of object to improve speed
-        """
-        
-        # setting intial shortest values
-        shortest_distance = float("inf")
-        shortest_index = None 
-
-        for i, pad in enumerate(landing_pad_locations):
-            # use distance formula to find distance between pad and waypoint
-            distance = ((waypoint.location_x - pad.location_x)**2 + (waypoint.location_y - pad.location_y)**2)**0.5
-
-            #check if pad is closest to waypoint and update values
-            if distance < shortest_distance:
-                shortest_distance = distance
-                shortest_index = i
-
-        return shortest_index
-    
 
     def is_same(self, postition: location.Location, destination: location.Location) -> bool:
         """
@@ -79,12 +56,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
              return False
         
         return True
-
+        
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
         """
-        Make the drone fly to the waypoint and then land at the nearest landing pad.
+        Make the drone fly to the waypoint.
 
         You are allowed to create as many helper methods as you want,
         as long as you do not change the __init__() and run() signatures.
@@ -104,22 +81,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        
-        # Do something based on the report and the state of this class...
-        
+
+        # Do something based on the report and the state of this class...\
+       
         # actions for once drone has reached destination
         if self.is_same(report.position, report.destination) and self.has_taken_off:
             if report.status == drone_status.DroneStatus.MOVING:  # halt if previously moving
                 command = commands.Command.create_halt_command()
-            if report.status == drone_status.DroneStatus.HALTED:  # actions once halted
-                # if at waypoint, find nearest landing pad and set new destination
-                # otherwise land, since drone will be at landing pad
-                if self.is_same(report.destination, self.waypoint):
-                    index = self.find_nearest_landing_pad(self.waypoint, landing_pad_locations)
-                    self.destination = landing_pad_locations[index]
-                    self.has_taken_off = False
-                else:
-                    command = commands.Command.create_land_command()
+            if report.status == drone_status.DroneStatus.HALTED:  # land if previously halted
+                command = commands.Command.create_land_command()
+
 
         # set destination to waypoint before drone takes off, and set take off status
         # to allow setting destination to waypoint before checking 
