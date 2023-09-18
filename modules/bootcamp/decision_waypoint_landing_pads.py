@@ -83,6 +83,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                     # Find the landing pad closest to the drone
                     shortest_distance = landing_pad_distances[0]
+                    self.destination = landing_pad_locations[0]
 
                     for i, landing_pad_distance in enumerate(landing_pad_distances[1:]):
                         if landing_pad_distance < shortest_distance:
