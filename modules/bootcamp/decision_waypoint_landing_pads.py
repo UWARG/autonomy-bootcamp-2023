@@ -97,7 +97,7 @@ def get_closest_pad(waypoint: location.Location, landing_pad_locations: "list[lo
     min = abs(landing_pad_locations[0].location_x-waypoint.location_x)+abs(landing_pad_locations[1].location_y-waypoint.location_x)
     print("number of landing pads: "+str(len(landing_pad_locations)))
     for landing_pad in landing_pad_locations[1:]:
-        distance_temp= abs(landing_pad.location_x-waypoint.location_x)+abs(landing_pad.location_y-waypoint.location_x)
+        distance_temp= (landing_pad.location_x-waypoint.location_x)**2+(landing_pad.location_y-waypoint.location_x)**2
         if  distance_temp < min: 
             min=distance_temp
             pad_to_land=landing_pad
