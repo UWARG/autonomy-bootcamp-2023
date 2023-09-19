@@ -87,18 +87,36 @@ class DetectLandingPad:
         # * device
         # * verbose
         
-        model = self.model
+        model = ultralytics.YOLO('yolov8n.pt')
 
-        # Get the Result object
-        
-        results = model.predict(image, stream=True, conf=0.7)  
+        # Get the Result object        
+
+        # results = model.train(image, stream=True, conf=True, labels=True, boxes=True) 
+        results = model(image, show=True, conf=True, boxes=True)
+        # results = predictions.xyxy[0].cpu().numpy() 
+        # results = model(image)
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        # image_annotated = ...
+
+        for r in results:
+            r.boxes
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = []
+        confidences = []
+        class_ids = []
+
+        for result in results:
+            boxes = result.boxes.cpu().numpy()
+            boxes_xyxy.append(boxes.xyxy)
+            confidences.append(boxes.conf)
+            class_ids.append(boxes.cls)
+        
+        results[0].plot()
+
+        print(boxes_xyxy)
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
@@ -112,7 +130,7 @@ class DetectLandingPad:
             # Create BoundingBox object and append to list
             # result, box = ...
 
-        # Remove this when done
+        #  Remove this when done
         raise NotImplementedError
 
         # ============
