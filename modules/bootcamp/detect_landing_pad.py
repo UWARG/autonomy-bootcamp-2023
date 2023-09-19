@@ -11,7 +11,6 @@ import ultralytics
 
 from .. import bounding_box
 
-
 # This is just an interface
 # pylint: disable=too-few-public-methods
 class DetectLandingPad:
@@ -28,6 +27,8 @@ class DetectLandingPad:
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+    __CONFIDENCE_THRESHOLD =  0.7
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -86,33 +87,35 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(source=image, device=self.__DEVICE, conf=self.__CONFIDENCE_THRESHOLD)
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
+        for i in range(boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
-            # result, box = ...
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            bounding_boxes.append(box)
+
+        return bounding_boxes, image_annotated
 
         # Remove this when done
-        raise NotImplementedError
-
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
