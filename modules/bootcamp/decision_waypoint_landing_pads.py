@@ -71,8 +71,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # print(landing_pad_locations)
-
         x1, y1 = report.position.location_x, report.position.location_y
 
         # Do something based on the report and the state of this class...
