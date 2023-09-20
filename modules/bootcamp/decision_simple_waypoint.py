@@ -40,7 +40,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.command_finished = False
         self.drone_command = commands.Command.create_set_relative_destination_command(
             waypoint.location_x,
-            waypoint.location_y
+            waypoint.location_y,
         )
 
         self.landed = False

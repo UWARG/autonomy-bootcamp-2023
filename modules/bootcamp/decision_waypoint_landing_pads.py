@@ -41,7 +41,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.landing_pad_found = False
         self.go_to_waypoint = commands.Command.create_set_relative_destination_command(
             waypoint.location_x,
-            waypoint.location_y
+            waypoint.location_y,
         )
 
         self.landed = False
@@ -82,8 +82,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif report.status == drone_status.DroneStatus.HALTED and not self.landing_pad_found:
             print("Halted at: " + str(report.position))
             self.landing_pad_found = True
-            min_distance_squared = (60 - (-60)) ** 2 + (60 - (-60)) ** 2
-            closest_pad = 0
+            min_distance_squared = float('inf')
+            closest_pad = location.Location(0, 0)
             for landing_pad in landing_pad_locations:
                 distance_squared = (landing_pad.location_x - report.position.location_x) ** 2 \
                                  + (landing_pad.location_y - report.position.location_y) ** 2

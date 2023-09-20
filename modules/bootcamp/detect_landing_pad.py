@@ -87,7 +87,12 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source=image, device=self.__DEVICE, conf=self.__CONFIDENCE_THRESHOLD)
+        predictions = self.__model.predict(
+            source=image,
+            device=self.__DEVICE,
+            conf=self.__CONFIDENCE_THRESHOLD,
+            verbose=False
+        )
 
         # Get the Result object
         prediction = predictions[0]
@@ -110,7 +115,8 @@ class DetectLandingPad:
         for i in range(boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            bounding_boxes.append(box)
+            if result:
+                bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
 
