@@ -40,6 +40,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.destination = self.waypoint #preset destination to waypoint so drone has intial direction
         self.has_taken_off = False
+        self.found_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -59,7 +60,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         for i, pad in enumerate(landing_pad_locations):
             # use distance formula to find distance between pad and waypoint
             distance = ((waypoint.location_x - pad.location_x)**2 + (waypoint.location_y - pad.location_y)**2)**0.5
-
+            
             #check if pad is closest to waypoint and update values
             if distance < shortest_distance:
                 shortest_distance = distance
@@ -116,10 +117,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if report.status == drone_status.DroneStatus.HALTED:  # actions once halted
                 # if at waypoint, find nearest landing pad and set new destination
                 # otherwise land, since drone will be at landing pad
-                if self.is_same(report.destination, self.waypoint):
+                if not self.found_landing_pad and self.is_same(report.destination, self.waypoint):
                     index = self.find_nearest_landing_pad(self.waypoint, landing_pad_locations)
                     self.destination = landing_pad_locations[index]
                     self.has_taken_off = False
+                    self.found_landing_pad = True
                 else:
                     command = commands.Command.create_land_command()
 
