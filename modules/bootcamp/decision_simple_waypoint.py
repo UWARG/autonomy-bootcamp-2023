@@ -7,7 +7,6 @@ Travel to designated waypoint.
 # pylint: disable=unused-import
 
 
-import math
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -68,8 +67,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        def euclidean_dist(p1: location.Location, p2: location.Location):
-            return math.sqrt((p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2)
+        
+        def square_dist(p1: location.Location, p2: location.Location):
+            return (p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2
 
         # account for cases where target exceeds flight boundary        
         def controlled_destination(p1: location.Location, p2: location.Location):
@@ -77,7 +77,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             y = p1.location_y - p2.location_y
 
             if (abs(x) > 60 or abs(y) > 60):
-                magnitude = euclidean_dist(p1, p2)
+                magnitude = max(x, y)
                 x = x / magnitude * 60
                 y = y / magnitude * 60
                 print(x, y)
@@ -85,7 +85,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             return x, y
 
         if (report.status == drone_status.DroneStatus.HALTED):
-            if (euclidean_dist(report.position, self.waypoint) > 0.1):
+            if (square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
                 x, y = controlled_destination(self.waypoint, report.position)
 
                 command = commands.Command.create_set_relative_destination_command(x, y)
@@ -93,7 +93,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
 
         elif (report.status == drone_status.DroneStatus.MOVING):
-            if (euclidean_dist(report.position, self.waypoint) > 0.1):
+            if (square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
                 command = commands.Command.create_null_command()
             else:
                 command = commands.Command.create_halt_command()
