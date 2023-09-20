@@ -87,51 +87,42 @@ class DetectLandingPad:
         # * device
         # * verbose
         
-        model = ultralytics.YOLO('yolov8n.pt')
+        results = self.__model(image, device=self.__DEVICE, conf=0.7, verbose=False)
 
-        # Get the Result object        
+        # print(results)
+        # print(results[0])
 
-        # results = model.train(image, stream=True, conf=True, labels=True, boxes=True) 
-        results = model(image, show=True, conf=True, boxes=True)
-        # results = predictions.xyxy[0].cpu().numpy() 
-        # results = model(image)
+        # Get the Result object
+
+        tuned_result = results[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        # image_annotated = ...
 
-        for r in results:
-            r.boxes
+        image_annotated = tuned_result.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = []
-        confidences = []
-        class_ids = []
 
-        for result in results:
-            boxes = result.boxes.cpu().numpy()
-            boxes_xyxy.append(boxes.xyxy)
-            confidences.append(boxes.conf)
-            class_ids.append(boxes.cls)
-        
-        results[0].plot()
-
-        print(boxes_xyxy)
+        boxes_xyxy = tuned_result.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
+        for box_cpu in boxes_cpu:
             # Create BoundingBox object and append to list
-            # result, box = ...
 
-        #  Remove this when done
-        raise NotImplementedError
+            box = bounding_box.BoundingBox.create(box_cpu)
+            
+            if box[0]:
+                bounding_boxes.append(box[1])
+
+        return bounding_boxes, image_annotated
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
