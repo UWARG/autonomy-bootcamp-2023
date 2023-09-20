@@ -94,7 +94,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 def get_closest_pad(waypoint: location.Location, landing_pad_locations: "list[location.Location]")->location.Location:
     print(landing_pad_locations)
     pad_to_land=landing_pad_locations[0]
-    min = abs(landing_pad_locations[0].location_x-waypoint.location_x)+abs(landing_pad_locations[1].location_y-waypoint.location_x)
+    min = (landing_pad_locations[0].location_x-waypoint.location_x)**2+(landing_pad_locations[0].location_y-waypoint.location_x)**2
     print("number of landing pads: "+str(len(landing_pad_locations)))
     for landing_pad in landing_pad_locations[1:]:
         distance_temp= (landing_pad.location_x-waypoint.location_x)**2+(landing_pad.location_y-waypoint.location_x)**2
