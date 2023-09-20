@@ -7,6 +7,7 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # pylint: disable=unused-import
 
 
+import math
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -37,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.plan = ["waypoint", "landing_pad"]
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,9 +70,39 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        def euclidean_dist(p1: location.Location, p2: location.Location):
+            return math.sqrt((p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2)
+        
+        # account for cases where target exceeds flight boundary        
+        def controlled_destination(p1: location.Location, p2: location.Location):
+            x = p1.location_x - p2.location_x
+            y = p1.location_y - p2.location_y
 
-        # Remove this when done
-        raise NotImplementedError
+            if (abs(x) > 60 or abs(y) > 60):
+                magnitude = euclidean_dist(p1, p2)
+                x = x / magnitude * 60
+                y = y / magnitude * 60
+                print(x, y)
+
+            return x, y
+
+        if (report.status == drone_status.DroneStatus.HALTED):
+            if (euclidean_dist(report.position, self.waypoint) > self.acceptance_radius or len(self.plan) >= 1):
+                action = self.plan.pop(0)
+
+                if (action == "landing_pad"):
+                    self.waypoint = min(landing_pad_locations, key=lambda location : euclidean_dist(location, report.position))
+
+                x, y = controlled_destination(self.waypoint, report.position)
+                command = commands.Command.create_set_relative_destination_command(x, y)
+            else:
+                command = commands.Command.create_land_command()
+
+        elif (report.status == drone_status.DroneStatus.MOVING):
+            if (euclidean_dist(report.position, self.waypoint) > self.acceptance_radius):
+                command = commands.Command.create_null_command()
+            else:
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

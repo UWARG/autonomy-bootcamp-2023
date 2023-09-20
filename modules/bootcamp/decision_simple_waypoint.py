@@ -7,6 +7,7 @@ Travel to designated waypoint.
 # pylint: disable=unused-import
 
 
+import math
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -67,11 +68,35 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        def euclidean_dist(p1: location.Location, p2: location.Location):
+            return math.sqrt((p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2)
 
-        # Do something based on the report and the state of this class...
+        # account for cases where target exceeds flight boundary        
+        def controlled_destination(p1: location.Location, p2: location.Location):
+            x = p1.location_x - p2.location_x
+            y = p1.location_y - p2.location_y
 
-        # Remove this when done
-        raise NotImplementedError
+            if (abs(x) > 60 or abs(y) > 60):
+                magnitude = euclidean_dist(p1, p2)
+                x = x / magnitude * 60
+                y = y / magnitude * 60
+                print(x, y)
+
+            return x, y
+
+        if (report.status == drone_status.DroneStatus.HALTED):
+            if (euclidean_dist(report.position, self.waypoint) > 0.1):
+                x, y = controlled_destination(self.waypoint, report.position)
+
+                command = commands.Command.create_set_relative_destination_command(x, y)
+            else:
+                command = commands.Command.create_land_command()
+
+        elif (report.status == drone_status.DroneStatus.MOVING):
+            if (euclidean_dist(report.position, self.waypoint) > 0.1):
+                command = commands.Command.create_null_command()
+            else:
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
