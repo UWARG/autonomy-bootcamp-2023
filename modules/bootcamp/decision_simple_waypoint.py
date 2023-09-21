@@ -83,8 +83,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y)
-        else:
-            command = commands.Command.create_null_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
