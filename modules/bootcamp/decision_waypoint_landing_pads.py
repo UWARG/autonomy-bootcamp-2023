@@ -67,7 +67,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 shortest_index = i
 
         return shortest_index
-    
+
 
     def is_same(self, postition: location.Location, destination: location.Location) -> bool:
         """
@@ -111,7 +111,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         
         # actions for once drone has reached destination
-        if self.is_same(report.position, report.destination) and self.has_taken_off:
+        if self.has_taken_off and self.is_same(report.position, report.destination):
             if report.status == drone_status.DroneStatus.MOVING:  # halt if previously moving
                 command = commands.Command.create_halt_command()
             if report.status == drone_status.DroneStatus.HALTED:  # actions once halted
