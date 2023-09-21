@@ -36,7 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        
+
         self.has_taken_off = False
 
         # ============
@@ -54,7 +54,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # check in y direction
         if abs(destination.location_y - postition.location_y) > self.acceptance_radius:
              return False
-        
+
         return True
         
     def run(self,
