@@ -95,16 +95,3 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return command
 
-    def nearest_pad(self, landing_pad_locations: "list[location.Location]") -> "location.Location":
-        assert len(landing_pad_locations) == 0, "No landing pad locations specified"
-
-        best_landing_pad = landing_pad_locations[0]
-        lowest_distance = math.hypot(best_landing_pad.location_x-self.location.location_x, best_landing_pad.location_y-self.location.location_y)
-        for landing_pad in landing_pad_locations[1:]:
-            new_dist = math.hypot(landing_pad.location_x-self.location.location_x, landing_pad.location_y-self.location.location_y)
-            if new_dist < lowest_distance:
-                best_landing_pad = landing_pad
-                lowest_distance = new_dist
-
-        return best_landing_pad
-
