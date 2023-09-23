@@ -105,7 +105,6 @@ predict
 
         # Loop over the boxes list and create a list of bounding boxes
         # Hint: .shape gets the dimensions of the numpy array
-        print("TENSOR SHAPE", np.shape(boxes_cpu))
         bounding_boxes = []
         for i in range(np.shape(boxes_cpu)[0]):
             # Create BoundingBox object and append to list
