@@ -100,9 +100,9 @@ class DetectLandingPad:
         # Plot the annotated image from the Result object
         # Include the confidence value
         image_annotated = prediction.plot(conf=True)
-        # Visualize image
-        im = Image.fromarray(image_annotated[..., ::-1])  # RGB PIL image
-        im.show()  # show image
+        # Visualize image (not needed)
+        #im = Image.fromarray(image_annotated[..., ::-1])  # RGB PIL image
+        #im.show()  # show image
 
 
         # Get the xyxy boxes list from the Boxes object in the Result object
@@ -120,15 +120,12 @@ class DetectLandingPad:
             # Create BoundingBox object and append to list
             # result, box = ...
         for i in range(boxes_cpu.shape[0]): #Loops through the numpy array
-            result, box = bounding_box.BoundingBox.create(boxes_cpu[i]) # Create a bounding box object from the boxes_cpu numpy array. The box object has x and y location, and x and y size.
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i]) # Create a bounding box object from the boxes_cpu numpy array. The box object has 2 x and y locations for its corners.
             if not result: #If unable to create bounding box based on numpy array
-                return [], image_annotated #
+                return [], image_annotated
             bounding_boxes.append(box) #Append the bounding box object to the bounding_boxes list
             
-        return bounding_boxes, image_annotated #
-
-        # Remove this when done
-        # raise NotImplementedError
+        return bounding_boxes, image_annotated
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
