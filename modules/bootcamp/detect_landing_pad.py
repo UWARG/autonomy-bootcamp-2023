@@ -9,6 +9,7 @@ import numpy as np
 import torch
 import ultralytics
 
+from PIL import Image
 from .. import bounding_box
 
 
@@ -86,32 +87,48 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict( # Run inference based on following parameters.
+            source=image, # source directory for images. In this case it is from numpy array of images.
+            device=self.__DEVICE, # Device to run on. Run on my PC in this case.
+            verbose=False, # Suppresses informational output from the model
+            conf=0.7 # Object confidence threshold for detection
+        )
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0] # From the above array
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
+        # Visualize image
+        im = Image.fromarray(image_annotated[..., ::-1])  # RGB PIL image
+        im.show()  # show image
+
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy # Return the boxes from the prediction in xyxy format.
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
-
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
+  
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
+        for i in range(boxes_cpu.shape[0]): #Loops through the numpy array
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i]) # Create a bounding box object from the boxes_cpu numpy array. The box object has x and y location, and x and y size.
+            if not result: #If unable to create bounding box based on numpy array
+                return [], image_annotated #
+            bounding_boxes.append(box) #Append the bounding box object to the bounding_boxes list
+            
+        return bounding_boxes, image_annotated #
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
