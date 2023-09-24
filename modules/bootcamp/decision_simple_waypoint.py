@@ -36,6 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+
         self.location = location.Location(0.0, 0.0)
 
         # Add your own
@@ -72,14 +73,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.location = report.position
 
         # Do something based on the report and the state of this class...
+        relative_x = self.waypoint.location_x - self.location.location_x
+        relative_y = self.waypoint.location_y - self.location.location_y
 
-        # target = self.nearest_pad(landing_pad_locations)
-        target = self.waypoint
-        relative_x = target.location_x - self.location.location_x
-        relative_y = target.location_x - self.location.location_x
-
-        if math.hypot(relative_x, relative_y) < self.acceptance_radius:
-
+        if relative_x ** 2 + relative_y ** 2 < self.acceptance_radius ** 2:
             if report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
 

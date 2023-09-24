@@ -38,6 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.location = location.Location(0.0, 0.0)
+        self.landed_at_waypoint = False
+        self.target = self.waypoint
 
         # Add your own
 
@@ -74,18 +76,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        target = self.nearest_pad(landing_pad_locations)
-        relative_x = target.location_x - self.location.location_x
-        relative_y = target.location_x - self.location.location_x
-
+        relative_x = self.target.location_x - self.location.location_x
+        relative_y = self.target.location_y - self.location.location_y
+        # check distance from current target
         if relative_x ** 2 + relative_y ** 2 < self.acceptance_radius ** 2:
-            if report.status == drone_status.DroneStatus.HALTED:
-                command = commands.Command.create_land_command()
+            # check if drone has already visited waypoint
+            if self.landed_at_waypoint:
+                if report.status == drone_status.DroneStatus.HALTED:
+                    command = commands.Command.create_land_command()
 
-            elif report.status == drone_status.DroneStatus.MOVING:
-                command = commands.Command.create_halt_command()
+                elif report.status == drone_status.DroneStatus.MOVING:
+                    command = commands.Command.create_halt_command()
+            else:
+                # if the drone has not visited the waypoint yet
+                if report.status == drone_status.DroneStatus.HALTED:
+                    if len(landing_pad_locations) != 0:
+                        self.target = self.nearest_pad(landing_pad_locations)
+                        self.landed_at_waypoint = True
+
+                elif report.status == drone_status.DroneStatus.MOVING:
+                    command = commands.Command.create_halt_command()
 
         elif (report.status == drone_status.DroneStatus.HALTED):
+            # if the drone is halted and not near its target, move to target
             command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
 
         # ============
@@ -95,11 +108,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return command
 
     def nearest_pad(self, landing_pad_locations: "list[location.Location]") -> "location.Location":
-        assert len(landing_pad_locations) == 0, "No landing pad locations specified"
+        assert len(landing_pad_locations) != 0, "No landing pad locations specified"
 
+        # Set the first landing pad to the best pad, then compare with others
         best_pad = landing_pad_locations[0]
         self_x = self.location.location_x
         self_y = self.location.location_y
+        # comparison distance
         lowest_distance = (best_pad.location_x-self_x)**2 + (best_pad.location_y-self_y)**2
 
         for landing_pad in landing_pad_locations[1:]:
@@ -108,7 +123,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             new_dist = (pad_x - self_x) ** 2 + (pad_y - self_y) ** 2
 
             if new_dist < lowest_distance:
-                best_landing_pad = landing_pad
+                best_pad = landing_pad
                 lowest_distance = new_dist
 
         return best_pad
