@@ -13,8 +13,6 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
-import math
-
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
