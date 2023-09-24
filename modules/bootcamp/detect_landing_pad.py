@@ -126,7 +126,7 @@ class DetectLandingPad:
             bounding_boxes.append(box) #Append the bounding box object to the bounding_boxes list
             
         return bounding_boxes, image_annotated
-
+         
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

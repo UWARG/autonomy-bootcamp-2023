@@ -23,7 +23,7 @@ from modules.private.utilities import worker_controller
 from modules.private.utilities import worker_manager
 
 
-QUEUE_MAX_SIZE = 1
+QUEUE_MAX_SIZE = 1.0
 TIMEOUT = 1000  # seconds
 LOG_FILE_DIRECTORY = pathlib.Path("log")
 TIME_WAIT_BEFORE_EXIT = 5  # seconds
@@ -36,7 +36,7 @@ TIME_WAIT_BEFORE_EXIT = 5  # seconds
 # to reach the 1st command
 # Increase the step size if your computer is lagging
 # Larger step size is smaller FPS
-TIME_STEP_SIZE = 0.1  # seconds
+TIME_STEP_SIZE = 1  # seconds
 
 # OpenCV ignores your display settings,
 # so if the window is too small or too large,
