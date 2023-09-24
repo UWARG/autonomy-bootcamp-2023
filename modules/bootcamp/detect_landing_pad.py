@@ -70,7 +70,7 @@ class DetectLandingPad:
         Converts an image into a list of bounding boxes.
 
         image: The image to run on.
-predict
+
         Return: A tuple of (list of bounding boxes, annotated image) .
             The list of bounding boxes can be empty.
         """

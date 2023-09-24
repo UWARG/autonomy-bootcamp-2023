@@ -13,6 +13,7 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
+
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
@@ -28,6 +29,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
+        print("Waypoint: " + str(waypoint))
 
         self.acceptance_radius = acceptance_radius
 
@@ -61,7 +63,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             put_output(command)
         ```
         """
-        
         # Default command
         command = commands.Command.create_null_command()
 
@@ -89,4 +90,3 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         return command
-
