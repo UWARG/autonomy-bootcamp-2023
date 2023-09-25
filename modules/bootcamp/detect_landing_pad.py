@@ -89,7 +89,7 @@ class DetectLandingPad:
         predictions = self.__model(image, conf=0.7, device=self.__DEVICE, verbose=False)
 
         # Get the Result object
-        prediction = predictions[0]             # since only 1 object is returned
+        prediction = predictions[0]  # since only 1 object is returned
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -104,7 +104,12 @@ class DetectLandingPad:
         boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
-        bounding_boxes = [box[1] for box in [bounding_box.BoundingBox.create(box_cpu) for box_cpu in boxes_cpu] if box[0]]
+        bounding_boxes = []
+
+        for box_cpu in boxes_cpu:
+            result, box = bounding_box.BoundingBox.create(box_cpu)
+            if (result):
+                bounding_boxes.append(box)
 
         # Remove this when done
         # raise NotImplementedError
