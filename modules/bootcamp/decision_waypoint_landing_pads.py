@@ -78,7 +78,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x  - report.position.location_x, self.waypoint.location_y  - report.position.location_y)
         
         elif not self.reached_waypoint and self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.MOVING:
-            print("halting at waypoint")
+            print("halting at waypoint: ", str(report.position))
             self.reached_waypoint = True
             command = commands.Command.create_halt_command()
 
@@ -93,17 +93,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_landing_pad = landing_pad_locations[i]
                 
             if self.within_range(closest_landing_pad, report.position):
-                print("landing at landing pad")
+                print("landing at landing pad: ", str(report.position))
                 command = commands.Command.create_land_command()
 
-            command = commands.Command.create_set_relative_destination_command(closest_landing_pad.location_x - report.position.location_x, closest_landing_pad.location_y - report.position.location_y)
+            command = commands.Command.create_set_relative_destination_command(
+                closest_landing_pad.location_x - report.position.location_x, 
+                closest_landing_pad.location_y - report.position.location_y
+            )
 
         elif self.reached_waypoint and self.within_range(closest_landing_pad, report.position) and report.status == drone_status.DroneStatus.MOVING:
-            print("halting at landing pad")
+            print("halting at landing pad: ", str(report.position))
             command = commands.Command.create_halt_command()
 
         elif self.reached_waypoint and self.within_range(closest_landing_pad, report.position) and report.status == drone_status.DroneStatus.HALTED:
-            print("landing at landing pad")
+            print("landing at landing pad: ", str(report.position))
             command = commands.Command.create_land_command()
 
         else:
@@ -118,7 +121,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     
     @staticmethod
     def calculate_distance(l1: location.Location, l2: location.Location) -> float:
-        return (l1.location_x-l2.location_x)**2+(l1.location_y-l2.location_y)**2
+        return (l1.location_x - l2.location_x) ** 2 + (l1.location_y - l2.location_y) ** 2
     
     def within_range(self, l1: location.Location, l2: location.Location,) -> bool:
-        return (abs(l1.location_x-l2.location_x)) < self.acceptance_radius and (abs(l1.location_y-l2.location_y)) < self.acceptance_radius
+        return (abs(l1.location_x - l2.location_x)) < self.acceptance_radius and (abs(l1.location_y - l2.location_y)) < self.acceptance_radius
