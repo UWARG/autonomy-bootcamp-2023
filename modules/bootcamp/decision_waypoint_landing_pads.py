@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.begin = True
+        self.reached_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,13 +69,52 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        closest_landing_pad = landing_pad_locations[0]
 
+        # Do something based on the report and the state of this class...
+        if self.begin and report.status == drone_status.DroneStatus.HALTED:
+            print("setting waypoint")
+            self.begin = False
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        
+        elif self.waypoint.__eq__(report.position) and report.status == drone_status.DroneStatus.MOVING:
+            print("halting at waypoint")
+            self.reached_waypoint = True
+            command = commands.Command.create_halt_command()
+
+        elif self.reached_waypoint and self.waypoint.__eq__(report.position) and report.status == drone_status.DroneStatus.HALTED:
+            print("finding closest landing pad")
+            closest_distance = DecisionWaypointLandingPads.calculate_distance(landing_pad_locations[0],report.position)
+
+            for i in range (1, len(landing_pad_locations)):
+                distance = DecisionWaypointLandingPads.calculate_distance(landing_pad_locations[i],report.position)
+                if distance < closest_distance:
+                    closest_distance = distance
+                    closest_landing_pad = landing_pad_locations[i]
+                
+            if closest_landing_pad.__eq__(report.position):
+                print("landing at landing pad")
+                command = commands.Command.create_land_command()
+
+            command = commands.Command.create_set_relative_destination_command(closest_landing_pad.location_x, closest_landing_pad.location_y)
+
+        elif self.reached_waypoint and report.position.__eq__(closest_landing_pad) and report.status == drone_status.DroneStatus.MOVING:
+            print("halting at landing pad")
+            command = commands.Command.create_halt_command()
+
+        elif self.reached_waypoint and report.position.__eq__(closest_landing_pad) and report.status == drone_status.DroneStatus.HALTED:
+            print("landing at landing pad")
+            command = commands.Command.create_land_command()
+
+        else:
+            print("just moving")
         # Remove this when done
-        raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    def calculate_distance(l1:location.Location, l2:location.Location):
+        return (l1.location_x-l2.location_x)^2+(l1.location_y-l2.location_y)^2

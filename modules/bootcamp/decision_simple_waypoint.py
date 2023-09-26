@@ -77,7 +77,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         elif not self.waypoint.__eq__(report.position) and report.status == drone_status.DroneStatus.HALTED:
             #print("setting destination")
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-                
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
