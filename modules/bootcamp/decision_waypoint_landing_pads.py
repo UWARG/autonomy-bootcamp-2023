@@ -38,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.location = location.Location(0.0, 0.0)
-        self.landed_at_waypoint = False
+        self.visited_waypoint = False
         self.target = self.waypoint
 
         # Add your own
@@ -81,7 +81,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # check distance from current target
         if relative_x ** 2 + relative_y ** 2 < self.acceptance_radius ** 2:
             # check if drone has already visited waypoint
-            if self.landed_at_waypoint:
+            if self.visited_waypoint:
                 if report.status == drone_status.DroneStatus.HALTED:
                     command = commands.Command.create_land_command()
 
@@ -92,7 +92,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if report.status == drone_status.DroneStatus.HALTED:
                     if len(landing_pad_locations) != 0:
                         self.target = self.nearest_pad(landing_pad_locations)
-                        self.landed_at_waypoint = True
+                        self.visited_waypoint = True
 
                 elif report.status == drone_status.DroneStatus.MOVING:
                     command = commands.Command.create_halt_command()
