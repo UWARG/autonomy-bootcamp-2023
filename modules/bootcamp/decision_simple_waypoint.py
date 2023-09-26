@@ -68,13 +68,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        if self.waypoint.__eq__(report.position) and report.status == drone_status.DroneStatus.HALTED:
+        if self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
             command = commands.Command.create_land_command()
 
-        elif self.waypoint.__eq__(report.position) and report.status == drone_status.DroneStatus.MOVING:
+        elif self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.MOVING:
             command = commands.Command.create_halt_command()
         
-        elif not self.waypoint.__eq__(report.position) and report.status == drone_status.DroneStatus.HALTED:
+        elif not self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
             #print("setting destination")
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
         elif report.status == drone_status.DroneStatus.HALTED:
@@ -85,3 +85,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         return command
+
+    def within_range(self, l1: location.Location, l2: location.Location,) -> bool:
+        return (abs(l1.location_x-l2.location_x)) < self.acceptance_radius and (abs(l1.location_y-l2.location_y)) < self.acceptance_radius
