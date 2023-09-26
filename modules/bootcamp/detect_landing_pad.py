@@ -91,7 +91,7 @@ class DetectLandingPad:
             source=image,
             device=self.__DEVICE,
             conf=self.__CONFIDENCE_THRESHOLD,
-            verbose=False
+            verbose=False,
         )
 
         # Get the Result object
@@ -115,8 +115,9 @@ class DetectLandingPad:
         for i in range(boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            if result:
-                bounding_boxes.append(box)
+            if not result:
+                bounding_boxes = []
+                break
 
         return bounding_boxes, image_annotated
 
