@@ -8,8 +8,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
-
-from .. import bounding_box
+#from .. import bounding_box
 
 
 # This is just an interface
@@ -28,6 +27,7 @@ class DetectLandingPad:
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
+    print("running on {__DEVICE}")
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -59,7 +59,7 @@ class DetectLandingPad:
 
     def __init__(self, class_private_create_key, model: ultralytics.YOLO):
         """
-        Private constructor, use create() method.
+        Private constructor, use create() method.  
         """
         assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
 
@@ -86,17 +86,17 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(source=image,conf=0.7,device=self.__DEVICE,verbose=True)
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
@@ -111,7 +111,7 @@ class DetectLandingPad:
             # result, box = ...
 
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
