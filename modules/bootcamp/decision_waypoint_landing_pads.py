@@ -69,7 +69,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        closest_landing_pad = landing_pad_locations[0]
+        print("loop")
+        print(report.status)
+        print("reached waypoint: ", self.reached_waypoint)
+        print("begin ", self.begin)
+
 
         # Do something based on the report and the state of this class...
         if self.begin and report.status == drone_status.DroneStatus.HALTED:
@@ -77,20 +81,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.begin = False
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x  - report.position.location_x, self.waypoint.location_y  - report.position.location_y)
         
-        elif not self.reached_waypoint and self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.MOVING:
-            print("halting at waypoint: ", str(report.position))
+        elif not self.reached_waypoint and self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
             self.reached_waypoint = True
-            command = commands.Command.create_halt_command()
-
-        elif self.reached_waypoint and self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
             print("finding closest landing pad")
-            closest_distance = DecisionWaypointLandingPads.calculate_distance(landing_pad_locations[0],report.position)
+            closest_landing_pad = 0
+            closest_distance = float('inf')
 
-            for i in range (1, len(landing_pad_locations)):
-                distance = DecisionWaypointLandingPads.calculate_distance(landing_pad_locations[i],report.position)
+            print("number of landing pads: ", len(landing_pad_locations))
+            for landing_pad in landing_pad_locations:
+                print("calculating distance")
+                distance = DecisionWaypointLandingPads.calculate_distance(landing_pad,report.position)
                 if distance < closest_distance:
                     closest_distance = distance
-                    closest_landing_pad = landing_pad_locations[i]
+                    closest_landing_pad = landing_pad
+                    print("current closest: ", closest_landing_pad)
                 
             if self.within_range(closest_landing_pad, report.position):
                 print("landing at landing pad: ", str(report.position))
@@ -101,16 +105,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 closest_landing_pad.location_y - report.position.location_y
             )
 
-        elif self.reached_waypoint and self.within_range(closest_landing_pad, report.position) and report.status == drone_status.DroneStatus.MOVING:
-            print("halting at landing pad: ", str(report.position))
-            command = commands.Command.create_halt_command()
-
-        elif self.reached_waypoint and self.within_range(closest_landing_pad, report.position) and report.status == drone_status.DroneStatus.HALTED:
+        elif self.reached_waypoint and report.status == drone_status.DroneStatus.HALTED:
             print("landing at landing pad: ", str(report.position))
             command = commands.Command.create_land_command()
 
         else:
             print("just moving")
+            
         # Remove this when done
 
         # ============
