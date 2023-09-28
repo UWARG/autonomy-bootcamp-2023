@@ -73,7 +73,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Calculation of closest waypoint
         if (self.calculation_done == 0):
-            current_closest_waypoint = landing_pad_locations[0]
+            current_closest_waypoint = landing_pad_locations[0] # Dummy value, and will be chnaged by for loop
             current_location_x = report.position.location_x
             current_location_y = report.position.location_y
 
