@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.calculation_done = 0
+        destination = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,8 +71,44 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        # Calculation of closest waypoint
+        if (self.calculation_done == 0):
+            current_closest_waypoint = landing_pad_locations[0]
+            current_location_x = report.position.location_x
+            current_location_y = report.position.location_y
+
+            for location in landing_pad_locations:
+                current_closest_distance = (current_closest_waypoint.location_x - current_location_x)**2 + (current_closest_waypoint.location_y - current_location_y)**2
+                next_distance = (location.location_x - current_location_x)**2 + (location.location_y - current_location_y)**2
+
+                if (next_distance < current_closest_distance):
+                    current_closest_waypoint = location
+   
+            self.destination = current_closest_waypoint
+            self.calculation_done = 1
+
+        # Data for distance calculation between current position and waypoint
+        current_location_x = report.position.location_x
+        current_location_y = report.position.location_y
+        waypoint_x = self.destination.location_x
+        waypoint_y = self.destination.location_y
+
+        pythagoras_x = (waypoint_x - current_location_x)**2
+        pythagoras_y = (waypoint_y - current_location_y)**2
+        pythagoras = pythagoras_x + pythagoras_y
+
+        # Moving towards waypoint
+        if (report.status == drone_status.DroneStatus.MOVING):
+            if (pythagoras < (self.acceptance_radius)**2):
+                command = commands.Command.create_halt_command()
+        elif (report.status == drone_status.DroneStatus.HALTED):
+            if (pythagoras < (self.acceptance_radius)**2):
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(waypoint_x - current_location_x, waypoint_y - current_location_y)
+
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
