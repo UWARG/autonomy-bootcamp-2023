@@ -12,8 +12,6 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-from math import sqrt
-import numpy as np
 
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
@@ -62,7 +60,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         x_dist = x1-x2
         y_dist = y1-y2
         
-        dist = sqrt(pow(x_dist,2) + pow(y_dist,2))
+        dist = (x_dist**2 + y_dist**2)**(1/2)
         
         return dist, x_dist, y_dist
     
@@ -105,20 +103,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         
         elif report.status == drone_status.DroneStatus.HALTED and not self.reached_landing_pad:
             print("Reached waypoint")
-            shortest_dist = np.inf
+            shortest_dist = float("inf")
             closest_landing_pad:location.Location = None
+            x_dist_closest = float("inf")
+            y_dist_closest = float("inf")
             
             for landing_pad in landing_pad_locations:
-                dist,_,_ = self.distance_between_2_locations(landing_pad, report.position)        
+                dist,x_dist,y_dist = self.distance_between_2_locations(landing_pad, report.position)        
                 if dist<shortest_dist:
                     dist = shortest_dist
-                    closest_landing_pad = landing_pad            
+                    closest_landing_pad = landing_pad      
+                    x_dist_closest = x_dist
+                    y_dist_closest = y_dist      
             print("Found Closest landing pad: ", closest_landing_pad )
-        
-            _,x_dist,y_dist = self.distance_between_2_locations(closest_landing_pad, report.position)
             
-            command = commands.Command.create_set_relative_destination_command(x_dist, y_dist)
-            print(x_dist, y_dist)
+            command = commands.Command.create_set_relative_destination_command(x_dist_closest, y_dist_closest)
+            print(x_dist_closest, y_dist_closest)
             
             self.reached_landing_pad = True
         
