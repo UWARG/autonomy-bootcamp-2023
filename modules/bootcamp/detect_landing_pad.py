@@ -8,7 +8,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
-#from .. import bounding_box
+from .. import bounding_box
 
 
 # This is just an interface
@@ -27,7 +27,6 @@ class DetectLandingPad:
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
-    print("running on {__DEVICE}")
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -86,14 +85,14 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source=image,conf=0.7,device=self.__DEVICE,verbose=True)
+        predictions = self.__model.predict(source=image,conf=0.7,device=self.__DEVICE,verbose=False)
 
         # Get the Result object
-        prediction = predictions[0]
+        prediction = predictions.__getitem__(0)
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot(conf=True)
+        image_annotated = prediction.plot(conf=0.7)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -101,17 +100,27 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
+        # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+        for box in boxes_cpu:
+            result, new_box = bounding_box.BoundingBox.create(np.array(box))
+            if result:
+                bounding_boxes.append(new_box)
+
+        return bounding_boxes, image_annotated
+
+            
+            
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
 
         # Remove this when done
-        #raise NotImplementedError
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

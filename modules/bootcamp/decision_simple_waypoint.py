@@ -10,6 +10,7 @@ Travel to designated waypoint.
 from .. import commands
 from .. import drone_report
 from .. import drone_status
+import math
 from .. import location
 from ..private.decision import base_decision
 
@@ -37,8 +38,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -61,6 +60,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             put_output(command)
         ```
         """
+        
         # Default command
         command = commands.Command.create_null_command()
 
@@ -69,12 +69,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
-
+        if self.within_range_of(self.waypoint, report.position) and report.status == drone_status.DroneStatus.MOVING:
+            command = commands.Command.create_halt_command()
+        elif self.within_range_of(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_land_command()
+        elif not self.within_range_of(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def within_range_of(self, l1: location.Location, l2: location.Location):
+        distance = math.sqrt((l1.location_x - l1.location_x)**2 + (l1.location_y - l2.location_x)**2)
+        return distance < self.acceptance_radius
+    

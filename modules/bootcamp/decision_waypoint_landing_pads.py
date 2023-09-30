@@ -12,6 +12,7 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
+import math
 
 
 # Disable for bootcamp use
@@ -37,7 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.waypoint_found = False
+        self.landing_pad_found = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,13 +70,35 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED and not self.waypoint_found:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, 
+                self.waypoint.location_y
+            )
+            self.waypoint_found = True
 
-        # Remove this when done
-        raise NotImplementedError
+        elif report.status == drone_status.DroneStatus.HALTED and not self.landing_pad_found:
+            min_distance = float('inf')
+            closest_pad = None
+            
+            for pad in landing_pad_locations:
+                distance = self.distance(report.position, pad)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_pad = pad
+            
+            if closest_pad is not None:
+                command = commands.Command.create_set_relative_destination_command(
+                    closest_pad.location_x - report.position.location_x,
+                    closest_pad.location_y - report.position.location_y
+                )
+                self.landing_pad_found = True
 
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
-
+        elif report.status == drone_status.DroneStatus.HALTED and self.landing_pad_found:
+            command = commands.Command.create_land_command()
+            
         return command
+
+    def distance(self, l1: location.Location, l2: location.Location):
+        return math.sqrt((l1.location_x - l2.location_x)**2 + (l1.location_y - l2.location_y)**2)
+    
