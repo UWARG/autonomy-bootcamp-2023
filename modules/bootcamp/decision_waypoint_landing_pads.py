@@ -84,13 +84,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif not self.reached_waypoint and self.within_range(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
             self.reached_waypoint = True
             print("finding closest landing pad")
-            closest_landing_pad = 0
+            closest_landing_pad = None
             closest_distance = float('inf')
 
             print("number of landing pads: ", len(landing_pad_locations))
             for landing_pad in landing_pad_locations:
                 print("calculating distance")
-                distance = DecisionWaypointLandingPads.calculate_distance(landing_pad,report.position)
+                distance = self.calculate_distance(landing_pad,report.position)
                 if distance < closest_distance:
                     closest_distance = distance
                     closest_landing_pad = landing_pad
@@ -102,7 +102,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             command = commands.Command.create_set_relative_destination_command(
                 closest_landing_pad.location_x - report.position.location_x, 
-                closest_landing_pad.location_y - report.position.location_y
+                closest_landing_pad.location_y - report.position.location_y,
             )
 
         elif self.reached_waypoint and report.status == drone_status.DroneStatus.HALTED:
