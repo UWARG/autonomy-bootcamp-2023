@@ -110,6 +110,9 @@ class DetectLandingPad:
             result, box = bounding_box.BoundingBox.create(box_cpu)
             if (result):
                 bounding_boxes.append(box)
+            else:
+                bounding_boxes = []
+                break
 
         # Remove this when done
         # raise NotImplementedError

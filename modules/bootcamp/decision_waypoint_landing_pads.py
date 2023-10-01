@@ -6,6 +6,7 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
+
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -39,6 +40,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.plan = ["waypoint", "landing_pad"]
         self.past_waypoints = []
 
+    def square_dist(self, p1: location.Location, p2: location.Location):
+        return (p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -68,16 +72,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def square_dist(p1: location.Location, p2: location.Location):
-            return (p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2
-
         if (report.status == drone_status.DroneStatus.HALTED):
 
             # if list of commands is not finished
             if (len(self.plan) >= 1):
 
                 # if within distance of waypoint
-                if (square_dist(report.position, self.waypoint) < self.acceptance_radius**2):
+                if (self.square_dist(report.position, self.waypoint) < self.acceptance_radius**2):
                     action = self.plan.pop(0)
 
                     # redefine waypoint
@@ -86,7 +87,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                         # if no landing pads are nearby, return to starting pad
                         if (len(landing_pad_locations) > 0):
-                            self.waypoint = min(landing_pad_locations, key=lambda location : square_dist(location, report.position))
+                            self.waypoint = min(landing_pad_locations, key=lambda location : self.square_dist(location, report.position))
                         else:
                             self.waypoint = self.past_waypoints[0]
 
@@ -101,7 +102,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif (report.status == drone_status.DroneStatus.MOVING):
 
             # if within distance of waypoint, halt to determine whether to land
-            if (not square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
+            if (not self.square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
                 command = commands.Command.create_halt_command()
 
         # ============

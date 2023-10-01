@@ -37,7 +37,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        
+    def square_dist(self, p1: location.Location, p2: location.Location):
+        return (p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,12 +70,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        
-        def square_dist(p1: location.Location, p2: location.Location):
-            return (p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2
-
         if (report.status == drone_status.DroneStatus.HALTED):
-            if (square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
+            if (self.square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
                 x = self.waypoint.location_x - report.position.location_x
                 y = self.waypoint.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(x, y)
@@ -82,7 +81,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         elif (report.status == drone_status.DroneStatus.MOVING):
             
             # if within distance of waypoint, halt to determine whether to land
-            if (not square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
+            if (not self.square_dist(report.position, self.waypoint) > self.acceptance_radius**2):
                 command = commands.Command.create_halt_command()
 
         # ============
