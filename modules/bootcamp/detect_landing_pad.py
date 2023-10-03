@@ -90,7 +90,7 @@ class DetectLandingPad:
             source=image, # source directory for images. In this case it is from numpy array of images.
             device=self.__DEVICE, # Device to run on. Run on my PC in this case.
             verbose=False, # Suppresses informational output from the model
-            conf=0.7 # Object confidence threshold for detection
+            conf=0.7, # Object confidence threshold for detection
         )
 
         # Get the Result object
