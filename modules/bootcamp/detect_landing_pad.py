@@ -112,6 +112,8 @@ class DetectLandingPad:
             new_box = bounding_box.BoundingBox.create(np.array(box))
             if new_box[0]: 
                 bounding_boxes.append(new_box[1])
+            else:
+                return [], image_annotated
 
         return bounding_boxes,image_annotated
 
