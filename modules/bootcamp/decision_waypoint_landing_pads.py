@@ -41,6 +41,33 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.calculation_done = False
         self.destination = None
 
+    def reach_destintation(self, report: drone_report.DroneReport, destination: location.Location, criteria) -> commands.Command:
+
+        command = commands.Command.create_null_command()
+
+        current_location_x = report.position.location_x
+        current_location_y = report.position.location_y
+        waypoint_x = destination.location_x
+        waypoint_y = destination.location_y
+
+        pythagoras_x = (waypoint_x - current_location_x)**2
+        pythagoras_y = (waypoint_y - current_location_y)**2
+        pythagoras = pythagoras_x + pythagoras_y
+
+        # Moving towards waypoint
+        if report.status == drone_status.DroneStatus.MOVING and pythagoras < self.acceptance_radius**2:
+            command = commands.Command.create_halt_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+            if pythagoras < self.acceptance_radius**2:
+                if criteria == "waypoint":
+                    self.waypoint_reached = True
+                elif criteria == "destination":
+                    command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(waypoint_x - current_location_x, waypoint_y - current_location_y)
+
+        return command
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -73,27 +100,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Land on waypoint first
         # Data for distance calculation between current position and waypoint
         if self.waypoint_reached == False:
-            current_location_x = report.position.location_x
-            current_location_y = report.position.location_y
-            waypoint_x = self.waypoint.location_x
-            waypoint_y = self.waypoint.location_y
-
-            pythagoras_x = (waypoint_x - current_location_x)**2
-            pythagoras_y = (waypoint_y - current_location_y)**2
-            pythagoras = pythagoras_x + pythagoras_y
-
-            # Moving towards waypoint
-            if report.status == drone_status.DroneStatus.MOVING and pythagoras < (self.acceptance_radius)**2:
-                command = commands.Command.create_halt_command()
-            elif report.status == drone_status.DroneStatus.HALTED:
-                if pythagoras < (self.acceptance_radius)**2:
-                    self.waypoint_reached = True
-                else:
-                    command = commands.Command.create_set_relative_destination_command(waypoint_x - current_location_x, waypoint_y - current_location_y)
+            command = self.reach_destintation(report, self.waypoint, "waypoint")
 
             
         # Calculation of closest destination
-        if self.calculation_done == False and self.waypoint_reached == True:
+        if not self.calculation_done and self.waypoint_reached:
             current_closest_waypoint = landing_pad_locations[0] # Dummy value, and will be changed by for loop
             current_location_x = report.position.location_x
             current_location_y = report.position.location_y
@@ -110,25 +121,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Data for distance calculation between current position and destination
 
-        if self.calculation_done == True and self.waypoint_reached == True:
-            current_location_x = report.position.location_x
-            current_location_y = report.position.location_y
-            destination_x = self.destination.location_x
-            destination_y = self.destination.location_y
-
-            pythagoras_x = (destination_x - current_location_x)**2
-            pythagoras_y = (destination_y - current_location_y)**2
-            pythagoras = pythagoras_x + pythagoras_y
-
-            # Moving towards destination
-            if self.calculation_done == True and self.waypoint_reached == True:
-                if report.status == drone_status.DroneStatus.MOVING and pythagoras < (self.acceptance_radius)**2:
-                    command = commands.Command.create_halt_command()
-                elif report.status == drone_status.DroneStatus.HALTED:
-                    if pythagoras < self.acceptance_radius**2:
-                        command = commands.Command.create_land_command()
-                    else:
-                        command = commands.Command.create_set_relative_destination_command(destination_x - current_location_x, destination_y - current_location_y)
+        if self.calculation_done and self.waypoint_reached:
+            command = self.reach_destintation(report, self.destination, "destination")
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

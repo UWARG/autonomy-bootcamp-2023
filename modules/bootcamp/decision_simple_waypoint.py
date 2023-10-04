@@ -81,10 +81,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         pythagoras = pythagoras_x + pythagoras_y
 
         # Moving towards waypoint
-        if report.status == drone_status.DroneStatus.MOVING and pythagoras < (self.acceptance_radius)**2:
+        if report.status == drone_status.DroneStatus.MOVING and pythagoras < self.acceptance_radius**2:
             command = commands.Command.create_halt_command()
         elif report.status == drone_status.DroneStatus.HALTED:
-            if pythagoras < (self.acceptance_radius)**2:
+            if pythagoras < self.acceptance_radius**2:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(waypoint_x - current_location_x, waypoint_y - current_location_y)
