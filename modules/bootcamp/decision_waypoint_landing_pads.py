@@ -99,7 +99,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Land on waypoint first
         # Data for distance calculation between current position and waypoint
-        if self.waypoint_reached == False:
+        if not self.waypoint_reached:
             command = self.reach_destintation(report, self.waypoint, "waypoint")
 
             
