@@ -12,7 +12,6 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-import math
 
 
 # Disable for bootcamp use
@@ -100,5 +99,5 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return command
 
     def distance(self, l1: location.Location, l2: location.Location):
-        return math.sqrt((l1.location_x - l2.location_x)**2 + (l1.location_y - l2.location_y)**2)
+        return (l1.location_x - l2.location_x)**2 + (l1.location_y - l2.location_y)**2
     

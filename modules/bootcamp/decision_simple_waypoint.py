@@ -69,14 +69,30 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if self.within_range_of(self.waypoint, report.position) and report.status == drone_status.DroneStatus.MOVING:
+        # Assuming 'commands' and 'drone_status' are imported modules
+        # and self.waypoint, report are provided context
+
+        status = report.status
+        pos = report.position
+        way_x = self.waypoint.location_x
+        way_y = self.waypoint.location_y
+        rel_dest_x = way_x - pos.location_x
+        rel_dest_y = way_y - pos.location_y
+
+        within_range = self.within_range_of(self.waypoint, pos)
+
+        if within_range and status == drone_status.DroneStatus.MOVING:
             command = commands.Command.create_halt_command()
-        elif self.within_range_of(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
+            
+        elif within_range and status == drone_status.DroneStatus.HALTED:
             command = commands.Command.create_land_command()
-        elif not self.within_range_of(self.waypoint, report.position) and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-        elif report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+            
+        elif not within_range and status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(way_x, way_y)
+            
+        elif status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(rel_dest_x, rel_dest_y)
+
         
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

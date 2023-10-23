@@ -10,7 +10,6 @@ import torch
 import ultralytics
 from .. import bounding_box
 
-
 # This is just an interface
 # pylint: disable=too-few-public-methods
 class DetectLandingPad:
@@ -58,7 +57,7 @@ class DetectLandingPad:
 
     def __init__(self, class_private_create_key, model: ultralytics.YOLO):
         """
-        Private constructor, use create() method.  
+        Private constructor, use create() method.
         """
         assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
 
@@ -88,7 +87,7 @@ class DetectLandingPad:
         predictions = self.__model.predict(source=image,conf=0.7,device=self.__DEVICE,verbose=False)
 
         # Get the Result object
-        prediction = predictions.__getitem__(0)
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -109,6 +108,8 @@ class DetectLandingPad:
             result, new_box = bounding_box.BoundingBox.create(np.array(box))
             if result:
                 bounding_boxes.append(new_box)
+            else:
+                return []
 
         return bounding_boxes, image_annotated
 
