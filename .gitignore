@@ -1,6 +1,7 @@
 # IDEs
 .idea/
 .vscode/
+.history/
 
 # Python
 __pycache__/
