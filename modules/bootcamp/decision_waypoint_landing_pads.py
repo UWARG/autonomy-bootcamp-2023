@@ -30,6 +30,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
+        print("Waypoint: " + str(waypoint))
+
         self.acceptance_radius = acceptance_radius
 
         # ============
