@@ -18,7 +18,6 @@ class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
-
     __create_key = object()
 
     # ============
@@ -62,9 +61,7 @@ class DetectLandingPad:
         """
         Private constructor, use create() method.
         """
-        assert (
-            class_private_create_key is DetectLandingPad.__create_key
-        ), "Use create() method"
+        assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
 
         self.__model = model
 
@@ -97,8 +94,11 @@ class DetectLandingPad:
         # set device to cpu since we don't have gpu???
         # no verbose option in current version
         # a list with a single object is returned since we are only predicting one image
-        predictions = self.__model.predict(
-            source=image, conf=0.7, device="cpu", boxes=True, verbose=False
+        predictions = self.__model.predict(source = image, 
+                                           conf = 0.7, 
+                                           device = self.__DEVICE, 
+                                           boxes = True, 
+                                           verbose = False,
         )
 
         # Get the Result object
@@ -114,13 +114,14 @@ class DetectLandingPad:
         boxes_xyxys = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
-        
         #There is no detatch() in the documentation
+        boxes_xyxys.detatch()
+        
         # move the copy into CPU space,
         # and convert to a numpy array
         boxes_cpu = boxes_xyxys.cpu().numpy()
 
-        print(boxes_xyxys)
+        #print(boxes_xyxys)
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []

@@ -24,7 +24,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.
     """
-
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
@@ -38,7 +37,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        # Helper function for determining relative distance to travel
+    def get_set_relative_distance_command(waypoint_position: location.Location, 
+                                          report_position: location.Location) \
+        -> commands.Command:     
+            
+        x_distance = waypoint_position.location_x - report_position.location_x
+        y_distance = waypoint_position.location_y - report_position.location_y
+
+        set_relative_destination_command = (commands.Command.create_set_relative_destination_command(x_distance,
+                                                                                                     y_distance,)
+                                            )
+
+        return set_relative_destination_command
+        
+    def validate_arrival_at_destination(flight_position: location.Location, destination_position: location.Location):
+        if abs(flight_position.location_x - destination_position.location_x) > 0.01:
+            return False
+        if abs(flight_position.location_y - destination_position.location_y) > 0.01:
+            return False
+        return True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -92,46 +110,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         The difference between the coordinates of the drone position and waypoint under the text file in log/ should be less than 0.1
         
         """
-
-        # Helper function for determining relative distance to travel
-        def get_set_relative_distance_command(
-            relative_flight_boundary_x_abs: float, relative_flight_boundary_y_abs: float
-        ) -> commands.Command:
-            x_distance = self.waypoint.location_x - report.position.location_x
-            y_distance = self.waypoint.location_y - report.position.location_y
-
-            sign_x_distance = (x_distance > 0) ^ (x_distance < 0)
-            sign_y_distance = (y_distance > 0) ^ (y_distance < 0)
-
-            x_distance = (
-                x_distance
-                if abs(x_distance) < abs(relative_flight_boundary_x_abs)
-                else (relative_flight_boundary_x_abs * sign_x_distance)
-            )
-            y_distance = (
-                y_distance
-                if abs(y_distance) < abs(relative_flight_boundary_y_abs)
-                else (relative_flight_boundary_y_abs * sign_y_distance)
-            )
-
-            set_relative_destination_command = (
-                commands.Command.create_set_relative_destination_command(
-                    x_distance,
-                    y_distance,
-                )
-            )
-
-            return set_relative_destination_command
-        
-        def validate_arrival_at_destination(flight_position: location.Location, destination_position: location.Location):
-            if abs(flight_position.location_x - destination_position.location_x) > 0.01:
-                return False
-            if abs(flight_position.location_y - destination_position.location_y) > 0.01:
-                return False
-            return True
-
-
-
         default_null_command = commands.Command.create_null_command()
         halt_command = commands.Command.create_halt_command()
         land_command = commands.Command.create_land_command()
@@ -143,13 +121,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 return default_null_command
 
         if report.status == drone_status.DroneStatus.HALTED:
-            if validate_arrival_at_destination(report.position,self.waypoint):
+            if self.validate_arrival_at_destination(report.position,self.waypoint):
                 return land_command
             else:
-                set_relative_destination_command_result = (
-                    get_set_relative_distance_command(60, 60)
-                )
-
+                set_relative_destination_command_result = (self.get_set_relative_distance_command(self.waypoint, 
+                                                                                                  report.position)
+                                                          )
                 return set_relative_destination_command_result
 
         if report.status == drone_status.DroneStatus.LANDED:
