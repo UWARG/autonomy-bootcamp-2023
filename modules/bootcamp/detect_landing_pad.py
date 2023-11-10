@@ -65,9 +65,7 @@ class DetectLandingPad:
 
         self.__model = model
 
-    def run(
-        self, image: np.ndarray
-    ) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
 
@@ -94,11 +92,12 @@ class DetectLandingPad:
         # set device to cpu since we don't have gpu???
         # no verbose option in current version
         # a list with a single object is returned since we are only predicting one image
-        predictions = self.__model.predict(source = image, 
-                                           conf = 0.7, 
-                                           device = self.__DEVICE, 
-                                           boxes = True, 
-                                           verbose = False,
+        predictions = self.__model.predict(
+            source = image, 
+            conf = 0.7, 
+            device = self.__DEVICE, 
+            boxes = True, 
+            verbose = False,
         )
 
         # Get the Result object
@@ -114,21 +113,18 @@ class DetectLandingPad:
         boxes_xyxys = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
-        #There is no detatch() in the documentation
-        boxes_xyxys.detatch()
-        
+        #There is no detatch in the documentation
+  
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxys.cpu().numpy()
+        boxes_cpu = boxes_xyxys.detatch().cpu().numpy()
 
-        #print(boxes_xyxys)
+
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-        # Create BoundingBox object and append to list
-        # result, box = ...
+
+
 
         for box in boxes_cpu:
             #Create method will call the init method, returns a tuple indicating success or failure and the boundingbox object created
