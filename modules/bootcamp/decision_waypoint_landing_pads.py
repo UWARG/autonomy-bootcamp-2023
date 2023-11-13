@@ -38,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-
+        self.started = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,7 +69,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.position != report.destination and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
 
+        # check if halted over landing spot
+        if report.status == drone_status.DroneStatus.HALTED and self.started:
+            command = commands.Command.create_land_command()
+
+        # check to see if drone has left starting position
+        if report.status == drone_status.DroneStatus.HALTED and not self.started:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y)
+            self.started = True
         # Remove this when done
         raise NotImplementedError
 
