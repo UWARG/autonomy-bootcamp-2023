@@ -70,18 +70,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        #check to see if drone has left starting position
-        if report.status == drone_status.DroneStatus.HALTED and self.started == False:
-            command = commands.Command.create_set_relative_destination_command(report.destination)
-            self.started = True
-
-        #check if stopped on way to destination for some reason
+        # check if stopped on way to destination for some reason
         if report.position != report.destination and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(report.destination)
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
 
-        #check if halted over landing spot
-        if report.position == report.destination and report.status == drone_status.DroneStatus.HALTED:
+        # check if halted over landing spot
+        if report.status == drone_status.DroneStatus.HALTED and self.started:
             command = commands.Command.create_land_command()
+
+        # check to see if drone has left starting position
+        if report.status == drone_status.DroneStatus.HALTED and not self.started:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y)
+            self.started = True
 
 
         # Remove this when done
