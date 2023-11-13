@@ -39,9 +39,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.started = False
+        self.located_pad = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+
+    def get_nearest_landing_pad(self,
+                                landing_pad_locations: "list[location.Location]",
+                                waypoint: location.Location) -> location.Location:
+        min_dist = float("inf")
+        desired_location = landing_pad_locations[0]
+
+        for pad in landing_pad_locations:
+            distance = ((waypoint.location_x - pad.location_x) ** 2 + (
+                        waypoint.location_y - pad.location_y) ** 2) ** 0.5
+
+            if distance < min_dist:
+                min_dist = distance
+                desired_location = pad
+
+        return desired_location
 
     def run(self,
             report: drone_report.DroneReport,
@@ -69,12 +87,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if report.position != report.destination and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
-
-        # check if halted over landing spot
-        if report.status == drone_status.DroneStatus.HALTED and self.started:
-            command = commands.Command.create_land_command()
+        # if launched and reached desired destination
+        if self.started and report.destination == report.position:
+            command = commands.Command.create_halt_command()
+            if drone_status.DroneStatus.HALTED == report.status:
+                if not self.located_pad:
+                    report.destination = self.get_nearest_landing_pad(landing_pad_locations, self.waypoint)
+                    self.located_pad = True
+                    self.started = False
+                else:
+                    command = commands.Command.create_land_command()
 
         # check to see if drone has left starting position
         if report.status == drone_status.DroneStatus.HALTED and not self.started:
@@ -83,7 +105,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint.location_y - report.position.location_y)
             self.started = True
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
