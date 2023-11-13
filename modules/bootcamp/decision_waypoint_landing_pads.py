@@ -61,6 +61,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return desired_location
 
+    def within_tolerance(self,
+                         curr: location.Location,
+                         dest: location.Location) -> bool:
+
+        if abs(dest.location_x - curr.location_x) > self.acceptance_radius:
+            return False
+
+        if abs(dest.location_y - curr.location_y) > self.acceptance_radius:
+            return False
+
+        return True
+
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -88,14 +100,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         # if launched and reached desired destination
-        if self.started and report.destination == report.position:
+        if self.started and self.within_tolerance(report.position, report.destination):
             command = commands.Command.create_halt_command()
+            print("stopped")
             if drone_status.DroneStatus.HALTED == report.status:
-                if not self.located_pad:
+                if not self.located_pad and self.within_tolerance(report.position, report.destination):
+                    print("checking nearest distance")
                     report.destination = self.get_nearest_landing_pad(landing_pad_locations, self.waypoint)
                     self.located_pad = True
                     self.started = False
                 else:
+                    print("trying to land")
                     command = commands.Command.create_land_command()
 
         # check to see if drone has left starting position
@@ -104,8 +119,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint.location_x - report.position.location_x,
                 self.waypoint.location_y - report.position.location_y)
             self.started = True
+            print("moving")
         # Remove this when done
-        #raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
