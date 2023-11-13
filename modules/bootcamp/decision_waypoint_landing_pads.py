@@ -107,6 +107,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if not self.located_pad and self.within_tolerance(report.position, report.destination):
                     print("checking nearest distance")
                     report.destination = self.get_nearest_landing_pad(landing_pad_locations, self.waypoint)
+                    self.waypoint = report.destination
                     self.located_pad = True
                     self.started = False
                 else:
