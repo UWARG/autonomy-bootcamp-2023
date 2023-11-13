@@ -55,7 +55,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             distance = ((waypoint.location_x - pad.location_x) ** 2 + (
                         waypoint.location_y - pad.location_y) ** 2) ** 0.5
 
-            if distance < min_dist and pad != waypoint:
+            if distance < min_dist:
                 min_dist = distance
                 desired_location = pad
 
@@ -99,22 +99,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        # if launched and reached desired destination
+
+        # if drone is at a waypoint
         if self.started and self.within_tolerance(report.position, report.destination):
             command = commands.Command.create_halt_command()
             print("stopped")
             if drone_status.DroneStatus.HALTED == report.status:
                 if not self.located_pad and self.within_tolerance(report.position, report.destination):
                     print("checking nearest distance")
-                    report.destination = self.get_nearest_landing_pad(landing_pad_locations, self.waypoint)
-                    self.waypoint = report.destination
+                    self.waypoint = self.get_nearest_landing_pad(landing_pad_locations, self.waypoint)
                     self.located_pad = True
                     self.started = False
                 else:
                     print("trying to land")
                     command = commands.Command.create_land_command()
 
-        # check to see if drone has left starting position
+        # if drone has not left waypoint
         if report.status == drone_status.DroneStatus.HALTED and not self.started:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x - report.position.location_x,
