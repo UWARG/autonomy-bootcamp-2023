@@ -55,7 +55,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             distance = ((waypoint.location_x - pad.location_x) ** 2 + (
                         waypoint.location_y - pad.location_y) ** 2) ** 0.5
 
-            if distance < min_dist:
+            if distance < min_dist and pad != waypoint:
                 min_dist = distance
                 desired_location = pad
 
