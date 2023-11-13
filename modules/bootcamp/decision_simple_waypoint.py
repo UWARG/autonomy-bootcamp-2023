@@ -36,7 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        self.started = False
         # Add your own
 
         # ============
@@ -70,8 +70,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        #check to see if drone has left starting position
+        if report.status == drone_status.DroneStatus.HALTED and self.started == False:
+            command = commands.Command.create_set_relative_destination_command(report.destination)
+            self.started = True
+
+        #check if stopped on way to destination for some reason
+        if report.position != report.destination and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(report.destination)
+
+        #check if halted over landing spot
+        if report.position == report.destination and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_land_command()
+
+
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
