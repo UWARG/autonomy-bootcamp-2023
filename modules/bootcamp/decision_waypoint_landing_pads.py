@@ -40,15 +40,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.arrived_at_waypoint = False
         
     # Helper function for determining relative distance to travel
-    def get_set_relative_distance_command(waypoint_position: location.Location, report_position: location.Location) -> commands.Command:      
+    def get_set_relative_distance_command(waypoint_position: location.Location, 
+                                          report_position: location.Location) -> commands.Command:      
         x_distance = waypoint_position.location_x - report_position.location_x
         y_distance = waypoint_position.location_y - report_position.location_y
 
-        set_relative_destination_command = commands.Command.create_set_relative_destination_command(x_distance, y_distance,)
+        set_relative_destination_command = commands.Command.create_set_relative_destination_command(x_distance, y_distance)
                                             
         return set_relative_destination_command
         
-    def validate_arrival_at_destination(flight_position: location.Location, destination_position: location.Location):
+    def validate_arrival_at_destination(flight_position: location.Location, 
+                                        destination_position: location.Location):
         if abs(flight_position.location_x - destination_position.location_x) > 0.01:
             return False
         if abs(flight_position.location_y - destination_position.location_y) > 0.01:
@@ -109,19 +111,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         
         """
         # Loop through the list of landing pad locations and find the nearest landing pad from the original location by finding the minimum L2 norm between the starting position and the landingpad_locations
-        def calculate_nearest_landing_pad(starting_position: location.Location, landingpad_locations: "list[location.Location]",) ->location.Location:
+        def calculate_nearest_landing_pad(starting_position: location.Location, 
+                                          landingpad_locations: "list[location.Location]") ->location.Location:
             
-            min = calculate_l2_norm_squared(starting_position, landingpad_locations[0])
+            min = calculate_l2_norm_squared(
+                starting_position, 
+                landingpad_locations[0],
+            )
             nearest_landingpad = landing_pad_locations[0]
             
             for landingpad_location in landingpad_locations:
-                temp = calculate_l2_norm_squared(starting_position, landingpad_location)
+                temp = calculate_l2_norm_squared(
+                    starting_position, 
+                    landingpad_location,
+                )
                 if temp < min:
                     min = temp
                     nearest_landingpad = landingpad_location
             return nearest_landingpad
 
-        def calculate_l2_norm_squared(location1: location.Location, location2: location.Location) -> float:
+        def calculate_l2_norm_squared(location1: location.Location, 
+                                      location2: location.Location) -> float:
             x_dif = location1.location_x - location2.location_x
             y_dif = location1.location_y - location2.location_y
             
@@ -152,7 +162,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     set_relative_destination_command_result = self.get_set_relative_distance_command(
                         report.position,                                                                             
-                        self.waypoint
+                        self.waypoint,
                     )
                     return set_relative_destination_command_result
 
@@ -162,7 +172,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if report.status == drone_status.DroneStatus.HALTED:
                 nearest_landing_pad_result = calculate_nearest_landing_pad(
                     report.position,
-                    landing_pad_locations
+                    landing_pad_locations,
                 )
                 self.nearest_landing_pad_result = nearest_landing_pad_result
                 
@@ -171,7 +181,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     set_relative_destination_command_result = self.get_set_relative_distance_command(
                         report.position,
-                        nearest_landing_pad_result
+                        nearest_landing_pad_result,
                     )
                                                                 
                     return set_relative_destination_command_result

@@ -39,8 +39,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Helper function for determining relative distance to travel
     def get_set_relative_distance_command(waypoint_position: location.Location, 
-                                          report_position: location.Location) \
-        -> commands.Command:     
+                                          report_position: location.Location) -> commands.Command:     
             
         x_distance = waypoint_position.location_x - report_position.location_x
         y_distance = waypoint_position.location_y - report_position.location_y
@@ -49,7 +48,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return set_relative_destination_command
         
-    def validate_arrival_at_destination(flight_position: location.Location, destination_position: location.Location):
+    def validate_arrival_at_destination(flight_position: location.Location, 
+                                        destination_position: location.Location):
         if abs(flight_position.location_x - destination_position.location_x) > 0.01:
             return False
         if abs(flight_position.location_y - destination_position.location_y) > 0.01:
@@ -120,7 +120,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if self.validate_arrival_at_destination(report.position,self.waypoint):
                 return land_command
             else:
-                set_relative_destination_command_result = self.get_set_relative_distance_command(self.waypoint, report.position)
+                set_relative_destination_command_result = self.get_set_relative_distance_command(
+                    self.waypoint, 
+                    report.position,
+                )
                 return set_relative_destination_command_result
 
         if report.status == drone_status.DroneStatus.LANDED:
