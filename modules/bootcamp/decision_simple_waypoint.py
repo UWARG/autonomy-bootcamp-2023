@@ -111,7 +111,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         land_command = commands.Command.create_land_command()
 
         if report.status == drone_status.DroneStatus.MOVING:
-            if report.position == self.waypoint:
+            if self.validate_arrival_at_destination(report.position, self.waypoint):
                 return halt_command
             else:
                 return default_null_command
