@@ -115,10 +115,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             nearest_landingpad = landing_pad_locations[0]
             
             for landingpad_location in landingpad_locations:
-                temp = calculate_l2_norm_squared(
-                    starting_position, 
-                    landingpad_location
-                )
+                temp = calculate_l2_norm_squared(starting_position, landingpad_location)
                 if temp < min:
                     min = temp
                     nearest_landingpad = landingpad_location

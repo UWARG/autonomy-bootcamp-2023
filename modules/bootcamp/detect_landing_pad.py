@@ -125,10 +125,10 @@ class DetectLandingPad:
         bounding_boxes = []
 
 
-
+        #Create method will call the init method, returns a tuple indicating success or failure and the boundingbox object created
+        #takes in the bounds, the bounds are in the form of x1y1x2y2
         for box in boxes_cpu:
-            #Create method will call the init method, returns a tuple indicating success or failure and the boundingbox object created
-            #takes in the bounds, the bounds are in the form of x1y1x2y2
+            
             result, box = bounding_box.BoundingBox.create(box)
             if result:
                 bounding_boxes.append(box)

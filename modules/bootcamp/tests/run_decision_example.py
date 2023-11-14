@@ -47,7 +47,6 @@ DISPLAY_SCALE = 0.5
 # Change to a constant for reproducibility (e.g. debugging)
 # Change back to = time.time_ns() to test robustness
 
-#SEED = 1698089598187979800
 SEED = time.time_ns()
 
 # ============
