@@ -44,7 +44,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         x_distance = waypoint_position.location_x - report_position.location_x
         y_distance = waypoint_position.location_y - report_position.location_y
 
-        set_relative_destination_command = commands.Command.create_set_relative_destination_command(x_distance, y_distance,)
+        set_relative_destination_command = commands.Command.create_set_relative_destination_command(x_distance, y_distance)
 
         return set_relative_destination_command
         
@@ -117,7 +117,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 return default_null_command
 
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.validate_arrival_at_destination(report.position,self.waypoint):
+            if self.validate_arrival_at_destination(report.position, self.waypoint):
                 return land_command
             else:
                 set_relative_destination_command_result = self.get_set_relative_distance_command(

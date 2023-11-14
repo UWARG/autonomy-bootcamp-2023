@@ -120,14 +120,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             )
             nearest_landingpad = landing_pad_locations[0]
             
-            for landingpad_location in landingpad_locations:
-                temp = calculate_l2_norm_squared(
-                    starting_position, 
-                    landingpad_location,
-                )
+            for index in range(1, len(landingpad_locations)):
+                landingpad_location = landingpad_locations[index]
+                temp = calculate_l2_norm_squared(starting_position, landingpad_location)
+    
                 if temp < min:
                     min = temp
                     nearest_landingpad = landingpad_location
+                    
             return nearest_landingpad
 
         def calculate_l2_norm_squared(location1: location.Location, 
@@ -136,7 +136,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             y_dif = location1.location_y - location2.location_y
             
             #avoid calculating the square root since we don't need it for the current purpose
-            l2norm_squared = (x_dif**2 + y_dif**2) 
+            l2norm_squared = x_dif**2 + y_dif**2
             return l2norm_squared
         
         
