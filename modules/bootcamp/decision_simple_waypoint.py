@@ -72,7 +72,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # check if stopped on way to destination for some reason
         if report.position != report.destination and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y)
 
         # check if halted over landing spot
         if report.status == drone_status.DroneStatus.HALTED and self.started:
