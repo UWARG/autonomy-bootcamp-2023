@@ -62,7 +62,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
     def run(self,
             report: drone_report.DroneReport,
-            landing_pad_locations: "list[location.Location]",) -> commands.Command:
+            landing_pad_locations: "list[location.Location]") -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
