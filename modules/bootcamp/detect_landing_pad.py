@@ -8,7 +8,6 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
-
 from .. import bounding_box
 
 
@@ -35,7 +34,7 @@ class DetectLandingPad:
 
     __MODEL_NAME = "best-2n.pt"
 
-    @classmethod
+    @classmethod #same as static in Java
     def create(cls, model_directory: pathlib.Path):
         """
         model_directory: Directory to models.
@@ -86,32 +85,40 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(image, conf = 0.7, show=True)
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot()
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.cpu().numpy()
+        # print("Type of boxes_cpu",type(boxes_cpu))
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
-
+        print(boxes_cpu.shape)
+        for bbox in boxes_cpu:
+            new_bounding_box = bounding_box.BoundingBox.create(bbox)[1]
+            bounding_boxes.append(new_bounding_box)
+            print(type(new_bounding_box))
+        
+        return bounding_boxes, image_annotated
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
