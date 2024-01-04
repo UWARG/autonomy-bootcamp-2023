@@ -103,7 +103,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
-            print("Halted at: " + str(report.position))
+            # print("Halted at: " + str(report.position))
             command = self.commands[self.command_index]
             self.command_index += 1
         elif report.status == drone_status.DroneStatus.HALTED and not self.finding_landing_pad:
