@@ -8,6 +8,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
+
 from .. import bounding_box
 
 
@@ -85,14 +86,14 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf = 0.7)
+        predictions = self.__model.predict(image, conf = 0.7, device = self.__DEVICE, verbose = True)
 
         # Get the Result object
         prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot()
+        image_annotated = prediction.plot(conf = True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -100,8 +101,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
-        # print("Type of boxes_cpu",type(boxes_cpu))
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -110,11 +110,11 @@ class DetectLandingPad:
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
-        print(boxes_cpu.shape)
+        
         for bbox in boxes_cpu:
-            new_bounding_box = bounding_box.BoundingBox.create(bbox)[1]
-            bounding_boxes.append(new_bounding_box)
-            print(type(new_bounding_box))
+            result, new_bounding_box = bounding_box.BoundingBox.create(bbox)
+            if result:
+                bounding_boxes.append(new_bounding_box)
         
         return bounding_boxes, image_annotated
         # Remove this when done
