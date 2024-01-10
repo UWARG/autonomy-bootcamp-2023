@@ -17,8 +17,19 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
-def pad_distance_squared(pad, drone):
+def pad_distance_squared(pad: location.Location, 
+                         drone: location.Location) -> float:
+        
         return (pad.location_x - drone.location_x) ** 2 + (pad.location_y - drone.location_y) ** 2
+
+def clamp(number: float,
+          min: float,
+          max: float) -> float:
+    if number < min:
+        return min
+    if number > max:
+        return max
+    return number
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -40,8 +51,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.distance_x = waypoint.location_x
-        self.distance_y = waypoint.location_y
 
         self.reached_waypoint = False
 
@@ -77,33 +86,25 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
-        self.distance_x = self.waypoint.location_x - report.position.location_x
-        self.distance_y = self.waypoint.location_y - report.position.location_y
+        distance_x = self.waypoint.location_x - report.position.location_x
+        distance_y = self.waypoint.location_y - report.position.location_y
 
         if report.status is drone_status.DroneStatus.HALTED:
-            if self.distance_x > 0.1:
-                command = commands.Command.create_set_relative_destination_command(min(60, self.distance_x),  0)
-            elif self.distance_x < -0.1:
-                command = commands.Command.create_set_relative_destination_command(max(-60, self.distance_x),  0)
-            elif self.distance_y > 0.1:
-                command = commands.Command.create_set_relative_destination_command(0, min(60, self.distance_y))
-            elif self.distance_y < -0.1:
-                command = commands.Command.create_set_relative_destination_command(0, max(-60, self.distance_y))
-            elif self.reached_waypoint:   
-                command = commands.Command.create_land_command()
+            if abs(distance_x) < 0.1 and abs(distance_y) < 0.1:
+                if self.reached_waypoint:
+                    command = commands.Command.create_land_command()
+                else:
+                    self.reached_waypoint = True
+                    closest_pad = landing_pad_locations[0]
+                    closest_pad_distance_squared = float('inf')
+                    for landing_pad_location in landing_pad_locations:
+                        if pad_distance_squared(landing_pad_location, report.position) < closest_pad_distance_squared:
+                            closest_pad_distance_squared = pad_distance_squared(landing_pad_location, report.position)
+                            closest_pad = landing_pad_location
+                    self.waypoint = closest_pad
             else:
-                self.reached_waypoint = True
-                closest_pad = landing_pad_locations[0]
-                closest_pad_distance_squared = 999999
-                for pad in landing_pad_locations:
-                    if pad_distance_squared(pad, report.position) < closest_pad_distance_squared:
-                        closest_pad_distance_squared = pad_distance_squared(pad, report.position)
-                        closest_pad = pad
-                self.waypoint = closest_pad
+                command = commands.Command.create_set_relative_destination_command(clamp(distance_x, -60, 60), clamp(distance_y, -60, 60))
 
-        # Remove this when done
-        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
