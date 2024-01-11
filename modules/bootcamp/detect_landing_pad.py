@@ -5,6 +5,7 @@ Detects landing pads.
 """
 import pathlib
 
+from PIL import Image
 import numpy as np
 import torch
 import ultralytics
@@ -79,39 +80,50 @@ class DetectLandingPad:
         # ============
 
         # Ultralytics has documentation and examples
-
+    
         # Use the model's predict() method to run inference
         # Parameters of interest:
         # * source
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(image, conf=0.7)
+        prediction=predictions[0]
+        image_annotated = prediction.plot(conf=True)
+        # check = Image.fromarray(check[..., ::-1])
+        # check.show()
 
-        # Get the Result object
-        prediction = ...
+        # # Get the Result object
+        # prediction = ...
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        # image_annotated = ...
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
-
+        boxes_xyxy = prediction.boxes.xyxy
+        # print(prediction.boxes)
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
-
+        boxes_cpu = boxes_xyxy.cpu().numpy()
+        # print(boxes_cpu)
+        # print(boxes_cpu.shape)
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+        for i in range(0, boxes_cpu.shape[0]):
+            # print(boxes_cpu[i, :])
+            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i, :])[1])
+            # print(bounding_boxes[i])
+
+        return (bounding_boxes, image_annotated)
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
 
-        # Remove this when done
-        raise NotImplementedError
+        # # Remove this when done
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
