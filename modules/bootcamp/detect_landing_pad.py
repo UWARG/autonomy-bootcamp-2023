@@ -109,8 +109,8 @@ class DetectLandingPad:
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
-        for i in boxes_cpu:
-            result, box = bounding_box.BoundingBox.create(np.array(i))
+        for items in boxes_cpu:
+            result, box = bounding_box.BoundingBox.create(items)
             if result:
                 bounding_boxes.append(box)
             else:
