@@ -13,15 +13,6 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
-def clamp(number: float,
-          min: float,
-          max: float) -> float:
-    if number < min:
-        return min
-    if number > max:
-        return max
-    return number
-
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
@@ -76,16 +67,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        # Relative distances between drone and waypoint
         distance_x = self.waypoint.location_x - report.position.location_x
         distance_y = self.waypoint.location_y - report.position.location_y
 
         if report.status is drone_status.DroneStatus.HALTED:
+            # If drone has arrived at the waypoint, land
             if abs(distance_x) < 0.1 and abs(distance_y) < 0.1:
                 command = commands.Command.create_land_command()
+            #If drone is halted but not at waypoint, move to waypoint
             else:
-                command = commands.Command.create_set_relative_destination_command(clamp(distance_x, -60, 60), clamp(distance_y, -60, 60))
-
-
+                command = commands.Command.create_set_relative_destination_command(distance_x, distance_y)
+                
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

@@ -13,23 +13,8 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
-
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
-
-def pad_distance_squared(pad: location.Location, 
-                         drone: location.Location) -> float:
-        
-        return (pad.location_x - drone.location_x) ** 2 + (pad.location_y - drone.location_y) ** 2
-
-def clamp(number: float,
-          min: float,
-          max: float) -> float:
-    if number < min:
-        return min
-    if number > max:
-        return max
-    return number
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -57,9 +42,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
     
-
+    def pad_distance_squared(self,
+                             pad: location.Location, 
+                             drone: location.Location) -> float:
+        
+        return (pad.location_x - drone.location_x) ** 2 + (pad.location_y - drone.location_y) ** 2
 
     def run(self,
             report: drone_report.DroneReport,
@@ -81,7 +69,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-
+        
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -89,22 +77,33 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         distance_x = self.waypoint.location_x - report.position.location_x
         distance_y = self.waypoint.location_y - report.position.location_y
 
+        # If drone is moving, we don't need to do anything
         if report.status is drone_status.DroneStatus.HALTED:
+            # If drone has arrived at it's destination
             if abs(distance_x) < 0.1 and abs(distance_y) < 0.1:
+                # If it has previously reached the waypoint, it must be at the landing pad
                 if self.reached_waypoint:
                     command = commands.Command.create_land_command()
-                else:
-                    self.reached_waypoint = True
-                    closest_pad = landing_pad_locations[0]
-                    closest_pad_distance_squared = float('inf')
-                    for landing_pad_location in landing_pad_locations:
-                        if pad_distance_squared(landing_pad_location, report.position) < closest_pad_distance_squared:
-                            closest_pad_distance_squared = pad_distance_squared(landing_pad_location, report.position)
-                            closest_pad = landing_pad_location
-                    self.waypoint = closest_pad
-            else:
-                command = commands.Command.create_set_relative_destination_command(clamp(distance_x, -60, 60), clamp(distance_y, -60, 60))
+                    return command
+                
+                # If the drone just arrived at the waypoint
+                self.reached_waypoint = True
+                closest_pad = landing_pad_locations[0]
+                closest_pad_distance_squared = float('inf')
+                
+                #Find the closest landing pad
+                for landing_pad_location in landing_pad_locations:
+                    distance_to_pad_squared = self.pad_distance_squared(landing_pad_location, report.position)
+                    if distance_to_pad_squared < closest_pad_distance_squared:
+                        closest_pad_distance_squared = distance_to_pad_squared
+                        closest_pad = landing_pad_location
+                
+                # Set new waypoint at the closest landing pad
+                self.waypoint = closest_pad
 
+            # If drone is halted but has not arrived at it's destination, move to destination
+            else:
+                command = commands.Command.create_set_relative_destination_command(distance_x, distance_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
