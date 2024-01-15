@@ -5,7 +5,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 """
 # Disable for bootcamp use
 # pylint: disable=unused-import
-import sys
 from numpy import sqrt
 from .. import commands
 from .. import drone_report
