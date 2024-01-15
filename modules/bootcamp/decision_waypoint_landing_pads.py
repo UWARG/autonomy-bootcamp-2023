@@ -5,8 +5,8 @@ Travel to designated waypoint and then land at a nearby landing pad.
 """
 # Disable for bootcamp use
 # pylint: disable=unused-import
-
-
+import sys
+from numpy import sqrt
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -36,12 +36,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        self.command_index = 0
+        self.commands = [
+            commands.Command.create_set_relative_destination_command( waypoint.location_x,  waypoint.location_y)
+        ]
+        self.has_sent_landing_command = False
+        self.landed = False
 
+        self.counter = 0
         # Add your own
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+    def closest_pad(self, current, pads):
+        smallestDist, closest_pad = sys.maxsize, ""
+        for pad in pads:
+            distance = self.calculate_distance(pad.location_x, pad.location_y, current.location_x, current.location_y)
+            if distance < smallestDist:
+                smallestDist, closest_pad = distance, pad
+        return closest_pad
+
+    def calculate_distance(self, x1, y1, x2, y2):
+        dx = x2-x1
+        dy = y2-y1
+        return sqrt((dx**2)+(dy**2))
 
     def run(self,
             report: drone_report.DroneReport,
@@ -64,6 +83,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands): #More commands in list
+            command = self.commands[self.command_index]
+            self.command_index+=1
+        
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command: # No more commands in list
+            command = commands.command.create_land_command()
+            self.has_sent_landing_command = True
+
+        
+        self.counter+=1
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -71,7 +100,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         # Remove this when done
-        raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
