@@ -41,7 +41,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             commands.Command.create_set_relative_destination_command( waypoint.location_x,  waypoint.location_y)
         ]
         self.has_sent_landing_command = False
-
         self.counter = 0
 
         # ============
@@ -74,11 +73,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands): #More commands in list
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands): #Fly to waypoint
             command = self.commands[self.command_index]
             self.command_index+=1
         
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command: # No more commands in list
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command: # Land
             command = commands.command.create_land_command()
             self.has_sent_landing_command = True
 

@@ -41,6 +41,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             commands.Command.create_set_relative_destination_command( waypoint.location_x,  waypoint.location_y)
         ]
         self.has_sent_landing_command = False
+        self.found_closest_landing_pad = False
         self.landed = False
 
         self.counter = 0
@@ -50,11 +51,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
     def closest_pad(self, current, pads):
-        smallestDist, closest_pad = sys.maxsize, ""
+        smallestDist, closest_pad = float('inf'), None
+
         for pad in pads:
             distance = self.calculate_distance(pad.location_x, pad.location_y, current.location_x, current.location_y)
             if distance < smallestDist:
                 smallestDist, closest_pad = distance, pad
+        
         return closest_pad
 
     def calculate_distance(self, x1, y1, x2, y2):
@@ -83,14 +86,23 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands): #More commands in list
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands): #Fly to waypoint
             command = self.commands[self.command_index]
             self.command_index+=1
+
+        elif report.status == drone_status.DroneStatus.HALTED and not self.found_closest_landing_pad: # Fly to closest landing pad
+            closest_pad = self.closest_pad(report.position,landing_pad_locations)
+
+            if closest_pad is not None:
+                command = commands.Command.create_set_relative_destination_command(
+                    closest_pad.location_x - report.position.location_x,
+                    closest_pad.location_y - report.position.location_y
+                )
+                self.found_closest_landing_pad = True
         
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command: # No more commands in list
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command: # Land
             command = commands.command.create_land_command()
             self.has_sent_landing_command = True
-
         
         self.counter+=1
         # ============
