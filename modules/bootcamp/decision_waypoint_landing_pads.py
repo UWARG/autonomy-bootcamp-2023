@@ -5,7 +5,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 """
 # Disable for bootcamp use
 # pylint: disable=unused-import
-from numpy import sqrt
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -61,7 +60,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def calculate_distance(self, x1, y1, x2, y2):
         dx = x2-x1
         dy = y2-y1
-        return sqrt((dx**2)+(dy**2))
+        return ((dx**2)+(dy**2))**(1/2)
 
     def run(self,
             report: drone_report.DroneReport,
