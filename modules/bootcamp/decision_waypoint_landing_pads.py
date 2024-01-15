@@ -48,19 +48,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
     def closest_pad(self, current, pads):
-        smallest_distance, closest_pad = float('inf'), None
+        smallest_squared_distance, closest_pad = float('inf'), None
 
         for pad in pads:
-            distance = self.calculate_distance(pad.location_x, pad.location_y, current.location_x, current.location_y)
-            if distance < smallest_distance:
-                smallest_distance, closest_pad = distance, pad
+            squared_distance = self.calculate_squared_distance(pad.location_x, pad.location_y, current.location_x, current.location_y)
+            if squared_distance < smallest_squared_distance:
+                smallest_squared_distance, closest_pad = squared_distance, pad
         
         return closest_pad
 
-    def calculate_distance(self, x1, y1, x2, y2):
+    def calculate_squared_distance(self, x1, y1, x2, y2):
         dx = x2-x1
         dy = y2-y1
-        return ((dx**2)+(dy**2))**(1/2)
+        return ((dx*dx)+(dy*dy))
 
     def run(self,
             report: drone_report.DroneReport,
