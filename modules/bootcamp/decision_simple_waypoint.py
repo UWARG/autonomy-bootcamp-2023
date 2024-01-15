@@ -41,7 +41,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             commands.Command.create_set_relative_destination_command( waypoint.location_x,  waypoint.location_y)
         ]
         self.has_sent_landing_command = False
-        self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -81,7 +80,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.command.create_land_command()
             self.has_sent_landing_command = True
 
-        self.counter += 1
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

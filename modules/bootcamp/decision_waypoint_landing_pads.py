@@ -44,7 +44,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.found_closest_landing_pad = False
         self.landed = False
 
-        self.counter = 0
         # Add your own
 
         # ============
@@ -104,7 +103,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = commands.command.create_land_command()
             self.has_sent_landing_command = True
         
-        self.counter+=1
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
