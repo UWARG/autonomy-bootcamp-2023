@@ -51,12 +51,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
     def closest_pad(self, current, pads):
-        smallestDist, closest_pad = float('inf'), None
+        smallest_distance, closest_pad = float('inf'), None
 
         for pad in pads:
             distance = self.calculate_distance(pad.location_x, pad.location_y, current.location_x, current.location_y)
-            if distance < smallestDist:
-                smallestDist, closest_pad = distance, pad
+            if distance < smallest_distance:
+                smallest_distance, closest_pad = distance, pad
         
         return closest_pad
 
