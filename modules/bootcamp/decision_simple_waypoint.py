@@ -40,7 +40,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Add your own
         self.currently_landing = False
         self.set_destination = commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y)
-        self.count = 0
+        self.flag = True
         
 
         # ============
@@ -76,9 +76,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         distance = (self.waypoint.location_x - report.position.location_x)**2 + (self.waypoint.location_y - report.position.location_y)**2
 
         if drone_status.DroneStatus.HALTED == report.status:
-            if 0 >= self.count:
+            if self.flag:
                 command = self.set_destination
-                self.count += 1
+                self.flag = False
 
             elif not self.currently_landing and distance < self.acceptance_radius:
                 self.currently_landing = True
