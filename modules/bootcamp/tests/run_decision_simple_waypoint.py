@@ -34,7 +34,7 @@ TIME_WAIT_BEFORE_EXIT = 5  # seconds
 # You can probably divide it by 10 or so since ML inference isn't running
 # Increase the step size if your computer is lagging
 # Larger step size is smaller FPS
-TIME_STEP_SIZE = 0.01  # seconds
+TIME_STEP_SIZE = 0.055  # seconds
 
 # OpenCV ignores your display settings,
 # so if the window is too small or too large,
