@@ -40,7 +40,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.landing_command = False
         self.at_waypoint = False
         self.closest_waypoint = False
-        self.landed = False
 
     # Helper function: distance between 2 points
     def calculate_distance2(self, p1: location.Location, p2: location.Location) -> float:
@@ -102,7 +101,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_lp.location_x - report.position.location_x,
                     closest_lp.location_y - report.position.location_y
                 )
-                self.found_closest_landing_pad = True
+                self.closest_waypoint = True
     
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
