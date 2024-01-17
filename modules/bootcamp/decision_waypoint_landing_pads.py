@@ -34,11 +34,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        self.command_index = 0
-        self.commands = [
-            commands.Command.create_set_relative_destination_command( waypoint.location_x,  waypoint.location_y)
-        ]
         self.has_sent_landing_command = False
+        self.traveled_to_waypoint = False
         self.found_closest_landing_pad = False
         self.landed = False
 
@@ -83,9 +80,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands): #Fly to waypoint
-            command = self.commands[self.command_index]
-            self.command_index+=1
+        if report.status == drone_status.DroneStatus.HALTED and not self.traveled_to_waypoint: #Fly to waypoint
+            command = commands.Command.create_set_relative_destination_command(
+                   self.waypoint.location_x - report.position.location_x,
+                   self. waypoint.location_y - report.position.location_y
+                )
+            self.traveled_to_waypoint = True
 
         elif report.status == drone_status.DroneStatus.HALTED and not self.found_closest_landing_pad: # Fly to closest landing pad
             closest_pad = self.closest_pad(report.position,landing_pad_locations)
