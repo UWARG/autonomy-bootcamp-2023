@@ -72,7 +72,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED and not self.traveled_to_waypoint: #Fly to waypoint
 
             command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x - report.position.location_x,
+                   self.waypoint.location_x - report.position.location_x,
                    self. waypoint.location_y - report.position.location_y
                 )
             self.traveled_to_waypoint = True
