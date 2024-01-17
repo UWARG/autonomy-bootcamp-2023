@@ -40,7 +40,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.currently_landing = False
         self.set_destination = commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y)
-        self.flag = True
+        self.at_initial_position = True
         self.going_to_pad = False
 
         # ============
@@ -73,28 +73,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        def find_distance(location_one, location_two):
-            return (location_two.location_x - location_one.location_x)**2 + (location_two.location_y - location_one.location_y)**2
-        
-        def find_closest_landing_pad(curr_location, landing_pad_list):
-            closest_landing_pad = None
-            closest_distance = 10000000000000
-            for index in landing_pad_list:
-                distance = find_distance(index, curr_location)
-                if closest_distance > distance:
-                    closest_distance = distance
-                    closest_landing_pad = index
-            return closest_landing_pad 
         
         if drone_status.DroneStatus.HALTED == report.status:
-            if self.flag:
+            if self.at_initial_position:
                 command = self.set_destination
-                self.flag = False
+                self.at_initial_position = False
             
             elif not self.going_to_pad:
                 self.going_to_pad = True
                 if self.waypoint not in landing_pad_locations:
-                    landing_pad = find_closest_landing_pad(report.position, landing_pad_locations)
+                    landing_pad = self.find_closest_landing_pad(report.position, landing_pad_locations)
                     command = commands.Command.create_set_relative_destination_command (landing_pad.location_x - report.position.location_x, landing_pad.location_y - report.position.location_y)
 
             elif not self.currently_landing:
@@ -109,3 +97,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         return command
+
+    # =======================
+    # Helper Functions:
+    # =======================
+    def find_distance(self, location_one, location_two):
+        return (location_two.location_x - location_one.location_x)**2 + (location_two.location_y - location_one.location_y)**2
+        
+    def find_closest_landing_pad(self, curr_location, landing_pad_list):
+        closest_landing_pad = None
+        closest_distance = float('inf')
+        for landing_pad in landing_pad_list:
+            distance = self.find_distance(landing_pad, curr_location)
+            if closest_distance > distance:
+                closest_distance = distance
+                closest_landing_pad = landing_pad
+        return closest_landing_pad 
