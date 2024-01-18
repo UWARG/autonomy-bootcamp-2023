@@ -111,6 +111,7 @@ class DetectLandingPad:
             result, box = bounding_box.BoundingBox.create(i)
             if not result:
                 bounding_boxes = []
+                break
 
             bounding_boxes.append(box)
 
