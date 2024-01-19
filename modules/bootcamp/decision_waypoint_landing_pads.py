@@ -38,6 +38,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.is_at_waypoint = False
+        self.should_land = False
+        self.is_at_closest_waypoint = False
+
+        
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,11 +75,47 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        def find_shortest_distance(curr_location, landing_pad_locations_list):
+            max_distance = float('inf')
+            closest_waypoint = landing_pad_locations_list[0]
+            for landing_pad in landing_pad_locations_list:
+                x = landing_pad.location_x - curr_location.location_x
+                y = landing_pad.location_y - curr_location.location_y
+
+                distance = ((x ** 2)+(y ** 2)) ** 1/2
+                if distance < max_distance:
+                    max_distance = distance
+                    closest_waypoint = landing_pad
+
+            return closest_waypoint
+
+        if report.status == drone_status.DroneStatus.HALTED and self.is_at_waypoint == False:
+            command = commands.Command.create_set_relative_destination_command((self.waypoint.location_x - report.position.location_x), \
+                                                                               (self. waypoint.location_y - report.position.location_y))
+            self.is_at_waypoint = True
+
+        elif report.status == drone_status.DroneStatus.HALTED and self.is_at_closest_waypoint == False:
+            closest_location = find_shortest_distance(report.position, landing_pad_locations)
+            if closest_location != report.position:
+                x = closest_location.location_x - report.position.location_x
+                y = closest_location.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(x, y)
+                self.is_at_closest_waypoint = True
+
+        elif report.status == drone_status.DroneStatus.HALTED and self.should_land == False:
+            command = commands.Command.create_land_command()
+            self.should_land = True
+
+        
+        
+
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    
