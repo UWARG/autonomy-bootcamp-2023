@@ -32,14 +32,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         print("Waypoint: " + str(waypoint))
 
         self.acceptance_radius = acceptance_radius
-
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Add your own
         self.is_at_waypoint = False
-        self.should_land = False
         self.is_at_closest_waypoint = False
 
         
@@ -102,9 +100,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_set_relative_destination_command(x, y)
                 self.is_at_closest_waypoint = True
 
-        elif report.status == drone_status.DroneStatus.HALTED and self.should_land == False:
+        elif report.status == drone_status.DroneStatus.HALTED and self.is_at_closest_waypoint == True:
             command = commands.Command.create_land_command()
-            self.should_land = True
 
         
         
