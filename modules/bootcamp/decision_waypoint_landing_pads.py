@@ -43,13 +43,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     # Helper function: distance between 2 points
     def calculate_distance2(self, p1: location.Location, p2: location.Location) -> float:
-        return ((p2.location_x - p1.location_x) ** 2) + ((p2.location_y - p1.location_y) ** 2)
+        return (p2.location_x - p1.location_x) ** 2 + (p2.location_y - p1.location_y) ** 2
 
     # Helper function: closest landing pad from the current location
     def closest_lp(self, current_point: location.Location, landing_pad_locations: "list[location.Location]") -> location.Location:
         max_distance = float('inf')
         for landing_pad in landing_pad_locations:
             curr_distance = self.calculate_distance2(current_point, landing_pad)
+            
             if curr_distance > max_distance:
                 max_distance = curr_distance
                 closest_waypoint = landing_pad
@@ -99,7 +100,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if closest_lp is not None:
                 command = commands.Command.create_set_relative_destination_command(
                     closest_lp.location_x - report.position.location_x,
-                    closest_lp.location_y - report.position.location_y
+                    closest_lp.location_y - report.position.location_y,
                 )
                 self.closest_waypoint = True
     

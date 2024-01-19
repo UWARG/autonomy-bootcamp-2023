@@ -107,9 +107,10 @@ class DetectLandingPad:
         bounding_boxes = []
         for box_cpu in boxes_cpu:
             # Create BoundingBox object and append to list
-            not_none, box = bounding_box.BoundingBox.create(box_cpu)
-            if not_none:
+            result, box = bounding_box.BoundingBox.create(box_cpu)
+            if result:
                 bounding_boxes.append(box)
+                
             else:
                 bounding_boxes = []
                 break
