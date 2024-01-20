@@ -4,8 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Detects landing pads.
 """
 import pathlib
-
-from PIL import Image
 import numpy as np
 import torch
 import ultralytics
@@ -87,14 +85,9 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.7)
+        predictions = self.__model.predict(source = image, conf=0.7, device = 0)
         prediction = predictions[0]
         image_annotated = prediction.plot(conf=True)
-        # check = Image.fromarray(check[..., ::-1])
-        # check.show()
-
-        # # Get the Result object
-        # prediction = ...
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -114,14 +107,6 @@ class DetectLandingPad:
             bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i, :])[1])
 
         return (bounding_boxes, image_annotated)
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
-
-        # # Remove this when done
-        # raise NotImplementedError
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

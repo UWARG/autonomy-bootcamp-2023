@@ -45,7 +45,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def distance(self,
+    def __distance(self,
                  location1: location.Location,
                  location2: location.Location) -> float:
         return (location2.location_x-location1.location_x)**2+(location2.location_y-location1.location_y)**2
@@ -80,10 +80,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(float(self.waypoint.location_x), float(self.waypoint.location_y))
         elif report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
             print("reached waypoint")
-            closest_pad_distance = 300
+            closest_pad_distance = self.__distance(self.waypoint, landing_pad_locations[1])
             closest_pad_index = -1
-            for i in range(len(landing_pad_locations)):
-                distance = self.distance(self.waypoint, landing_pad_locations[i])
+            for i in range(1, len(landing_pad_locations)):
+                distance = self.__distance(self.waypoint, landing_pad_locations[i])
                 if distance < closest_pad_distance:
                     closest_pad_distance = distance
                     closest_pad_index = i
@@ -92,11 +92,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.state = "past waypoint"
         elif report.status == drone_status.DroneStatus.HALTED and self.state == "past waypoint":
             command = commands.Command.create_land_command()
-                    
-
-        # Remove this when done
-        # raise NotImplementedError
-
+            
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
