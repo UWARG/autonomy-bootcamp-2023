@@ -54,6 +54,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if curr_distance > max_distance:
                 max_distance = curr_distance
                 closest_waypoint = landing_pad
+        
         return closest_waypoint 
 
         # ============
