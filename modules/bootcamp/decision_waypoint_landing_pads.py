@@ -74,22 +74,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         def find_shortest_distance(curr_location, landing_pad_locations_list):
-            max_distance = float('inf')
+            min_distance = float('inf')
             closest_waypoint = landing_pad_locations_list[0]
             for landing_pad in landing_pad_locations_list:
                 x = landing_pad.location_x - curr_location.location_x
                 y = landing_pad.location_y - curr_location.location_y
 
-                distance = ((x ** 2)+(y ** 2)) ** 1/2
-                if distance < max_distance:
-                    max_distance = distance
+                distance = ((x ** 2)+(y ** 2)) ** (1/2)
+                if distance < min_distance:
+                    min_distance = distance
                     closest_waypoint = landing_pad
 
             return closest_waypoint
 
         if report.status == drone_status.DroneStatus.HALTED and self.is_at_waypoint == False:
-            command = commands.Command.create_set_relative_destination_command((self.waypoint.location_x - report.position.location_x), \
-                                                                               (self. waypoint.location_y - report.position.location_y))
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, 
+                                                                               self. waypoint.location_y - report.position.location_y)
             self.is_at_waypoint = True
 
         elif report.status == drone_status.DroneStatus.HALTED and self.is_at_closest_waypoint == False:
@@ -102,12 +102,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif report.status == drone_status.DroneStatus.HALTED and self.is_at_closest_waypoint == True:
             command = commands.Command.create_land_command()
-
-        
-        
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

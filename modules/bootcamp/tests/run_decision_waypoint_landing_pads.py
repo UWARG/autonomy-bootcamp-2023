@@ -46,7 +46,7 @@ DISPLAY_SCALE = 0.5
 # Seed for randomly generating the waypoint and landing pad
 # Change to a constant for reproducibility (e.g. debugging)
 # Change back to = time.time_ns() to test robustness
-SEED = time.time_ns()
+SEED =1000
 
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
