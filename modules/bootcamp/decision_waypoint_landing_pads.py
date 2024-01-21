@@ -80,7 +80,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 x = landing_pad.location_x - curr_location.location_x
                 y = landing_pad.location_y - curr_location.location_y
 
-                distance = ((x ** 2)+(y ** 2)) ** (1/2)
+                distance = (x ** 2)+(y ** 2)
                 if distance < min_distance:
                     min_distance = distance
                     closest_waypoint = landing_pad
