@@ -4,6 +4,7 @@ BOOTCAMPERS TO COMPLETE.
 Detects landing pads.
 """
 import pathlib
+
 import numpy as np
 import torch
 import ultralytics
@@ -85,7 +86,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source = image, conf=0.7, device = 0)
+        predictions = self.__model.predict(source = image, conf=0.7, device = self.__DEVICE)
         prediction = predictions[0]
         image_annotated = prediction.plot(conf=True)
 
@@ -99,7 +100,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = torch.detach(boxes_xyxy).cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []

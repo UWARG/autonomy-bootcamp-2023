@@ -80,7 +80,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(float(self.waypoint.location_x), float(self.waypoint.location_y))
         elif report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
             print("reached waypoint")
-            closest_pad_distance = 10**378
+            closest_pad_distance = float('inf')
             closest_pad_index = -1
             for i in range(len(landing_pad_locations)):
                 distance = self.__distance(self.waypoint, landing_pad_locations[i])
