@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.has_sent_move_command_to_waypoint = False
+        self.has_sent_move_command_to_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,13 +69,60 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            # Drone is halted, either in start state, finished moving to waypoint or finished moving to landing pad
+            if self.has_sent_move_command_to_landing_pad:
+                # Final state after arriving at landing pad
+                command = commands.Command.create_land_command()
 
-        # Remove this when done
-        raise NotImplementedError
+            if self.has_sent_move_command_to_waypoint and not self.has_sent_move_command_to_landing_pad:
+                # State after arriving at waypoint
+                closest_landing_pad = self.find_closest_landing_pad(self.waypoint, landing_pad_locations)
+                relative_x, relative_y = self.calculate_relative_difference(
+                    destination=closest_landing_pad, starting_point=report.position)
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                self.has_sent_move_command_to_landing_pad = True
+
+            if not self.has_sent_move_command_to_waypoint:
+                # Start State - Drone is halted and we have not issued the command to move to waypoint yet
+                relative_x, relative_y = self.calculate_relative_difference(
+                    destination=self.waypoint, starting_point=report.position)
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                self.has_sent_move_command_to_waypoint = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+
+    def calculate_relative_difference(self, 
+                                    destination: location.Location, 
+                                    starting_point: location.Location) -> (float, float):
+        """
+        Given the absolute location of the waypoint and the drone, return the relative distance of the two
+        """
+        return (destination.location_x - starting_point.location_x, 
+                destination.location_y - starting_point.location_y)
+    
+    def calculate_euclidian_distance(self,
+                                     destination: location.Location,
+                                     starting_point: location.Location
+                                     ) -> float:
+        """
+        Given two locations, return the euclidian distance of the two
+        """
+        distance_x, distance_y = self.calculate_relative_difference(destination, starting_point)
+        return distance_x ** 2 + distance_y ** 2
+    
+    def find_closest_landing_pad(self, 
+                                 waypoint: location.Location, 
+                                 landing_pad_locations: "list[location.Location]") -> location.Location:
+        if len(landing_pad_locations) == 0:
+            raise ValueError
+
+        closest_landing_pad = min(landing_pad_locations, 
+                                  key=lambda location: self.calculate_euclidian_distance(location, self.waypoint))
+        
+        return closest_landing_pad
