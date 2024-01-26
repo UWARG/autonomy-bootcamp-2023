@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.has_sent_move_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,12 +69,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_move_command:
+            # Calculate relative destination
+            relative_x, relative_y = self.calculate_relative_distance(waypoint=self.waypoint, 
+                                                                      drone_location=report.position)
+            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            print("Drone location:", report.position)
+            print("Travelling to", self.waypoint)
+            print("Relative Distance is ", relative_x, relative_y)
+            self.has_sent_move_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    def calculate_relative_distance(self, 
+                                    waypoint: location.Location, 
+                                    drone_location: location.Location) -> (float, float):
+        """
+        Given the absolute location of the waypoint and the drone, return the relative distance of the two
+        """
+        return (waypoint.location_x - drone_location.location_x, waypoint.location_y - drone_location.location_y)
