@@ -24,7 +24,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
     Travel to the designed waypoint and then land at the nearest landing pad.
     """
-
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
@@ -76,11 +75,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return (pos.location_x - dest.location_x)**2 + (pos.location_y - dest.location_y)**2
 
         def __find_closest_landing_pad() -> location.Location:
-            min_distance: float = 30000
+            min_distance: float = float('inf')
             closest_landing_pad: location.Location = None
             for landing_pad_location in landing_pad_locations:
                 dist: float = __distance_squared(
-                    landing_pad_location, report.position)
+                    landing_pad_location,
+                    report.position
+                )
                 if dist < min_distance:
                     min_distance = dist
                     closest_landing_pad = landing_pad_location
@@ -88,16 +89,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if report.status == drone_status.DroneStatus.HALTED:
             if self.looking_for_waypoint:
-                dy: float = self.waypoint.location_y - report.position.location_y
-                dx: float = self.waypoint.location_x - report.position.location_x
+                distance_to_target_y: float = self.waypoint.location_y - report.position.location_y
+                distance_to_target_x: float = self.waypoint.location_x - report.position.location_x
             else:
                 landing_pad: location.Location = __find_closest_landing_pad()
-                dy: float = landing_pad.location_y - report.position.location_y
-                dx: float = landing_pad.location_x - report.position.location_x
+                distance_to_target_y: float = landing_pad.location_y - report.position.location_y
+                distance_to_target_x: float = landing_pad.location_x - report.position.location_x
 
-            if abs(dy) > self.acceptance_radius and abs(dx) > self.acceptance_radius:
+            if (abs(distance_to_target_y) > self.acceptance_radius and
+                    abs(distance_to_target_x) > self.acceptance_radius):
                 command = commands.Command.create_set_relative_destination_command(
-                    dx, dy)
+                    distance_to_target_x,
+                    distance_to_target_y
+                )
             elif self.looking_for_waypoint:
                 self.looking_for_waypoint = False
                 command = commands.Command.create_halt_command()

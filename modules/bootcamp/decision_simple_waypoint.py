@@ -24,7 +24,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.
     """
-
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
@@ -68,13 +67,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        dy: float = self.waypoint.location_y - report.position.location_y
-        dx: float = self.waypoint.location_x - report.position.location_x
+        distance_to_waypoint_y: float = self.waypoint.location_y - report.position.location_y
+        distance_to_waypoint_x: float = self.waypoint.location_x - report.position.location_x
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if abs(dy) > self.acceptance_radius and abs(dx) > self.acceptance_radius:
+            if (abs(distance_to_waypoint_y) > self.acceptance_radius and
+                    abs(distance_to_waypoint_x) > self.acceptance_radius):
                 command = commands.Command.create_set_relative_destination_command(
-                    dx, dy)
+                    distance_to_waypoint_x,
+                    distance_to_waypoint_y
+                )
             else:
                 command = commands.Command.create_land_command()
 
