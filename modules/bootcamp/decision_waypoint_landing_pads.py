@@ -38,10 +38,33 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.reached_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+        # Helper Function to Find Distance Between Two Locations
+    def distance(self, loc_1: location.Location, loc_2: location.Location):
+        loc_1_x = loc_1.location_x
+        loc_1_y = loc_1.location_y
+        loc_2_x = loc_2.location_x
+        loc_2_y = loc_2.location_y
+        relative_x_posn = loc_1_x - loc_2_x
+        relative_y_posn = loc_1_y - loc_2_y
+        return (relative_x_posn ** 2 + relative_y_posn ** 2) ** 0.5
+    
+    # Helper Function to Find the Nearest Pad from the Drone's Current Position
+    def get_closest_pad(self, curr_posn: location.Location, landing_pads: "list[location.Location]"):
+        closest_pad_distance = float("inf")
+        closest_pad = None
+        for pad in landing_pads:
+            if self.distance(pad, curr_posn) < closest_pad_distance:
+                closest_pad_distance = self.distance(pad, curr_posn)
+                closest_pad = pad
+            else:
+                pass
+        return closest_pad
 
     def run(self,
             report: drone_report.DroneReport,
@@ -67,11 +90,34 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.reached_waypoint:
+                curr_x = report.position.location_x
+                curr_y = report.position.location_y
+                x_from_curr_posn = self.waypoint.location_x - curr_x
+                y_from_curr_posn = self.waypoint.location_y - curr_y
+                curr_distance_away = (x_from_curr_posn ** 2 + y_from_curr_posn ** 2) ** 0.5
+                if curr_distance_away > self.acceptance_radius:
+                    command = commands.Command.create_set_relative_destination_command(x_from_curr_posn, y_from_curr_posn)
+                else:
+                    self.reached_waypoint = True
+
+            else:
+                self.waypoint = self.get_closest_pad(report.position, landing_pad_locations)
+                curr_x = report.position.location_x
+                curr_y = report.position.location_y
+                x_from_curr_posn = self.waypoint.location_x - curr_x
+                y_from_curr_posn = self.waypoint.location_y - curr_y
+                curr_distance_away = (x_from_curr_posn ** 2 + y_from_curr_posn ** 2) ** 0.5
+                if curr_distance_away > self.acceptance_radius:
+                    command = commands.Command.create_set_relative_destination_command(x_from_curr_posn, y_from_curr_posn)
+                else:
+                    command = commands.Command.create_land_command()
 
         # Do something based on the report and the state of this class...
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
