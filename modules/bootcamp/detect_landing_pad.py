@@ -11,7 +11,6 @@ import ultralytics
 
 from .. import bounding_box
 
-
 # This is just an interface
 # pylint: disable=too-few-public-methods
 class DetectLandingPad:
@@ -88,11 +87,11 @@ class DetectLandingPad:
         # * verbose
         predictions = self.__model.predict(source = image, conf=0.7, device = self.__DEVICE)
         prediction = predictions[0]
-        image_annotated = prediction.plot(conf=True)
+        
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        # image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -100,12 +99,12 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = torch.detach(boxes_xyxy).cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for i in range(0, boxes_cpu.shape[0]):
-            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i, :])[1])
+            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i])[1])
 
         return (bounding_boxes, image_annotated)
         # ============

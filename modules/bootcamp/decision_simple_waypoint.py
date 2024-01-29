@@ -39,8 +39,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.has_moved = False
 
-        self.counter = 0
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -70,7 +68,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         if report.status == drone_status.DroneStatus.HALTED and not self.has_moved:
-            command = commands.Command.create_set_relative_destination_command(float(self.waypoint.location_x), float(self.waypoint.location_y))
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
             self.has_moved = True
         elif report.status == drone_status.DroneStatus.HALTED and self.has_moved:
             command = commands.Command.create_land_command()

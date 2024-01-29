@@ -12,7 +12,6 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-import math
 
 
 # Disable for bootcamp use
@@ -48,7 +47,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def __distance(self,
                  location1: location.Location,
                  location2: location.Location) -> float:
-        return (location2.location_x-location1.location_x)**2+(location2.location_y-location1.location_y)**2
+        return (location2.location_x - location1.location_x) ** 2 + (location2.location_y - location1.location_y) ** 2
 
     def run(self,
             report: drone_report.DroneReport,
