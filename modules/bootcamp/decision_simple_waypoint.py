@@ -76,14 +76,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             curr_y = report.position.location_y
             x_from_curr_posn = self.destination_x - curr_x
             y_from_curr_posn = self.destination_y - curr_y
-            curr_distance_away = (x_from_curr_posn ** 2 + y_from_curr_posn ** 2) ** 0.5
-            if curr_distance_away > self.acceptance_radius:
+            curr_distance_away = x_from_curr_posn ** 2 + y_from_curr_posn ** 2
+            if curr_distance_away > self.acceptance_radius ** 2:
                 command = commands.Command.create_set_relative_destination_command(x_from_curr_posn, y_from_curr_posn)
             else:
                 command = commands.Command.create_land_command()
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
