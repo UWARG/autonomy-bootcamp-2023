@@ -69,15 +69,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_move_command:
-            # Calculate relative destination
-            relative_x, relative_y = self.calculate_relative_distance(waypoint=self.waypoint, 
-                                                                      drone_location=report.position)
-            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
-            print("Drone location:", report.position)
-            print("Travelling to", self.waypoint)
-            print("Relative Distance is ", relative_x, relative_y)
-            self.has_sent_move_command = True
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.has_sent_move_command:
+                # Drone has moved to the waypoint
+                command = commands.Command.create_land_command()
+            else:
+                # Drone is at the starting point
+                #    Calculate relative destination
+                relative_x, relative_y = self.calculate_relative_distance(waypoint=self.waypoint, 
+                                                                        drone_location=report.position)
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                print("Drone location:", report.position)
+                print("Travelling to", self.waypoint)
+                print("Relative Distance is ", relative_x, relative_y)
+                self.has_sent_move_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
