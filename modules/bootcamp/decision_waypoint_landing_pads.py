@@ -52,7 +52,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         loc_2_y = loc_2.location_y
         relative_x_posn = loc_1_x - loc_2_x
         relative_y_posn = loc_1_y - loc_2_y
-        return (relative_x_posn ** 2 + relative_y_posn ** 2) ** 0.5
+        return relative_x_posn ** 2 + relative_y_posn ** 2
     
     # Helper Function to Find the Nearest Pad from the Drone's Current Position
     def get_closest_pad(self, curr_posn: location.Location, landing_pads: "list[location.Location]"):
