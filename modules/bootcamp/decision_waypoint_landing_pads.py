@@ -34,7 +34,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Initialize all persistent variables here with self.
         """
-        
+        self.visited = False
         # self.l = []
         # self.landing_count = int(input("Enter how many landing locations you want: "))
         # for x in range(self.landing_count):
@@ -78,21 +78,35 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         def distance_calculator(startx, starty, finalx, finaly):
             return ((finalx-startx)**2 + (finaly-starty)**2)**(1/2)
 
-        def find_min(l, mins, startx, starty, i):
-            if len(l) == 0:
-                return i
-            elif mins < 0:
-                dis = distance_calculator(startx, starty, l[-1].location_x, l[-1].location_y)
-                i = len(l) - 1
-                l.pop()
-                return find_min(l, abs(dis), startx, starty, i)
-            dis = distance_calculator(startx, starty, l[-1].location_x, l[-1].location_y)
-            if dis < mins:
-                i = len(l) - 1
-                l.pop()
-                return find_min(l, dis, startx, starty, i)
-            l.pop()
-            return find_min(l, mins, startx, starty, i)
+        def find_min(l, startx, starty):
+            mins = -1
+            i = None
+            for x in range(len(l.copy())):
+                dis = distance_calculator(startx, starty, l[x].location_x, l[x].location_y)
+                if mins < 0:
+                    mins = dis
+                    i = x
+                elif dis < mins:
+                    mins = dis
+            return i
+                           
+    
+            
+            
+            # if len(l) == 0:
+            #     return i
+            # elif mins < 0:
+            #     dis = distance_calculator(startx, starty, l[-1].location_x, l[-1].location_y)
+            #     i = len(l) - 1
+            #     l.pop()
+            #     return find_min(l, abs(dis), startx, starty, i)
+            # dis = distance_calculator(startx, starty, l[-1].location_x, l[-1].location_y)
+            # if dis < mins:
+            #     i = len(l) - 1
+            #     l.pop()
+            #     return find_min(l, dis, startx, starty, i)
+            # l.pop()
+            # return find_min(l, mins, startx, starty, i)
         # Default command
        
         command = commands.Command.create_null_command()
@@ -113,21 +127,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if pos == location.Location(0.0,0.0):
             print(self.waypoint)
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        if self.visited == True and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_land_command()
         if report.status == drone_status.DroneStatus.HALTED and pos == self.waypoint:
-            close = int(find_min(landing_pad_locations, -1, pos.location_x, pos.location_y, None))
-            
-            #sclose = 0
+            close = int(find_min(landing_pad_locations, pos.location_x, pos.location_y))
             print("HELLO", close)
             print(type(close))
+            self.visited = True
             command = commands.Command.create_set_relative_destination_command(landing_pad_locations[close].location_x - pos.location_x, landing_pad_locations[close].location_y - pos.location_y)
             
-        # if pos == landing_pad_locations[0] and self.visited == True:
-        #     command = commands.Command.create_land_command()
+       
 
-
-        # if pos == location.Location(self.l[-1][0], self.l[-1][1]):
-        #     command = commands.Command.create_halt_command()
-        #     self.l.pop() 
+        
         
             
             
