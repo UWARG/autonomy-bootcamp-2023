@@ -106,7 +106,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return (destination.location_x - starting_point.location_x, 
                 destination.location_y - starting_point.location_y)
     
-    def calculate_euclidian_distance(self,
+    def calculate_squared_euclidian_distance(self,
                                      destination: location.Location,
                                      starting_point: location.Location
                                      ) -> float:
@@ -123,6 +123,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             raise ValueError
 
         closest_landing_pad = min(landing_pad_locations, 
-                                  key=lambda location: self.calculate_euclidian_distance(location, self.waypoint))
+                                  key=lambda location: self.calculate_squared_euclidian_distance(location, self.waypoint))
         
         return closest_landing_pad
