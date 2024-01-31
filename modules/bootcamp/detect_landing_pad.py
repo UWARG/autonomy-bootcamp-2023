@@ -11,7 +11,6 @@ import ultralytics
 
 from .. import bounding_box
 
-
 # This is just an interface
 # pylint: disable=too-few-public-methods
 class DetectLandingPad:
@@ -79,40 +78,35 @@ class DetectLandingPad:
         # ============
 
         # Ultralytics has documentation and examples
-
+    
         # Use the model's predict() method to run inference
         # Parameters of interest:
         # * source
         # * conf
         # * device
         # * verbose
-        predictions = ...
-
-        # Get the Result object
-        prediction = ...
+        predictions = self.__model.predict(source = image, conf=0.7, device = self.__DEVICE)
+        prediction = predictions[0]
+        
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
+        for i in range(0, boxes_cpu.shape[0]):
+            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i])[1])
 
-        # Remove this when done
-        raise NotImplementedError
-
+        return (bounding_boxes, image_annotated)
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

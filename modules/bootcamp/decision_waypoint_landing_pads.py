@@ -38,10 +38,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.state = "initiated"
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def __distance(self,
+                 location1: location.Location,
+                 location2: location.Location) -> float:
+        return (location2.location_x - location1.location_x) ** 2 + (location2.location_y - location1.location_y) ** 2
 
     def run(self,
             report: drone_report.DroneReport,
@@ -69,9 +75,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
+        if report.position.location_x == 0 and report.position.location_y == 0 and report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(float(self.waypoint.location_x), float(self.waypoint.location_y))
+        elif report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
+            print("reached waypoint")
+            closest_pad_distance = float('inf')
+            closest_pad_index = -1
+            for i in range(len(landing_pad_locations)):
+                distance = self.__distance(self.waypoint, landing_pad_locations[i])
+                if distance < closest_pad_distance:
+                    closest_pad_distance = distance
+                    closest_pad_index = i
+            print(f"closest landing pad: {landing_pad_locations[closest_pad_index]}")
+            command = commands.Command.create_set_relative_destination_command((landing_pad_locations[i].location_x-report.position.location_x), (landing_pad_locations[i].location_y - report.position.location_y))
+            self.state = "past waypoint"
+        elif report.status == drone_status.DroneStatus.HALTED and self.state == "past waypoint":
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
