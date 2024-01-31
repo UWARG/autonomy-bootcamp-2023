@@ -73,32 +73,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Jiwon: Maybe need to change command depending on state of the class
 
-        # waypoint
-        # acceptance radius
-        
         if report.status == drone_status.DroneStatus.HALTED and self.halt_at_init_pos:
             self.halt_at_init_pos = False
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
         elif report.status == drone_status.DroneStatus.HALTED and not self.halt_at_init_pos:
             command = commands.Command.create_land_command()
-            
-
-            
-        '''
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
-            # Print some information for debugging
-            print(self.counter)
-            print(self.command_index)
-            
-
-            command = self.commands[self.command_index]
-            self.command_index += 1
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
-            command = commands.Command.create_land_command()
-
-            self.has_sent_landing_command = True
-
-        self.counter += 1'''
 
 
         # ============
