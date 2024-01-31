@@ -86,7 +86,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.7)
+        predictions = self.__model.predict(image, conf=0.7, device=None)
         
 
         # Get the Result object
@@ -99,26 +99,19 @@ class DetectLandingPad:
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
 
-        # Detach the xyxy boxes to make a copy,
-        # move the copy into CPU space,
-        # and convert to a numpy array
-        # boxes_xyxy_detach = boxes_xyxy.detach()
         boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
         
         for box in boxes_cpu:
             result, result_box = bounding_box.BoundingBox.create(box)
-            bounding_boxes.append(result_box)
+            if result == False:
+                return [], image_annotated
+            else:
+                bounding_boxes.append(result_box)
         
         return bounding_boxes, image_annotated
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

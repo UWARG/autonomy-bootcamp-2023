@@ -38,7 +38,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.status = drone_status.DroneStatus(1)
         self.halt_at_init_pos = True
 
         # ============
@@ -101,10 +100,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.counter += 1'''
 
-        
-
-        # Remove this when done
-       # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

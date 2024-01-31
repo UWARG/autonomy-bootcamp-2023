@@ -38,7 +38,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.status = drone_status.DroneStatus(1)
         self.halt_at_init_pos = True
         self.halt_at_waypoint = False
 
@@ -84,27 +83,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.halt_at_waypoint = False 
             max_dist_squared = float('inf')
 
-            self.closest_landing_pad = landing_pad_locations[0]
-            print(self.closest_landing_pad.location_x)
-
             for cur_landing_pad in landing_pad_locations:
-                print("jsldkfjas")
                 cur_dist_squared = pow((self.waypoint.location_x - cur_landing_pad.location_x), 2) + pow((self.waypoint.location_y - cur_landing_pad.location_y), 2)
-                print("hey")
                 if cur_dist_squared < max_dist_squared:
-                    print("thank goodness")
                     max_dist_squared = cur_dist_squared
                     self.closest_landing_pad = cur_landing_pad
             
             command = commands.Command.create_set_relative_destination_command(self.closest_landing_pad.location_x - self.waypoint.location_x, self.closest_landing_pad.location_y - self.waypoint.location_y)
         elif report.status == drone_status.DroneStatus.HALTED and not self.halt_at_init_pos and not self.half_at_waypoint:
             command = commands.Command.create_land_command()
-            
         
-
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
