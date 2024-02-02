@@ -38,11 +38,30 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.at_waypoint = False
+        self.bestpad = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def calc_dis_squared(self, drone, pad):
+        dist_x = abs(pad.location_x - drone.location_x)
+        dist_y = abs(pad.location_y - drone.location_y)
+        return dist_x ** 2 + dist_y ** 2
+
+    def find_pad(self,
+                report: drone_report.DroneReport,
+                landing_pad_locations: "list[location.Location]") -> commands.Command: 
+                # find which one is closest
+        self.bestpad = landing_pad_locations[0]
+        bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
+        for i in landing_pad_locations:
+            dist_total_squared = self.calc_dis_squared(report.position, i)
+            if bestpad_dist_total_squared > dist_total_squared:
+                self.bestpad = i
+                bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
+     
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -69,9 +88,26 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        tolerance = self.acceptance_radius
+        if report.status == drone_status.DroneStatus.HALTED:
+            relative_x = self.waypoint.location_x - report.position.location_x
+            relative_y = self.waypoint.location_y - report.position.location_y
+            if self.at_waypoint:
+                relative_x = self.bestpad.location_x - report.position.location_x
+                relative_y = self.bestpad.location_y - report.position.location_y
+            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+
+            if self.at_waypoint and abs(relative_x) < tolerance and abs(relative_y) < tolerance:
+                command = commands.Command.create_land_command()
+
+            if not self.at_waypoint and abs(relative_x) < tolerance and abs(relative_y) < tolerance:
+                # find which one is closest
+                self.find_pad(report, landing_pad_locations)
+                self.at_waypoint = True
+                
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
