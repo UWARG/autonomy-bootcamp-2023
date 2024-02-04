@@ -37,8 +37,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
+        self.at_start = True
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -68,10 +67,30 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
 
+        required_dist_x = self.waypoint.location_x - report.position.location_x
+        required_dist_y = self.waypoint.location_y - report.position.location_y
+
+
+        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            if  abs(required_dist_x) < 0.1 and abs(required_dist_y) < 0.1:
+                if self.at_start == False: # if not at start, then ok to land
+                    command = commands.Command.create_land_command()
+            else:
+                self.at_start = False
+                command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
+
+        min_dist = 10000 #max possible dist is 60^2 + 60^2, so anything > 7200 works for an initial value
+        closest_landing_pad = self.waypoint
+
+        for landing_pad_location in landing_pad_locations:
+            if (landing_pad_location.location_x + report.position.location_x) ** 2 + (landing_pad_location.location_y + report.position.location_y) ** 2 < min_dist:
+                min_dist = (landing_pad_location.location_x + report.position.location_x) ** 2 + (landing_pad_location.location_y + report.position.location_y) ** 2
+                closest_landing_pad = landing_pad_location
+        self.waypoint = closest_landing_pad
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
