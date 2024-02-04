@@ -80,6 +80,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             else:
                 self.at_start = False
                 command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
+
+        if report.status == drone_status.DroneStatus.MOVING and abs(required_dist_x) < 0.1 and abs(required_dist_y) < 0.1:
+            command = commands.Command.create_halt_command()
         # Remove this when done
         #raise NotImplementedError
 
