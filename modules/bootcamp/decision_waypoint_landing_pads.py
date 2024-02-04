@@ -87,8 +87,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         closest_landing_pad = self.waypoint
 
         for landing_pad_location in landing_pad_locations:
-            if (landing_pad_location.location_x + report.position.location_x) ** 2 + (landing_pad_location.location_y + report.position.location_y) ** 2 < min_dist:
-                min_dist = (landing_pad_location.location_x + report.position.location_x) ** 2 + (landing_pad_location.location_y + report.position.location_y) ** 2
+            #distance can be calculated by sqrt((x1-x2)^2 - (y1-y2)^2), so order is preserved if we do (x1-x2)^2 - (y1-y2)^2 (and saves computation time w/o using sqrt)
+            if (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2 < min_dist:
+                min_dist = (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2
                 closest_landing_pad = landing_pad_location
         self.waypoint = closest_landing_pad
 
