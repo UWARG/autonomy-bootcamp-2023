@@ -90,14 +90,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         min_dist = float('inf') #max possible dist is 60^2 + 60^2, so anything > 7200 works for an initial value
         closest_landing_pad = self.waypoint
 
-        for landing_pad_location in landing_pad_locations:
-            #distance can be calculated by sqrt((x1-x2)^2 - (y1-y2)^2), so order is preserved if we do (x1-x2)^2 - (y1-y2)^2 (and saves computation time w/o using sqrt)
-            pad_distance = (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2
-            if pad_distance < min_dist:
-                min_dist = pad_distance
-                closest_landing_pad = landing_pad_location
-        # set waypoint to landing pad
-        self.waypoint = closest_landing_pad
+        if self.at_start == True:
+            for landing_pad_location in landing_pad_locations:
+                #distance can be calculated by sqrt((x1-x2)^2 - (y1-y2)^2), so order is preserved if we do (x1-x2)^2 - (y1-y2)^2 (and saves computation time w/o using sqrt)
+                pad_distance = (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2
+                if pad_distance < min_dist:
+                    min_dist = pad_distance
+                    closest_landing_pad = landing_pad_location
+            # set waypoint to landing pad
+            self.waypoint = closest_landing_pad
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
