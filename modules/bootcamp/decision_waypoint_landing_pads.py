@@ -37,7 +37,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.at_start = True
+        self.at_waypoint = False
+        self.closest_pad_found = False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -75,29 +77,30 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if  distance_away < self.acceptance_radius:
-                if self.at_start == False: 
-                    # if not at start, then drone should be at landing pad
-                    # we set landing pad to waypoint below, so won't stop randomly
+            if  abs(distance_away) < self.acceptance_radius ** 2:
+                if self.at_waypoint == False:
+                    # dont do anything and let it retarget to pad
+                    commands.Command.create_null_command()
+                    self.at_waypoint = True
+                if self.closest_pad_found == True: 
+                    # if waypoint has been switched to closest pad, and is within acceptance radius, then it means it has reached pad
                     command = commands.Command.create_land_command()
             else:
-                # set drone to not be at start anymore
-                self.at_start = False
                 command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
 
 
 
-        min_dist = float('inf') #max possible dist is 60^2 + 60^2, so anything > 7200 works for an initial value
-        closest_landing_pad = self.waypoint
 
-        if self.at_start == True:
+        if self.closest_pad_found ==  False and self.at_waypoint == True:
+            min_dist = float('inf') #max possible dist is 60^2 + 60^2, so anything > 7200 works for an initial value
             for landing_pad_location in landing_pad_locations:
-                #distance can be calculated by sqrt((x1-x2)^2 - (y1-y2)^2), so order is preserved if we do (x1-x2)^2 - (y1-y2)^2 (and saves computation time w/o using sqrt)
-                pad_distance = (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2
+                #distance can be calculated by sqrt((x1-x2)^2 + (y1-y2)^2), so order is preserved if we do (x1-x2)^2 + (y1-y2)^2 (and saves computation time w/o using sqrt)
+                pad_distance = (landing_pad_location.location_x - report.position.location_x) ** 2 + (landing_pad_location.location_y - report.position.location_y) ** 2
                 if pad_distance < min_dist:
                     min_dist = pad_distance
                     closest_landing_pad = landing_pad_location
             # set waypoint to landing pad
+            self.closest_pad_found = True
             self.waypoint = closest_landing_pad
 
         # ============
