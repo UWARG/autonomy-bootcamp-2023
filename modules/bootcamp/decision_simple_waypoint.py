@@ -18,8 +18,6 @@ from ..private.decision import base_decision
 # pylint: disable=unused-argument,line-too-long
 
 
-
-
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
@@ -30,12 +28,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         Initialize all persistent variables here with self.
         """
-        # self.l = []
-        # self.landing_count = int(input("Enter how many landing locations you want: "))
-        # for x in range(self.landing_count):
-        #     self.ix = float(input("Enter the x coordinate for the landing location: "))
-        #     self.iy = float(input("Enter the y coordinate for the landing location: "))
-        #     self.l.append((self.ix, self.iy))        
+
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
 
@@ -77,30 +70,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-       
+        print(self.acceptance_radius)
         pos = report.position
-        # Do something based on the report and the state of this class...
         print(report.status)
-
         if report.status == drone_status.DroneStatus.HALTED and pos == self.waypoint:
             command = commands.Command.create_land_command()
-
-        # if report.status == drone_status.DroneStatus.HALTED and len(self.l) != 0:
-        #     command = commands.Command.create_set_relative_destination_command(self.l[-1][0] - pos.location_x, self.l[-1][1] - pos.location_y)
-
         if pos == location.Location(0.0,0.0):
             print(self.waypoint)
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
 
-        # if pos == location.Location(self.l[-1][0], self.l[-1][1]):
-        #     command = commands.Command.create_halt_command()
-        #     self.l.pop() 
+
         
             
             
 
 
-        # Remove this when done
+
         
 
         # ============
