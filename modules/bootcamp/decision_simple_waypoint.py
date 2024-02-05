@@ -69,17 +69,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         required_dist_x = self.waypoint.location_x - report.position.location_x
         required_dist_y = self.waypoint.location_y - report.position.location_y
+
+        #we wont take sqrt of this, and square the acceptance radius instead
+        distance_away = required_dist_x ** 2 + required_dist_y ** 2
+        
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and abs(required_dist_x) < 0.1 and abs(required_dist_y) < 0.1:
-            command = commands.Command.create_land_command()
-        elif report.status == drone_status.DroneStatus.MOVING and abs(required_dist_x) < 0.1 and abs(required_dist_y) < 0.1:
-            command = commands.Command.create_halt_command()
-        else:
-            command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
+        if report.status == drone_status.DroneStatus.HALTED:
+            # if close enough, land at pad
+            if abs(distance_away) < self.acceptance_radius ** 2:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
                 
 
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

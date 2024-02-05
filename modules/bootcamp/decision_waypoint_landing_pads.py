@@ -71,29 +71,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         required_dist_x = self.waypoint.location_x - report.position.location_x
         required_dist_y = self.waypoint.location_y - report.position.location_y
 
+        distance_away = required_dist_x ** 2 + required_dist_y ** 2
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if  abs(required_dist_x) < 0.1 and abs(required_dist_y) < 0.1:
-                if self.at_start == False: # if not at start, then ok to land
+            if  distance_away < self.acceptance_radius:
+                if self.at_start == False: 
+                    # if not at start, then drone should be at landing pad
+                    # we set landing pad to waypoint below, so won't stop randomly
                     command = commands.Command.create_land_command()
             else:
+                # set drone to not be at start anymore
                 self.at_start = False
                 command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
 
-        if report.status == drone_status.DroneStatus.MOVING and abs(required_dist_x) < 0.1 and abs(required_dist_y) < 0.1:
-            command = commands.Command.create_halt_command()
-        # Remove this when done
-        #raise NotImplementedError
 
-        min_dist = 10000 #max possible dist is 60^2 + 60^2, so anything > 7200 works for an initial value
+
+        min_dist = float('inf') #max possible dist is 60^2 + 60^2, so anything > 7200 works for an initial value
         closest_landing_pad = self.waypoint
 
         for landing_pad_location in landing_pad_locations:
             #distance can be calculated by sqrt((x1-x2)^2 - (y1-y2)^2), so order is preserved if we do (x1-x2)^2 - (y1-y2)^2 (and saves computation time w/o using sqrt)
-            if (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2 < min_dist:
-                min_dist = (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2
+            pad_distance = (landing_pad_location.location_x - report.position.location_x) ** 2 - (landing_pad_location.location_y - report.position.location_y) ** 2
+            if pad_distance < min_dist:
+                min_dist = pad_distance
                 closest_landing_pad = landing_pad_location
+        # set waypoint to landing pad
         self.waypoint = closest_landing_pad
 
         # ============
