@@ -76,7 +76,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
             # if close enough, land at pad
-            if abs(distance_away) < self.acceptance_radius ** 2:
+            if distance_away < self.acceptance_radius ** 2:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(required_dist_x, required_dist_y)
