@@ -77,7 +77,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if  abs(distance_away) < self.acceptance_radius ** 2:
+            if  distance_away < self.acceptance_radius ** 2:
                 if self.at_waypoint == False:
                     # dont do anything and let it retarget to pad
                     commands.Command.create_null_command()
