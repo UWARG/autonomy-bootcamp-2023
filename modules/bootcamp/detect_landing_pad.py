@@ -79,13 +79,6 @@ class DetectLandingPad:
         Return: A tuple of (list of bounding boxes, annotated image) .
             The list of bounding boxes can be empty.
         """
-        def flattener(l):
-         return_list = []
-         for x in l:
-            if x.__class__ == list:
-                for y in x:
-                    return_list.append(y)
-         return return_list
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -98,42 +91,32 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf = 0.7, device = DetectLandingPad.__DEVICE)
-       
+        confidence_threshold = 0.7
+        predictions = self.__model.predict(image, conf = confidence_threshold, device = DetectLandingPad.__DEVICE, verbose = False)
         # Get the Result object
         prediction =  predictions[0]
-        print(predictions)
-        
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated =  prediction.orig_img
-
+        image_annotated =  prediction.plot()
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
-       
-        
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        
         boxes_cpu = boxes_xyxy.detach().cpu().numpy()
-       
-        print(boxes_cpu)
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for box in boxes_cpu:
-            print(box)
             adding_box = bounding_box.BoundingBox.create(box)[1]
-            print(adding_box)
-            bounding_boxes.append(adding_box)
-        print(bounding_boxes)
+            if adding_box != None:
+                bounding_boxes.append(adding_box)
         return bounding_boxes, image_annotated
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
 
-        # Remove this when done
+
         
 
         # ============

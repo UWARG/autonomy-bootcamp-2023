@@ -28,7 +28,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         Initialize all persistent variables here with self.
         """
-
+        
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
 
@@ -38,7 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.visited = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -63,31 +63,24 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ```
         """
         
-        # Default command
+        
        
         command = commands.Command.create_null_command()
        
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        print(self.acceptance_radius)
+        w_x = self.waypoint.location_x
+        w_y = self.waypoint.location_y
+        r = self.acceptance_radius
+        halted = drone_status.DroneStatus.HALTED
+        move = commands.Command.create_set_relative_destination_command
         pos = report.position
-        print(report.status)
-        if report.status == drone_status.DroneStatus.HALTED and pos == self.waypoint:
-            command = commands.Command.create_land_command()
-        if pos == location.Location(0.0,0.0):
+        if report.status == halted and self.visited == False:
             print(self.waypoint)
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-
-
-        
-            
-            
-
-
-
-        
-
+            command = move(w_x - pos.location_x, w_y - pos.location_y)
+        if report.status == halted and (w_x - pos.location_x)**2 + (w_y - pos.location_y)**2 <= r**2:
+            command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
