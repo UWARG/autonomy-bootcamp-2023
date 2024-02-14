@@ -12,11 +12,6 @@ import ultralytics
 from .. import bounding_box
 
 
-            
-
-
-
-
 # This is just an interface
 # pylint: disable=too-few-public-methods
 class DetectLandingPad:
@@ -67,7 +62,8 @@ class DetectLandingPad:
         Private constructor, use create() method.
         """
         assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
-
+        self.confidence = 0.7
+        self.verbose = False
         self.__model = model
 
     def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
@@ -91,13 +87,13 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        confidence_threshold = 0.7
-        predictions = self.__model.predict(image, conf = confidence_threshold, device = DetectLandingPad.__DEVICE, verbose = False)
+        predictions = self.__model.predict(image, conf = self.confidence , 
+                                           device = self.__DEVICE, verbose = self.verbose)
         # Get the Result object
         prediction =  predictions[0]
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated =  prediction.plot()
+        image_annotated =  prediction.plot(conf = True)
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
         # Detach the xyxy boxes to make a copy,
@@ -107,9 +103,10 @@ class DetectLandingPad:
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for box in boxes_cpu:
-            adding_box = bounding_box.BoundingBox.create(box)[1]
-            if adding_box != None:
-                bounding_boxes.append(adding_box)
+            added = bounding_box.BoundingBox.create(box)
+            if added[0] == False:
+                return []
+            bounding_boxes.append(added[1])
         return bounding_boxes, image_annotated
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):

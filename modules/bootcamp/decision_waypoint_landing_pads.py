@@ -18,32 +18,25 @@ from ..private.decision import base_decision
 # pylint: disable=unused-argument,line-too-long
 
 
-
-
-    
-
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
     Travel to the designed waypoint and then land at the nearest landing pad.
     """
-    
-    
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
-
+        self.close = 0
         self.acceptance_radius = acceptance_radius
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         self.visited = False
-        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -52,14 +45,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return ((finalx-startx)**2 + (finaly-starty)**2)**(1/2)
 
     def find_min(self, l, startx, starty):
-        mins = -1
-        i = None
+        mins = self.distance_calculator(startx, starty, l[0].location_x, l[0].location_y)
+        i = l[0]
+        l.pop(0)
         for pad in l:
             dis = self.distance_calculator(startx, starty, pad.location_x, pad.location_y)
-            if mins < 0:
-                mins = dis
-                i = pad
-            elif dis < mins:
+            if dis < mins:
                 mins = dis
                 i = pad
         return i
@@ -81,16 +72,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = Decision.run(report, landing_pad_locations)
             put_output(command)
         ```
-        """
-        
-                           
-    
-            
-            
-            
-       
+        """  
+       # Default command
         command = commands.Command.create_null_command()
-       
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -100,15 +84,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         r = self.acceptance_radius
         halted = drone_status.DroneStatus.HALTED
         move = commands.Command.create_set_relative_destination_command
-        if self.visited == True and report.status == halted:
+        if self.visited == True and report.status == halted and (self.close.location_x - pos.location_x)**2 + (self.close.location_y - pos.location_y)**2 < r**2:
             command = commands.Command.create_land_command()
-
-        if report.status == halted and (w_x - pos.location_x)**2 + (w_y - pos.location_y)**2 <= r**2:
+        elif report.status == halted and (w_x - pos.location_x)**2 + (w_y - pos.location_y)**2 <= r**2:
             self.visited = True
-            close = self.find_min(landing_pad_locations, pos.location_x, pos.location_y)
-            command = move(close.location_x - pos.location_x, close.location_y - pos.location_y)
-
-        if report.status == halted and self.visited == False:
+            self.close = self.find_min(landing_pad_locations, pos.location_x, pos.location_y)
+            command = move(self.close.location_x - pos.location_x, self.close.location_y - pos.location_y)
+        elif report.status == halted and self.visited == False:
             command = move(w_x - pos.location_x, w_y - pos.location_y)
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

@@ -62,9 +62,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             put_output(command)
         ```
         """
-        
-        
-       
+       # Default command
         command = commands.Command.create_null_command()
        
         # ============
