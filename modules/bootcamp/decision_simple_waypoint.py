@@ -38,6 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.epsilon = 1e-1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,11 +68,23 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        
+        drone_x_coordinate = report.position.location_x
+        drone_y_coordinate = report.position.location_y
+        target_x = self.waypoint.location_x
+        target_y = self.waypoint.location_y
+        distance_squared = (target_x - drone_x_coordinate)**2 + (target_y - drone_y_coordinate)**2
 
-        # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
+        """
+        Statuses -> Command: 
+         - Halted: Issue new command (either Set Rel. Destination or Land)
+         - Moving: Retain NULL
+        """
+        if report.status == drone_status.DroneStatus.HALTED:
+            if abs(distance_squared - (self.acceptance_radius**2)) < self.epsilon:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(target_x - drone_x_coordinate, target_y - drone_y_coordinate)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
