@@ -109,7 +109,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.find_pad(report, landing_pad_locations)
                 self.at_waypoint = True
                 
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

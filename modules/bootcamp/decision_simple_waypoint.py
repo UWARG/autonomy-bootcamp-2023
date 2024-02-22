@@ -39,7 +39,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
         
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
