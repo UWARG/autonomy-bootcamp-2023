@@ -53,14 +53,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def find_pad(self,
                 report: drone_report.DroneReport,
                 landing_pad_locations: "list[location.Location]") -> commands.Command: 
-                # find which one is closest
-        self.bestpad = landing_pad_locations[0]
-        bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
-        for i in landing_pad_locations:
-            dist_total_squared = self.calc_dis_squared(report.position, i)
-            if bestpad_dist_total_squared > dist_total_squared:
-                self.bestpad = i
-                bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
+        # find which one is closest
+        if len(landing_pad_locations) > 0:
+            self.bestpad = landing_pad_locations[0]
+            bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
+        
+            for i in landing_pad_locations:
+                dist_total_squared = self.calc_dis_squared(report.position, i)
+                if bestpad_dist_total_squared > dist_total_squared:
+                    self.bestpad = i
+                    bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
+        else:
+            self.bestpad = report.position
      
     def run(self,
             report: drone_report.DroneReport,
@@ -105,9 +109,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.find_pad(report, landing_pad_locations)
                 self.at_waypoint = True
                 
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

@@ -77,8 +77,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
             if abs(relative_x) < self.acceptance_radius and abs(relative_y) < self.acceptance_radius:
                 command = commands.Command.create_land_command()
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
