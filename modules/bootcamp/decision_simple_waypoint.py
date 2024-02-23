@@ -44,13 +44,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             # the bootcamp, we've been asked to refrain from doing so.
             print("Invalid waypoint provided.")
 
-        self.tolerance = 1e-2
+        self.has_sent_landing_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def euclidean_distance_sq(loc1: location.Location, loc2: location.Location):
+    # Function to calculate the square of the Euclidean distance between two Location
+    # objects. We use the square of the distance to avoid calculating the square root
+    # which is computationally expensive.
+    def euclidean_distance_sq(self, loc1: location.Location, loc2: location.Location):
         return (loc1.location_x - loc2.location_x)**2 + (loc1.location_y - loc2.location_y)**2
 
     def run(self,
@@ -78,26 +81,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        distance_to_wp_sq = self.euclidean_distance_sq(self.waypoint, report.position)
-
         # NOTE: The second condition here handles the case where the drone
         # can halt at any time. By checking if we're clear to land, i.e, if
         # we've reached the designated waypoint in this case, we can make the
         # appropriate decision.
-        if report.status == drone_status.DroneStatus.HALTED and \
-            abs(distance_to_wp_sq - self.acceptance_radius**2) <= self.tolerance:
-            # Drone can land at the waypoint
-            print("Halted at: " + str(report.position))
+        if report.status == drone_status.DroneStatus.HALTED:
+            distance_to_wp_sq = self.euclidean_distance_sq(self.waypoint, report.position)
+            if distance_to_wp_sq <= self.acceptance_radius**2:
+                if not self.has_sent_landing_command:
+                    # Initiate landing
+                    print("Initiating landing...")
+                    command = commands.Command.create_land_command()
+                    self.has_sent_landing_command = True
+            else:
+                # Drone can land at the waypoint
+                print("Halted at: " + str(report.position))
 
-            # Initiate landing
-            print("Initiating landing...")
-            command = commands.Command.create_land_command()
-        else:
-            # Move to waypoint
-            relative_x = self.waypoint.location_x - report.position.location_x
-            relative_y = self.waypoint.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
-
+                # Move to waypoint
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
