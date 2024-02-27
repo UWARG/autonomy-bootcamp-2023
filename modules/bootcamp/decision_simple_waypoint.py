@@ -38,7 +38,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.epsilon = 1e-1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,11 +68,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         
-        drone_x_coordinate = report.position.location_x
-        drone_y_coordinate = report.position.location_y
-        target_x = self.waypoint.location_x
-        target_y = self.waypoint.location_y
-        distance_squared = (target_x - drone_x_coordinate)**2 + (target_y - drone_y_coordinate)**2
+        distance_squared = (self.waypoint.location_x - report.position.location_x)**2 + (self.waypoint.location_y - report.position.location_y)**2
 
         """
         Statuses -> Command: 
@@ -81,10 +76,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
          - Moving: Retain NULL
         """
         if report.status == drone_status.DroneStatus.HALTED:
-            if abs(distance_squared - (self.acceptance_radius**2)) < self.epsilon:
+            if distance_squared < (self.acceptance_radius**2):
                 command = commands.Command.create_land_command()
             else:
-                command = commands.Command.create_set_relative_destination_command(target_x - drone_x_coordinate, target_y - drone_y_coordinate)
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_x)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

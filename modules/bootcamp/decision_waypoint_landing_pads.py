@@ -37,7 +37,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.epsilon = 1e-1
         self.closest_landing_pad = None
         self.reached_waypoint = False
         # Add your own
@@ -46,7 +45,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def L2_norm(self, current_loc: location.Location, target_loc: location.Location):
+    def l2_norm(self, current_loc: location.Location, target_loc: location.Location):
         return (current_loc.location_x - target_loc.location_x)**2 + (current_loc.location_y - target_loc.location_y)**2
 
     def run(self,
@@ -73,7 +72,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        drone_coordinates = report.position
 
         if self.reached_waypoint:
             # Reached waypoint, find closest landing location
@@ -83,30 +81,30 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 closest_pad_distance = float('inf')
                 closest_landing_pad = None
                 for lpad in landing_pad_locations:
-                    calculated_distance = self.L2_norm(drone_coordinates, lpad)
+                    calculated_distance = self.l2_norm(report.position, lpad)
                     if calculated_distance < closest_pad_distance:
                         closest_pad_distance = calculated_distance
                         closest_landing_pad = lpad
                 self.closest_landing_pad = closest_landing_pad
             else:
                 # Direct drone to nearest landing pad
-                distance_to_pad = self.L2_norm(drone_coordinates, self.closest_landing_pad)
+                distance_to_pad = self.l2_norm(report.position, self.closest_landing_pad)
 
                 if report.status == drone_status.DroneStatus.HALTED:
-                    if abs(distance_to_pad - (self.acceptance_radius**2)) < self.epsilon:
+                    if distance_to_pad < self.acceptance_radius**2:
                         command = commands.Command.create_land_command()
                     else:
-                        command = commands.Command.create_set_relative_destination_command(self.closest_landing_pad.location_x - drone_coordinates.location_x, self.closest_landing_pad.location_y - drone_coordinates.location_y)
+                        command = commands.Command.create_set_relative_destination_command(self.closest_landing_pad.location_x - report.position.location_x, self.closest_landing_pad.location_y - report.position.location_y)
         else:
             # Need to go to waypoint
-            distance_squared = self.L2_norm(drone_coordinates, self.waypoint)
+            distance_squared = self.l2_norm(report.position, self.waypoint)
 
             if report.status == drone_status.DroneStatus.HALTED:
-                if abs(distance_squared - (self.acceptance_radius**2)) < self.epsilon:
+                if distance_squared < self.acceptance_radius**2:
                     # Retain HALT status
                     self.reached_waypoint = True
                 else:
-                    command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - drone_coordinates.location_x, self.waypoint.location_y - drone_coordinates.location_y)
+                    command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
