@@ -105,19 +105,21 @@ class DetectLandingPad:
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+
+        # Hint: .shape gets the dimensions of the numpy array
+        # for i in range(0, ...):
+            # Create BoundingBox object and append to list
+            # result, box = ...
         for i in range(0, boxes_cpu.shape()):
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             
             if result:
                 bounding_boxes.append(box)
             else:
-                bounding_boxes = []
-
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
-        return bounding_boxes
+                break        
+                
+        
+        return bounding_boxes, image_annotated
         # Remove this when done
             
         # ============
