@@ -55,7 +55,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         gets square of distance between two points
         """
-        return (p1.location_x - p2.location_x)*(p1.location_x - p2.location_x) + (p1.location_y - p2.location_y)*(p1.location_y - p2.location_y)        
+        return (p1.location_x - p2.location_x)**2 + (p1.location_y - p2.location_y)**2    
 
     def get_closest_landing_pad(self, current_pos: location.Location, landing_pad_locations: "list[location.Location]") -> location.Location:
         """
