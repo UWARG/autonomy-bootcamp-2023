@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.eps = 0.01
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,10 +68,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        def sqrdist(p1: location.Location, p2: location.Location):
+            dx = p2.location_x - p1.location_x
+            dy = p2.location_y - p1.location_y
+            return dx * dx + dy * dy
 
-        # Remove this when done
-        raise NotImplementedError
+        if sqrdist(report.position, self.waypoint) <= self.eps * self.eps:
+            if report.status == drone_status.DroneStatus.HALTED:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_halt_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+            dx = self.waypoint.location_x - report.position.location_x
+            dy = self.waypoint.location_y - report.position.location_y
+            command = commands.Command.create_set_relative_destination_command(dx, dy)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
