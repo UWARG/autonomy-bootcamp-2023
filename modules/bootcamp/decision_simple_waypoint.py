@@ -37,7 +37,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        # Track if the drone is at home or not
+        # Starts at home so default is True
+        self.at_home = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,11 +72,28 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        # Remove this when done
-        raise NotImplementedError
+        while True:
+
+            # If the drone is at home and halted, set the relative distance to the destination
+            if report.status == drone_status.DroneStatus.HALTED and self.at_home == True:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
+                self.at_home = False
+            # Do I need to check if the waypoint is within the (-60.0, -60.0) to (60.0, 60.0) square?
+
+            # Since the drone is not at home and halted, it is at the destination
+            # Drone should land at the destination
+            elif report.status == drone_status.DroneStatus.HALTED and self.at_home == False:
+
+                # Handling the random stop problem by checking if the current coordinates match with the destination
+                if report.position.location_x == self.waypoint.location_x and report.position.location_y == self.waypoint.location_y:
+                    command = commands.Command.create_land_command()
+
+                else:
+                    command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
+
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
-        return command
+            return command
