@@ -37,8 +37,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.eps = 0.01
-        self.reached_waypoint = False
         self.landing_pad = None
 
         # ============
@@ -74,28 +72,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             dy = p2.location_y - p1.location_y
             return dx * dx + dy * dy
 
-        if self.reached_waypoint:
-            if not self.landing_pad:
-                self.landing_pad = min(landing_pad_locations, key = lambda pt: sqrdist(pt, self.waypoint))
+        if report.status != drone_status.DroneStatus.HALTED: return command
 
-            if sqrdist(report.position, self.landing_pad) <= self.eps * self.eps:
-                if report.status == drone_status.DroneStatus.HALTED:
-                    command = commands.Command.create_land_command()
-                else:
-                    command = commands.Command.create_halt_command()
-            elif report.status == drone_status.DroneStatus.HALTED:
-                dx = self.landing_pad.location_x - report.position.location_x
-                dy = self.landing_pad.location_y - report.position.location_y
-                command = commands.Command.create_set_relative_destination_command(dx, dy)
-
-        elif sqrdist(report.position, self.waypoint) <= self.eps * self.eps:
-            command = commands.Command.create_halt_command()
-            self.reached_waypoint = True
-
-        elif report.status == drone_status.DroneStatus.HALTED:
-            dx = self.waypoint.location_x - report.position.location_x
-            dy = self.waypoint.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(dx, dy)
+        if self.landing_pad:
+            command = commands.Command.create_land_command()
+        elif sqrdist(report.position, self.waypoint) <= self.acceptance_radius * self.acceptance_radius:
+            self.landing_pad = min(landing_pad_locations, key=lambda pt: sqrdist(pt, self.waypoint))
+            command = commands.Command.create_set_relative_destination_command(
+                self.landing_pad.location_x - report.position.location_x,
+                self.landing_pad.location_y - report.position.location_y
+            )
+        else:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y
+            )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.eps = 0.01
+        # Add your own
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -73,15 +73,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             dy = p2.location_y - p1.location_y
             return dx * dx + dy * dy
 
-        if sqrdist(report.position, self.waypoint) <= self.eps * self.eps:
-            if report.status == drone_status.DroneStatus.HALTED:
-                command = commands.Command.create_land_command()
-            else:
-                command = commands.Command.create_halt_command()
-        elif report.status == drone_status.DroneStatus.HALTED:
-            dx = self.waypoint.location_x - report.position.location_x
-            dy = self.waypoint.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(dx, dy)
+        if report.status != drone_status.DroneStatus.HALTED: return command
+
+        if sqrdist(report.position, self.waypoint) <= self.acceptance_radius * self.acceptance_radius:
+            command = commands.Command.create_land_command()
+        else:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y
+            )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
