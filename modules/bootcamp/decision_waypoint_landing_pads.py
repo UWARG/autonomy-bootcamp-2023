@@ -83,16 +83,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.at_home = False
 
         elif report.status == drone_status.DroneStatus.HALTED and self.at_home == False:
+
+            command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - report.position.location_x, closest_pad.location_y - report.position.location_y)
+            self.at_local_pad = True
             
+        elif report.status == drone_status.DroneStatus.HALTED and self.at_local_pad == True:
+            command = commands.Command.create_land_command()
+        """   
             if report.position.location_x == self.waypoint.location_x and report.position.location_y == self.waypoint.location_y and self.at_local_pad == False:
                 command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - report.position.location_x, closest_pad.location_y - report.position.location_y)
                 self.at_local_pad = True
 
             else:
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
-        
-        elif report.status == drone_status.DroneStatus.HALTED and self.at_local_pad == True:
-            command = commands.Command.create_land_command()
+        """
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
