@@ -86,6 +86,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, self.closest_pad.location_y - report.position.location_y)
             self.at_local_pad = True
+            command = commands.Command.create_land_command()
 
         elif report.status == drone_status.DroneStatus.HALTED and self.at_local_pad == True:
             command = commands.Command.create_land_command()
