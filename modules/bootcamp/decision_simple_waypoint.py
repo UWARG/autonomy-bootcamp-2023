@@ -73,8 +73,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             dy = p2.location_y - p1.location_y
             return dx * dx + dy * dy
 
-        if report.status != drone_status.DroneStatus.HALTED: return command
-
         if sqrdist(report.position, self.waypoint) <= self.acceptance_radius * self.acceptance_radius:
             command = commands.Command.create_land_command()
         else:
