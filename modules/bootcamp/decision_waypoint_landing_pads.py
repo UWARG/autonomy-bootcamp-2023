@@ -82,7 +82,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             for i in landing_pad_locations:
                 if (((i.location_x - report.position.location_x) ** 2) + ((i.location_y - report.position.location_y) ** 2)) < self.distance:
-                    self.distance = i
+                    self.distance = ((i.location_x - report.position.location_x) ** 2) + ((i.location_y - report.position.location_y) ** 2)
                     self.closest_pad = i
 
             command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, self.closest_pad.location_y - report.position.location_y)
