@@ -79,7 +79,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if distance_squared < (self.acceptance_radius**2):
                 command = commands.Command.create_land_command()
             else:
-                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_x)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x, 
+                    self.waypoint.location_y - report.position.location_x
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
