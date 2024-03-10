@@ -73,46 +73,95 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if not self.reached_waypoint:
-            # If we haven't reached waypoint go to it.
-            distance_squared = self.l2_norm(report.position, self.waypoint)
+        if report.status == drone_status.DroneStatus.HALTED:
+            # First check if drone is halted.
 
-            if report.status == drone_status.DroneStatus.HALTED:
+            if not self.reached_waypoint:
+                # If we have not reached waypoint, either set the drone to go to to it
+                # or if we have, then find the closest landing pad
+
+                distance_squared = self.l2_norm(report.position, self.waypoint)
+
                 if distance_squared < self.acceptance_radius**2:
+                    # Reached waypoint, find closest landing pad and direct the drone to it.
+
                     self.reached_waypoint = True
-                else:
-                    command = commands.Command.create_set_relative_destination_command(
-                        self.waypoint.location_x - report.position.location_x, 
-                        self.waypoint.location_y - report.position.location_y
-                    )
-        else:
-            # Waypoint was reached. 
-        
-            if self.closest_landing_pad == None:
-                # If closest landing pad was not calculated, then find it and go to it.
-                closest_pad_distance = float('inf')
-                closest_landing_pad = None
-                for lpad in landing_pad_locations:
-                    calculated_distance = self.l2_norm(report.position, lpad)
-                    if calculated_distance < closest_pad_distance:
-                        closest_pad_distance = calculated_distance
-                        closest_landing_pad = lpad
 
-                self.closest_landing_pad = closest_landing_pad
+                    closest_pad_distance = float('inf')
+                    closest_landing_pad = None
+                    for lpad in landing_pad_locations:
+                        calculated_distance = self.l2_norm(report.position, lpad)
+                        if calculated_distance < closest_pad_distance:
+                            closest_pad_distance = calculated_distance
+                            closest_landing_pad = lpad
 
-            elif report.status == drone_status.DroneStatus.HALTED:
-                # Closest landing pad has been found. Land.
+                    self.closest_landing_pad = closest_landing_pad
 
-                distance_to_pad = self.l2_norm(report.position, self.closest_landing_pad)
-
-                if report.status == drone_status.DroneStatus.HALTED:
-                    if distance_to_pad < self.acceptance_radius**2:
-                        command = commands.Command.create_land_command()
-                    else:
+                    if self.closest_landing_pad:
+                        # If closest landing pad has been found. 
                         command = commands.Command.create_set_relative_destination_command(
                             self.closest_landing_pad.location_x - report.position.location_x, 
                             self.closest_landing_pad.location_y - report.position.location_y
                         )
+
+                else:
+                    # Set the drone to go to the waypoint.
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x - report.position.location_x, 
+                        self.waypoint.location_y - report.position.location_y
+                    )
+            else:
+                # Halted at landing pad. Check for distance and land.
+                distance_to_pad = self.l2_norm(report.position, self.closest_landing_pad)
+
+                if distance_to_pad < self.acceptance_radius**2:
+                    command = commands.Command.create_land_command()
+
+
+
+
+
+
+        # if not self.reached_waypoint:
+        #     # If we haven't reached waypoint go to it.
+        #     distance_squared = self.l2_norm(report.position, self.waypoint)
+
+        #     if report.status == drone_status.DroneStatus.HALTED:
+        #         if distance_squared < self.acceptance_radius**2:
+        #             self.reached_waypoint = True
+        #         else:
+        #             command = commands.Command.create_set_relative_destination_command(
+        #                 self.waypoint.location_x - report.position.location_x, 
+        #                 self.waypoint.location_y - report.position.location_y
+        #             )
+        # else:
+        #     # Waypoint was reached. 
+        
+        #     if self.closest_landing_pad == None:
+        #         # If closest landing pad was not calculated, then find it and go to it.
+        #         closest_pad_distance = float('inf')
+        #         closest_landing_pad = None
+        #         for lpad in landing_pad_locations:
+        #             calculated_distance = self.l2_norm(report.position, lpad)
+        #             if calculated_distance < closest_pad_distance:
+        #                 closest_pad_distance = calculated_distance
+        #                 closest_landing_pad = lpad
+
+        #         self.closest_landing_pad = closest_landing_pad
+
+        #     elif report.status == drone_status.DroneStatus.HALTED:
+        #         # Closest landing pad has been found. Land.
+
+        #         distance_to_pad = self.l2_norm(report.position, self.closest_landing_pad)
+
+        #         if report.status == drone_status.DroneStatus.HALTED:
+        #             if distance_to_pad < self.acceptance_radius**2:
+        #                 command = commands.Command.create_land_command()
+        #             else:
+        #                 command = commands.Command.create_set_relative_destination_command(
+        #                     self.closest_landing_pad.location_x - report.position.location_x, 
+        #                     self.closest_landing_pad.location_y - report.position.location_y
+        #                 )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
