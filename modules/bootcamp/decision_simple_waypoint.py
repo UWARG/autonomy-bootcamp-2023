@@ -89,9 +89,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
             # Handling the random stop problem 
             # Checking if the current coordinates match with the destination
-            if report.position.location_x == self.waypoint.location_x and \
-                report.position.location_y == self.waypoint.location_y:
-
+            if report.position.location_x == self.waypoint.location_x \
+                and report.position.location_y == self.waypoint.location_y:
+                # Required comment for separation
+                
                 command = commands.Command.create_land_command()
 
             else:
