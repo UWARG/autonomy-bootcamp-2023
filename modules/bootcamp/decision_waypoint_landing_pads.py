@@ -83,20 +83,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             
             self.at_home = False
 
-        elif(report.status == drone_status.DroneStatus.HALTED and 
-            not self.at_home and not self.at_local_pad):
-        
-            
+        elif report.status == drone_status.DroneStatus.HALTED \
+            and not self.at_home and not self.at_local_pad:
+            # Required comment for separation
+
             for landing_pad in landing_pad_locations:
-                if (
-                    ((landing_pad.location_x - report.position.location_x) ** 2) + 
-                    ((landing_pad.location_y - report.position.location_y) ** 2) )\
+                
+                if (((landing_pad.location_x - report.position.location_x) ** 2) 
+                    + ((landing_pad.location_y - report.position.location_y) ** 2) )\
                         < self.minimum_distance_squared:
                     
                     self.minimum_distance_squared = \
                         (
-                            ((landing_pad.location_x - report.position.location_x) ** 2) + 
-                            ((landing_pad.location_y - report.position.location_y) ** 2)
+                            ((landing_pad.location_x - report.position.location_x) ** 2) 
+                            + ((landing_pad.location_y - report.position.location_y) ** 2)
                         )
                     self.closest_pad = landing_pad
 
