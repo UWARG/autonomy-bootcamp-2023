@@ -75,11 +75,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # If the drone is at home and halted, set the relative distance to the destination
         if report.status == drone_status.DroneStatus.HALTED and self.at_home == True:
-            command = \
-                commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x, 
-                    self.waypoint.location_y - report.position.location_y
-                    )
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x, 
+                self.waypoint.location_y - report.position.location_y,
+            )
 
             self.at_home = False
 
@@ -96,11 +95,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
 
             else:
-                command = \
-                    commands.Command.create_set_relative_destination_command(
-                        self.waypoint.location_x - report.position.location_x, 
-                        self.waypoint.location_y - report.position.location_y
-                        )
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x, 
+                    self.waypoint.location_y - report.position.location_y,
+                )
 
 
 
