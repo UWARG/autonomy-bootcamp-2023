@@ -43,7 +43,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.at_local_pad = False
 
         # Variable to find the distance from a pad and to record the closest pad
-        self.distance = float('inf')
+        self.minimum_distance_squared = float('inf')
         self.closest_pad = None
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -74,20 +74,37 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============ 
         
-        if report.status == drone_status.DroneStatus.HALTED and self.at_home == True:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, 
-                                                                               self.waypoint.location_y - report.position.location_y)
+        if report.status == drone_status.DroneStatus.HALTED and self.at_home:
+            command = \
+                commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x, 
+                    self.waypoint.location_y - report.position.location_y
+                    )
+            
             self.at_home = False
 
-        elif report.status == drone_status.DroneStatus.HALTED and self.at_home == False and self.at_local_pad == False:
-
+        elif(report.status == drone_status.DroneStatus.HALTED and 
+            not self.at_home and self.at_local_pad):
+        
+            
             for landing_pad in landing_pad_locations:
-                if (((landing_pad.location_x - report.position.location_x) ** 2) + ((landing_pad.location_y - report.position.location_y) ** 2)) < self.distance:
-                    self.distance = ((landing_pad.location_x - report.position.location_x) ** 2) + ((landing_pad.location_y - report.position.location_y) ** 2)
+                if (
+                    ((landing_pad.location_x - report.position.location_x) ** 2) + 
+                    ((landing_pad.location_y - report.position.location_y) ** 2) )\
+                        < self.minimum_distance_squared:
+                    
+                    self.minimum_distance_squared = \
+                        (
+                            ((landing_pad.location_x - report.position.location_x) ** 2) + 
+                            ((landing_pad.location_y - report.position.location_y) ** 2)
+                        )
                     self.closest_pad = landing_pad
 
-            command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, 
-                                                                               self.closest_pad.location_y - report.position.location_y)
+            command = \
+                commands.Command.create_set_relative_destination_command(
+                    self.closest_pad.location_x - report.position.location_x, 
+                    self.closest_pad.location_y - report.position.location_y
+                    )
             self.at_local_pad = True
 
 
