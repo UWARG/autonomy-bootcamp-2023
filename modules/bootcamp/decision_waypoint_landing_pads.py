@@ -84,7 +84,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.at_home = False
 
         elif(report.status == drone_status.DroneStatus.HALTED and 
-            not self.at_home and self.at_local_pad):
+            not self.at_home and not self.at_local_pad):
         
             
             for landing_pad in landing_pad_locations:
