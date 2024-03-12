@@ -101,7 +101,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
             # move to waypoint
-            # print("Halted at start, moving to waypoint: " + str(report.position))
             command = self.commands[self.command_index]
             self.command_index += 1
         elif report.status == drone_status.DroneStatus.HALTED and not self.found_landing_pad:
@@ -109,7 +108,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # if already on landing pad, ignore 
             self.found_landing_pad = True
             if self.waypoint not in landing_pad_locations:
-                # print("Halted at waypoint: " + str(report.position))
                 landing_pad = self.get_closest_landing_pad(report.position, landing_pad_locations) 
                 command = commands.Command.create_set_relative_destination_command (
                     landing_pad.location_x - report.position.location_x, 
@@ -118,11 +116,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # land if distance to landing pad location is wtihin acceptance_radius
             command = commands.Command.create_land_command()
             self.has_sent_landing_command = True
-            # print("Halted at landing pad: " + str(report.position))        
         
-        # Remove this when done
-        # raise NotImplementedError
-            
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

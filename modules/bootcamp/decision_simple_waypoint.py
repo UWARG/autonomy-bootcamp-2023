@@ -74,11 +74,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        # state of class: command_index and has_sent_landing_command ?
 
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
-            #print(self.command_index)
-            #print("Halted at: " + str(report.position))
             command = self.commands[self.command_index]
             self.command_index += 1
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
@@ -87,11 +84,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if distance <= self.acceptance_radius**2:
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
-                #print("Halted at landing pad: " + str(report.position))
-
-        # Remove this when done
-        # raise NotImplementedError
-
+            else:
+                comamnd = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x, 
+                    self.waypoint.location_y - report.position.location_y
+                )
+                
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

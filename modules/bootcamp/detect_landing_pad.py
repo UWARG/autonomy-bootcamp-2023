@@ -108,8 +108,6 @@ class DetectLandingPad:
         # and convert to a numpy array
         boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
-        #bounding_boxes.append(boxes_cpu)
-
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
@@ -122,9 +120,7 @@ class DetectLandingPad:
             bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
-        # Remove this when done
-        # raise NotImplementedError
-
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
