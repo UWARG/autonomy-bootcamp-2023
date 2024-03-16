@@ -37,7 +37,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.has_sent_landing_command = False
+        self.command_index = 0
+        
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,10 +71,28 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x, 
+                self.waypoint.location_y - report.position.location_y)
+        ]
 
-        # Remove this when done
-        raise NotImplementedError
-
+        self.has_sent_landing_command = False
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
+            command = self.commands[self.command_index]
+            self.command_index += 1
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            # land if distance to landing pad location is wtihin acceptance_radius
+            distance = (self.waypoint.location_x - report.position.location_x)**2 + (self.waypoint.location_y - report.position.location_y)**2
+            if distance <= self.acceptance_radius**2:
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+            else:
+                comamnd = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x, 
+                    self.waypoint.location_y - report.position.location_y
+                )
+                
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
