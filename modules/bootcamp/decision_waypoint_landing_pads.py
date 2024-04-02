@@ -37,13 +37,33 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         self.reached_waypoint = False
+        self.destination = waypoint
 
         # Validate data
         if abs(self.waypoint.location_x) > 60 or abs(self.waypoint.location_y) > 60:
             print("Invalid waypoint, must be in flight boundary")
     
+
     def euclidean_distance_squared(self, x0: float, y0: float, x1: float, y1: float) -> float:
         return (x1-x0)**2 + (y1-y0)**2
+    
+
+    def get_closest_landing_pad(self,
+        report: drone_report.DroneReport,
+        landing_pad_locations: "list[location.Location]") -> location.Location:
+        closest_distance_to_landing_squared = float('inf')
+        closest_landing_location = landing_pad_locations[0]
+
+        for location in landing_pad_locations:
+            distance_to_landing_squared = self.euclidean_distance_squared(
+                location.location_x, location.location_y, 
+                report.position.location_x, report.position.location_y)
+
+            if distance_to_landing_squared < closest_distance_to_landing_squared:
+                closest_landing_location = location
+                closest_distance_to_landing_squared = distance_to_landing_squared
+        return closest_landing_location
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -79,7 +99,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # Only compute distance if needed within halt branch
             distance_to_destination_squared = self.euclidean_distance_squared(
                 report.position.location_x, report.position.location_y, 
-                self.waypoint.location_x, self.waypoint.location_y)
+                self.destination.location_x, self.destination.location_y)
 
             # Reached the destination
             if distance_to_destination_squared < self.acceptance_radius**2:
@@ -88,27 +108,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     return commands.Command.create_land_command()
 
                 # find location of closest launch pad
-                closest_distance_to_landing_squared = float('inf')
-                closest_landing_location = landing_pad_locations[0]
-
-                for location in landing_pad_locations:
-                    distance_to_landing_squared = self.euclidean_distance_squared(
-                        location.location_x, location.location_y, 
-                        report.position.location_x, report.position.location_y)
-
-                    if distance_to_landing_squared < closest_distance_to_landing_squared:
-                        closest_landing_location = location
-                        closest_distance_to_landing_squared = distance_to_landing_squared
+                closest_landing_location = self.get_closest_landing_pad(report, landing_pad_locations)
 
                 # Change waypoint to closest landing pad (simplifes number of distance calculations)
-                self.waypoint = closest_landing_location
+                self.destination = closest_landing_location
                 self.reached_waypoint = True
 
             else:
                 # At the starting point or at first waypoint, set new relative destination
                 return commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y)
+                    self.destination.location_x - report.position.location_x,
+                    self.destination.location_y - report.position.location_y)
 
 
         # ============
