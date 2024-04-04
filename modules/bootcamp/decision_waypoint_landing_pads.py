@@ -88,7 +88,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             #Find closest landing pad
             self.waypoint_is_landing_pad = True
             
-            closest_landing_pad_location: location.Location = location.Location(23,23)
+            closest_landing_pad_location: location.Location = None
             lowest_distance_squared = float('inf')
             
             for landing_pad_location in landing_pad_locations:
