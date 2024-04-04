@@ -37,12 +37,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
+        self.waypoint_is_landing_pad = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+
+    def __distance_squared(self, x1: float, y1: float, x2: float, y2: float) -> float:
+        """Returns distance between two locations squared
+        """
+        return (x2-x1)**2 + (y2-y1)**2
+    
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -67,11 +72,35 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
+        
+        #If drone is already moving to waypoint do nothing
+        if report.status == drone_status.DroneStatus.MOVING:
+            return command
+               
+        if self.__distance_squared(self.waypoint.location_x, self.waypoint.location_y, report.position.location_x, report.position.location_y) > self.acceptance_radius**2 :
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
+        else:
+            #If drone has reached landing pad, land
+            if self.waypoint_is_landing_pad:
+                command = commands.Command.create_land_command()
+                return command
+            
+            #Find closest landing pad
+            self.waypoint_is_landing_pad = True
+            
+            closest_landing_pad_location: location.Location = location.Location(23,23)
+            lowest_distance_squared = float('inf')
+            
+            for landing_pad_location in landing_pad_locations:
+                new_distance_squared = self.__distance_squared(landing_pad_location.location_x, report.position.location_x, landing_pad_location.location_y, report.position.location_y)
+                if new_distance_squared < lowest_distance_squared:
+                    closest_landing_pad_location = landing_pad_location
+                    lowest_distance_squared = new_distance_squared
+            
+            self.waypoint.location_x = closest_landing_pad_location.location_x
+            self.waypoint.location_y = closest_landing_pad_location.location_y
+            
+            command=commands.Command.create_set_relative_destination_command(closest_landing_pad_location.location_x - self.waypoint.location_x, closest_landing_pad_location.location_y - self.waypoint.location_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
