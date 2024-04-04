@@ -18,7 +18,7 @@ class DroneReport:
                  status: drone_status.DroneStatus,
                  destination: location.Location,
                  position: location.Location):
-        """
+        """x
         Construct report on the state of the drone.
         """
         self.status = status

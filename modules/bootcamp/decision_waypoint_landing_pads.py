@@ -37,11 +37,25 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.at_waypoint = False
+        self.closest_landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+    def distance_sqr (self, p1: location.Location, p2: location.Location):
+        return ((p1.location_x - p2.location_x) ** 2 + \
+        (p1.location_y - p2.location_y) ** 2)
+    
+    def find_closest_pad (self, p1: location.Location, landing_pad_locations: "list[location.Location]"):
+        min_dist = float("inf")
+        best_location = landing_pad_locations[0]
+        for pad in landing_pad_locations:
+            distance = self.distance_sqr(p1, pad)
+            if distance < min_dist:
+                min_dist = distance
+                best_location = pad
+        return best_location
 
     def run(self,
             report: drone_report.DroneReport,
@@ -64,14 +78,26 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        if self.at_waypoint and not self.closest_landing_pad:
+            self.closest_landing_pad = self.find_closest_pad(report.position, landing_pad_locations)
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.at_waypoint:
+                if self.distance_sqr(self.waypoint, report.position) <= self.acceptance_radius * self.acceptance_radius:
+                    self.at_waypoint = True
+                else:
+                    command = commands.Command.create_set_relative_destination_command((self.waypoint.location_x - report.position.location_x), (self.waypoint.location_y- report.position.location_y))     
+            else:
+                if self.distance_sqr(self.closest_landing_pad, report.position) <= self.acceptance_radius * self.acceptance_radius:
+                    command = commands.Command.create_land_command()
+                else: 
+                    command = commands.Command.create_set_relative_destination_command((self.closest_landing_pad.location_x - report.position.location_x), (self.closest_landing_pad.location_y - report.position.location_y))
 
-        # Do something based on the report and the state of this class...
 
-        # Remove this when done
-        raise NotImplementedError
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
