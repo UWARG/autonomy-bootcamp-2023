@@ -90,13 +90,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             
             closest_landing_pad_location: location.Location = None
             lowest_distance_squared = float('inf')
-            
+
             for landing_pad_location in landing_pad_locations:
-                new_distance_squared = self.__distance_squared(landing_pad_location.location_x, report.position.location_x, landing_pad_location.location_y, report.position.location_y)
+                new_distance_squared = self.__distance_squared(landing_pad_location.location_x, landing_pad_location.location_y, report.position.location_x, report.position.location_y)
+
                 if new_distance_squared < lowest_distance_squared:
                     closest_landing_pad_location = landing_pad_location
                     lowest_distance_squared = new_distance_squared
-            
+
             self.waypoint.location_x = closest_landing_pad_location.location_x
             self.waypoint.location_y = closest_landing_pad_location.location_y
             
