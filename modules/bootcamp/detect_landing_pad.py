@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Detects landing pads.
 """
+
 import pathlib
 
 import numpy as np
@@ -18,6 +19,7 @@ class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
+
     __create_key = object()
 
     # ============
@@ -61,11 +63,15 @@ class DetectLandingPad:
         """
         Private constructor, use create() method.
         """
-        assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
+        assert (
+            class_private_create_key is DetectLandingPad.__create_key
+        ), "Use create() method"
 
         self.__model = model
 
-    def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    def run(
+        self, image: np.ndarray
+    ) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
 
@@ -86,7 +92,9 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
+        )
 
         # Get the Result object
         prediction = predictions[0]
@@ -103,18 +111,17 @@ class DetectLandingPad:
         # and convert to a numpy array
         boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
-        # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-        # Create BoundingBox object and append to list
-        # result, box = ...
 
-        for i in range (0, boxes_cpu.shape[0]):
+        for i in range(0, boxes_cpu.shape[0]):
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            bounding_boxes.append(box)
+            if result:
+                bounding_boxes.append(box)
+            else:
+                print("Failed to create bounding box")
+                bounding_boxes = []
+                break
 
-        # Remove this when done
         return bounding_boxes, image_annotated
 
         # ============

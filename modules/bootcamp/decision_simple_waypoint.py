@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint.
 """
+
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
@@ -44,9 +45,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def run(self,
-            report: drone_report.DroneReport,
-            landing_pad_locations: "list[location.Location]") -> commands.Command:
+    def run(
+        self,
+        report: drone_report.DroneReport,
+        landing_pad_locations: "list[location.Location]",
+    ) -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -72,10 +75,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
             if self.relative_distance(report) > self.acceptance_radius:
-                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x
-                                                                                   - report.position.location_x,
-                                                                                   self.waypoint.location_y
-                                                                                   - report.position.location_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
             else:
                 command = commands.Command.create_land_command()
         elif report.status == drone_status.DroneStatus.MOVING:
@@ -91,7 +94,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         return command
 
     def relative_distance(self, report: drone_report.DroneReport) -> float:
-        r_d = ((self.waypoint.location_x - report.position.location_x) ** 2
-               + (self.waypoint.location_y - report.position.location_y) ** 2) ** 0.5
+        relative_distance = (
+            (self.waypoint.location_x - report.position.location_x) ** 2
+            + (self.waypoint.location_y - report.position.location_y) ** 2
+        ) ** 0.5
 
-        return r_d
+        return relative_distance
