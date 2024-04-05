@@ -118,9 +118,7 @@ class DetectLandingPad:
             if not result:
                 print("Failed to create bounding box")
                 bounding_boxes = []
-                break
-            else:
-                bounding_boxes.append(box)
+            bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
 
