@@ -84,7 +84,7 @@ class DetectLandingPad:
         # Parameters of interest:
         # * source
         # * conf
-        # * devices
+        # * device
         # * verbose
 
         path = pathlib.Path("models/")
@@ -99,12 +99,12 @@ class DetectLandingPad:
         # Get the Result object
         results = model.predict(image, verbose = False, conf = 0.7)
         for result in results:
+            
             # Plot the annotated image from the Result object
             # Include the confidence value
-            
-            #sum = np.sum(image)
-            #image_file = f"result{sum}.jpg"
-            #result.save(filename=image_path + image_file)
+            sum = np.sum(image)
+            image_file = f"result{sum}.jpg"
+            result.save(filename=image_path + image_file)
             result_array = result.plot()
 
             # Get the xyxy boxes list from the Boxes object in the Result object
