@@ -12,26 +12,13 @@ import ultralytics
 from .. import bounding_box
 
 
-# This is just an interface
-# pylint: disable=too-few-public-methods
 class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
     __create_key = object()
+    __DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
-    # ============
-    # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-    # ============
-
-    # Chooses the GPU if it exists, otherwise runs on the CPU
-    # If you have a CUDA capable GPU but want to force it to
-    # run on the CPU instead, replace the right side with "cpu"
-    __DEVICE = "cpu"
-
-    # ============
-    # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-    # ============
 
     __MODEL_NAME = "best-2n.pt"
 
@@ -50,8 +37,6 @@ class DetectLandingPad:
 
         try:
             model = ultralytics.YOLO(str(model_path))
-        # Library can throw any exception
-        # pylint: disable-next=broad-exception-caught
         except Exception:
             return False, None
 
@@ -74,49 +59,23 @@ class DetectLandingPad:
         Return: A tuple of (list of bounding boxes, annotated image) .
             The list of bounding boxes can be empty.
         """
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
 
-        # Ultralytics has documentation and examples
-
-        # Use the model's predict() method to run inference
-        # Parameters of interest:
-        # * source
-        # * conf
-        # * device
-        # * verbose
         predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
 
-        # Get the Result object
         prediction = predictions[0]
 
-        # Plot the annotated image from the Result object
-        # Include the confidence value
         image_annotated = prediction.plot()
 
-        # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
 
-        # Detach the xyxy boxes to make a copy,
-        # move the copy into CPU space,
-        # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
-        # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for i in range(boxes_cpu.shape[0]):
-            bounds = boxes_cpu[i, :4]
+            bounds = boxes_cpu[i]
             success, box = bounding_box.BoundingBox.create(bounds)
-            if success:
-                bounding_boxes.append(box)
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
+            if not success:
+                return [], image_annotated
+            bounding_boxes.append(box)
 
-        return(bounding_boxes, image_annotated)
-
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+        return bounding_boxes, image_annotated

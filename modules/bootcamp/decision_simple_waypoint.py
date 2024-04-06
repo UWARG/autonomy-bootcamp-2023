@@ -3,8 +3,6 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint.
 """
-# Disable for bootcamp use
-# pylint: disable=unused-import
 
 
 from .. import commands
@@ -13,13 +11,6 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
-
-# Disable for bootcamp use
-# pylint: disable=unused-argument,line-too-long
-
-
-# All logic around the run() method
-# pylint: disable-next=too-few-public-methods
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.
@@ -32,16 +23,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         print("Waypoint: " + str(waypoint))
 
         self.acceptance_radius = acceptance_radius
+        self.acceptance_radius_sqr = self.acceptance_radius ** 2
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
-
-        # Add your own
-
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
 
     def run(self,
             report: drone_report.DroneReport,
@@ -61,27 +44,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             put_output(command)
         ```
         """
-        # Default command
         command = commands.Command.create_null_command()
-
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
-        current_pos = report.position
-        distance_sqr = (self.waypoint.location_x - current_pos.location_x) ** 2 + \
-            (self.waypoint.location_y - current_pos.location_y) ** 2
-        acceptance_radius_sqr = self.acceptance_radius ** 2
+        
         if report.status == drone_status.DroneStatus.HALTED:
-            if distance_sqr <= acceptance_radius_sqr:
+            current_pos = report.position
+            distance_sqr = (self.waypoint.location_x - current_pos.location_x) ** 2 + \
+            (self.waypoint.location_y - current_pos.location_y) ** 2
+            if distance_sqr <= self.acceptance_radius_sqr:
                 command = commands.Command.create_land_command()
             else:
                 x = self.waypoint.location_x - current_pos.location_x
                 y = self.waypoint.location_y - current_pos.location_y
                 command = commands.Command.create_set_relative_destination_command(x, y)
-        # Do something based on the report and the state of this class...
-
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
 
         return command
