@@ -38,6 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.reachedWayPoint = False
+        self.toLandAt = waypoint # Initializing to waypoint
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,13 +70,57 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        position_x, position_y = report.position.location_x, report.position.location_y
+
+        if self.reachedWayPoint:
+            destination_x, destination_y = self.toLandAt.location_x, self.toLandAt.location_y
+        else:
+            destination_x, destination_y = self.waypoint.location_x, self.waypoint.location_y
+            
+        to_travel_x = destination_x - position_x
+        to_travel_y = destination_y - position_y
+
+        #Restricting to flight boundary
+        if to_travel_x > 60:
+            to_travel_x = 60
+        elif to_travel_x < -60:
+            to_travel_x = -60
+        
+        if to_travel_y > 60:
+            to_travel_y = 60
+        elif to_travel_y < -60:
+            to_travel_y = -60
+
         # Do something based on the report and the state of this class...
+        if abs(to_travel_x) <= self.acceptance_radius and abs(to_travel_y) <= self.acceptance_radius:
+            if self.reachedWayPoint and report.status == drone_status.DroneStatus.MOVING:
+                command = commands.Command.create_halt_command()
+            elif self.reachedWayPoint and report.status == drone_status.DroneStatus.HALTED:
+                command = commands.Command.create_land_command()
+            else:
+                self.reachedWayPoint = True
+                minimumDistance = float("inf")
+
+                # Iterate through landing pad locations to find closest
+                for landing_pad in landing_pad_locations:
+                    distance = self.distance(report.position, landing_pad)
+                    if distance < minimumDistance:
+                        minimumDistance = distance
+                        self.toLandAt = landing_pad
+                command = commands.Command.create_halt_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(to_travel_x, to_travel_y)
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    def distance(self, start, end):
+        distance_x = end.location_x - start.location_x
+        distance_y = end.location_y - start.location_y
+        return distance_x**2 + distance_y**2

@@ -84,34 +84,46 @@ class DetectLandingPad:
         # Parameters of interest:
         # * source
         # * conf
-        # * device
+        # * devices
         # * verbose
-        predictions = ...
+
+        path = pathlib.Path("models/")
+        createResult, instance = self.create(path)
+        if not createResult:
+            raise ValueError
+        
+        model = instance.__model
+
+        image_path = "modules/bootcamp/"
 
         # Get the Result object
-        prediction = ...
+        results = model.predict(image, verbose = False, conf = 0.7)
+        for result in results:
+            # Plot the annotated image from the Result object
+            # Include the confidence value
+            
+            #sum = np.sum(image)
+            #image_file = f"result{sum}.jpg"
+            #result.save(filename=image_path + image_file)
+            result_array = result.plot()
 
-        # Plot the annotated image from the Result object
-        # Include the confidence value
-        image_annotated = ...
+            # Get the xyxy boxes list from the Boxes object in the Result object
+            boxes_xyxy = result.boxes.xyxy
 
-        # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+            # Detach the xyxy boxes to make a copy,
+            # move the copy into CPU space,
+            # and convert to a numpy array
+            boxes_cpu = boxes_xyxy.cpu().numpy()
 
-        # Detach the xyxy boxes to make a copy,
-        # move the copy into CPU space,
-        # and convert to a numpy array
-        boxes_cpu = ...
+            # Loop over the boxes list and create a list of bounding boxes
+            bounding_boxes = []
+            
+            for box in boxes_cpu:
+                boxResult, boundingBox = bounding_box.BoundingBox.create(box)
+                if boxResult:
+                    bounding_boxes.append(boundingBox)
 
-        # Loop over the boxes list and create a list of bounding boxes
-        bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
-
-        # Remove this when done
-        raise NotImplementedError
+            return bounding_boxes,result_array
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

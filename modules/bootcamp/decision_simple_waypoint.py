@@ -67,11 +67,35 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        
+        position_x, position_y = report.position.location_x, report.position.location_y
+        destination_x, destination_y = self.waypoint.location_x, self.waypoint.location_y
+
+        to_travel_x = destination_x - position_x
+        to_travel_y = destination_y - position_y
+
+        #Restricting to flight boundary
+        if to_travel_x > 60:
+            to_travel_x = 60
+        elif to_travel_x < -60:
+            to_travel_x = -60
+        
+        if to_travel_y > 60:
+            to_travel_y = 60
+        elif to_travel_y < -60:
+            to_travel_y = -60
 
         # Do something based on the report and the state of this class...
+        if abs(to_travel_x) <= self.acceptance_radius and abs(to_travel_y) <= self.acceptance_radius:
+            if report.status == drone_status.DroneStatus.MOVING:
+                command = commands.Command.create_halt_command()
+            elif report.status == drone_status.DroneStatus.HALTED:
+                command = commands.Command.create_land_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_set_relative_destination_command(to_travel_x, to_travel_y)
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
