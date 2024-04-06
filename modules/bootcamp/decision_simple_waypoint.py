@@ -48,13 +48,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         
         if report.status == drone_status.DroneStatus.HALTED:
             current_pos = report.position
-            distance_sqr = (self.waypoint.location_x - current_pos.location_x) ** 2 + \
-            (self.waypoint.location_y - current_pos.location_y) ** 2
+            distance_sqr = (self.waypoint.location_x - current_pos.location_x) ** 2 + (self.waypoint.location_y - current_pos.location_y) ** 2
             if distance_sqr <= self.acceptance_radius_sqr:
                 command = commands.Command.create_land_command()
             else:
-                x = self.waypoint.location_x - current_pos.location_x
-                y = self.waypoint.location_y - current_pos.location_y
-                command = commands.Command.create_set_relative_destination_command(x, y)
+                relative_x = self.waypoint.location_x - current_pos.location_x
+                relative_y = self.waypoint.location_y - current_pos.location_y
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
 
         return command

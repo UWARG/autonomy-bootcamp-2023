@@ -32,7 +32,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     
     def find_closest_pad (self, p1: location.Location, landing_pad_locations: "list[location.Location]"):
         min_dist = float("inf")
-        best_location = landing_pad_locations[0]
+        best_location = None
         for pad in landing_pad_locations:
             distance = self.distance_sqr(p1, pad)
             if distance < min_dist:
@@ -60,13 +60,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         command = commands.Command.create_null_command()
 
-        if self.at_waypoint and not self.closest_landing_pad:
-            self.closest_landing_pad = self.find_closest_pad(report.position, landing_pad_locations)
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.at_waypoint:
                 target = self.waypoint
             else:
-                target = self.closest_landing_pad
+                target = self.find_closest_pad(report.position, landing_pad_locations)
             distance_to_target_sqr = self.distance_sqr(target,report.position)
             if distance_to_target_sqr <= self.acceptance_radius * self.acceptance_radius:
                 if not self.at_waypoint:
