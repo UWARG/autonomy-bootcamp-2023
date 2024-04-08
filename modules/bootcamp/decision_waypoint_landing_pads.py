@@ -84,12 +84,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif report.status == drone_report.drone_status.DroneStatus.HALTED and not self.landed_at_waypoint:
             
             self.landed_at_waypoint = True
-            min_landing = 100000
+            min_landing_distance = 10000000
             for landing_pad in landing_pad_locations:
-                min_landing = min(self.getL2Norm(landing_pad, report.position), min_landing)
-                self.landing_pad_cache = landing_pad
+                distance_to_lp = self.getL2Norm(landing_pad, report.position)
+                if distance_to_lp < min_landing_distance:
+                    self.landing_pad_cache = landing_pad
+                    min_landing_distance = distance_to_lp
             
-            self.commands.append(commands.Command.create_set_relative_destination_command(self.landing_pad_cache.location_x - report.position.location_x, self.landing_pad_cache.location_y - report.position.location_y))
+            location_delta_x = self.landing_pad_cache.location_x - report.position.location_x
+            location_delta_y = self.landing_pad_cache.location_y - report.position.location_y
+            self.commands.append(commands.Command.create_set_relative_destination_command(location_delta_x, location_delta_y))
             command = self.commands[self.command_index]
             
             self.command_index += 1
