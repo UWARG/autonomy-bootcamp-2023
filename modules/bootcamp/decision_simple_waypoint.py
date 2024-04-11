@@ -38,6 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.radius_squared = self.acceptance_radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -86,11 +87,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             to_travel_y = -60
 
         # Do something based on the report and the state of this class...
-        if abs(to_travel_x) <= self.acceptance_radius and abs(to_travel_y) <= self.acceptance_radius:
-            if report.status == drone_status.DroneStatus.MOVING:
-                command = commands.Command.create_halt_command()
-            elif report.status == drone_status.DroneStatus.HALTED:
-                command = commands.Command.create_land_command()
+        dist_squared = to_travel_x**2 + to_travel_y**2
+        if dist_squared <= self.radius_squared:
+            command = commands.Command.create_land_command()
         elif report.status == drone_status.DroneStatus.HALTED:
             command = commands.Command.create_set_relative_destination_command(to_travel_x, to_travel_y)
 

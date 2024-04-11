@@ -38,6 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.radius_squared = self.acceptance_radius**2
         self.reachedWayPoint = False
         self.toLandAt = waypoint # Initializing to waypoint
 
@@ -92,10 +93,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             to_travel_y = -60
 
         # Do something based on the report and the state of this class...
-        if abs(to_travel_x) <= self.acceptance_radius and abs(to_travel_y) <= self.acceptance_radius:
-            if self.reachedWayPoint and report.status == drone_status.DroneStatus.MOVING:
-                command = commands.Command.create_halt_command()
-            elif self.reachedWayPoint and report.status == drone_status.DroneStatus.HALTED:
+        dist_squared = to_travel_x**2 + to_travel_y**2
+        if dist_squared <= self.radius_squared:
+            if self.reachedWayPoint and report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
             else:
                 self.reachedWayPoint = True
@@ -120,7 +120,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
     
-    def distance(self, start, end):
+    def distance(self, start: location.Location, end: location.Location) -> float:
+        """
+        Calculates the squared value of the distance between two points
+        """
         distance_x = end.location_x - start.location_x
         distance_y = end.location_y - start.location_y
         return distance_x**2 + distance_y**2
