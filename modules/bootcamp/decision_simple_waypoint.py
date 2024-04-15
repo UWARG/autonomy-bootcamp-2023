@@ -38,7 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -67,14 +67,33 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        status = report.status
+        relative_x_dist = self.waypoint.location_x - report.position.location_x
+        relative_y_dist = self.waypoint.location_y - report.position.location_y
 
-        # Do something based on the report and the state of this class...
+        if status == drone_status.DroneStatus.HALTED:
+            # Check if halted at initial position or at waypoint
+            if self.relative_distance(relative_x_dist, relative_y_dist) < self.acceptance_radius:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x_dist,
+                    relative_y_dist,
+                )
+        elif status == drone_status.DroneStatus.MOVING:
+            if self.relative_distance(relative_x_dist, relative_y_dist) < self.acceptance_radius:
+                command = commands.Command.create_halt_command()
 
-        # Remove this when done
-        raise NotImplementedError
-
+            
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def relative_distance(
+            self, 
+            relative_x_dist: float, 
+            relative_y_dist: float,
+            ) -> float:
+        return (relative_x_dist ** 2 + relative_y_dist ** 2) ** 0.5
