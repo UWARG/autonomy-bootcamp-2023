@@ -88,8 +88,9 @@ class DetectLandingPad:
         # * verbose
         
         # Get the Result object
-        result = self.__model.predict(image, verbose = False, conf = 0.7)[0]
-            
+        results = self.__model.predict(image, verbose = False, conf = 0.7, device = self.__DEVICE)
+        result = results[0]
+        
         # Plot the annotated image from the Result object
         # Include the confidence value
         result_array = result.plot(conf=True)
