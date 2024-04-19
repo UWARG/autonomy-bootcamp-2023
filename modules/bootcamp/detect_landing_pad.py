@@ -86,11 +86,6 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-
-        path = pathlib.Path("models/")
-        createResult, _ = self.create(path)
-        if not createResult:
-            raise ValueError
         
         # Get the Result object
         result = self.__model.predict(image, verbose = False, conf = 0.7)[0]
