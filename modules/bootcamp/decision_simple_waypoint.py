@@ -37,7 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
         self.radius_squared = self.acceptance_radius**2
 
         # ============
@@ -68,33 +67,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        
-        position_x, position_y = report.position.location_x, report.position.location_y
-        destination_x, destination_y = self.waypoint.location_x, self.waypoint.location_y
-
-        to_travel_x = destination_x - position_x
-        to_travel_y = destination_y - position_y
-
-        #Restricting to flight boundary
-        if to_travel_x > 60:
-            to_travel_x = 60
-        elif to_travel_x < -60:
-            to_travel_x = -60
-        
-        if to_travel_y > 60:
-            to_travel_y = 60
-        elif to_travel_y < -60:
-            to_travel_y = -60
-
         # Do something based on the report and the state of this class...
-        dist_squared = to_travel_x**2 + to_travel_y**2
+        dist_squared = (self.waypoint.location_x - report.position.location_x)**2 + (self.waypoint.location_y - report.position.location_y)**2
         if dist_squared <= self.radius_squared:
-            command = commands.Command.create_land_command()
+            if report.status == drone_status.DroneStatus.HALTED:
+                command = commands.Command.create_land_command()
+            elif report.status == drone_status.DroneStatus.MOVING:
+                command = commands.Command.create_halt_command()
         elif report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(to_travel_x, to_travel_y)
-
-        # Remove this when done
-        # raise NotImplementedError
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, 
+                                                                               self.waypoint.location_y - report.position.location_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

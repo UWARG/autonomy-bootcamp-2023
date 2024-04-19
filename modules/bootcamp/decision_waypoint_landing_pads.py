@@ -39,8 +39,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.radius_squared = self.acceptance_radius**2
-        self.reachedWayPoint = False
-        self.toLandAt = waypoint # Initializing to waypoint
+        self.reached_way_point = False
+        self.to_land_at = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -71,48 +71,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        position_x, position_y = report.position.location_x, report.position.location_y
-
-        if self.reachedWayPoint:
-            destination_x, destination_y = self.toLandAt.location_x, self.toLandAt.location_y
+        if self.reached_way_point:
+            dist_squared = (self.to_land_at.location_x - report.position.location_x)**2 + (self.to_land_at.location_y - report.position.location_y)**2
         else:
-            destination_x, destination_y = self.waypoint.location_x, self.waypoint.location_y
-            
-        to_travel_x = destination_x - position_x
-        to_travel_y = destination_y - position_y
-
-        #Restricting to flight boundary
-        if to_travel_x > 60:
-            to_travel_x = 60
-        elif to_travel_x < -60:
-            to_travel_x = -60
-        
-        if to_travel_y > 60:
-            to_travel_y = 60
-        elif to_travel_y < -60:
-            to_travel_y = -60
+            dist_squared = (self.waypoint.location_x - report.position.location_x)**2 + (self.waypoint.location_y - report.position.location_y)**2
 
         # Do something based on the report and the state of this class...
-        dist_squared = to_travel_x**2 + to_travel_y**2
         if dist_squared <= self.radius_squared:
-            if self.reachedWayPoint and report.status == drone_status.DroneStatus.HALTED:
+            if self.reached_way_point and report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
             else:
-                self.reachedWayPoint = True
-                minimumDistance = float("inf")
+                self.reached_way_point = True
+                minimum_distance = float("inf")
 
                 # Iterate through landing pad locations to find closest
                 for landing_pad in landing_pad_locations:
-                    distance = self.distance(report.position, landing_pad)
-                    if distance < minimumDistance:
-                        minimumDistance = distance
-                        self.toLandAt = landing_pad
+                    distance = self.distance_squared_calculator(report.position, landing_pad)
+                    if distance < minimum_distance:
+                        minimum_distance = distance
+                        self.to_land_at = landing_pad
                 command = commands.Command.create_halt_command()
         elif report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(to_travel_x, to_travel_y)
-
-        # Remove this when done
-        # raise NotImplementedError
+            if self.reached_way_point:
+                command = commands.Command.create_set_relative_destination_command(self.to_land_at.location_x - report.position.location_x, self.to_land_at.location_y - report.position.location_y)
+            else:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)            
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -120,10 +103,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
     
-    def distance(self, start: location.Location, end: location.Location) -> float:
+    def distance_squared_calculator(self, start: location.Location, end: location.Location) -> float:
         """
         Calculates the squared value of the distance between two points
         """
-        distance_x = end.location_x - start.location_x
-        distance_y = end.location_y - start.location_y
-        return distance_x**2 + distance_y**2
+        return (end.location_x - start.location_x)**2 + (end.location_y - start.location_y)**2
