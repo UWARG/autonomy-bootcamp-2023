@@ -97,6 +97,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 
                 if distance_to_waypoint_squared < self.acceptance_radius**2:
                     self.reached = True
+                    return commands.Command.create_land_command()
                 else:
                     return commands.Command.create_set_relative_destination_command(
                         self.waypoint.location_x - report.position.location_x,
