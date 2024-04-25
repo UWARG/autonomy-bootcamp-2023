@@ -36,7 +36,7 @@ TIME_WAIT_BEFORE_EXIT = 5  # seconds
 # to reach the 1st command
 # Increase the step size if your computer is lagging
 # Larger step size is smaller FPS
-TIME_STEP_SIZE = 0.1  # seconds
+TIME_STEP_SIZE = 0.7  # seconds
 
 # OpenCV ignores your display settings,
 # so if the window is too small or too large,
