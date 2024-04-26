@@ -37,11 +37,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.at_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def dist_to_pad(self, pad: location.Location):
+        relative_x = pad.location_x - self.waypoint.location_x
+        relative_y = pad.location_y - self.waypoint.location_y
+        return relative_x ** 2 + relative_y ** 2
 
     def run(self,
             report: drone_report.DroneReport,
@@ -68,10 +73,30 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        relative_x = self.waypoint.location_x - report.position.location_x
+        relative_y = self.waypoint.location_y - report.position.location_y
 
-        # Remove this when done
-        raise NotImplementedError
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.at_waypoint:
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                self.at_waypoint = True
+            else:
+                min_pad_dist = 10000
+                closest = 0
+                for i in range(len(landing_pad_locations)):
+                    pad_dist = self.dist_to_pad(landing_pad_locations[i])
+                    if pad_dist < min_pad_dist:
+                        min_pad_dist = pad_dist
+                        closest = i
+                if min_pad_dist < 10000:
+                    relative_x = landing_pad_locations[closest].location_x - report.position.location_x
+                    relative_y = landing_pad_locations[closest].location_y - report.position.location_y
+                if relative_x ** 2 + relative_y ** 2 <= self.acceptance_radius ** 2:
+                    command = commands.Command.create_land_command()
+                    self.landing_requested = True
+                else: 
+                    command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

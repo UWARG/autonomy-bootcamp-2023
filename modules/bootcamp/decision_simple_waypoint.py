@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.landing_requested = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,11 +68,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        # find relative positions
+        relative_x = self.waypoint.location_x - report.position.location_x
+        relative_y = self.waypoint.location_y - report.position.location_y
 
-        # Remove this when done
-        raise NotImplementedError
-
+        if report.status == drone_status.DroneStatus.HALTED and not self.landing_requested:
+            # check if drone can land
+            if relative_x ** 2 + relative_y ** 2 <= self.acceptance_radius ** 2:
+                command = commands.Command.create_land_command()
+                self.landing_requested = True
+                
+            # check if valid waypoint
+            elif abs(self.waypoint.location_x) <= 60 and abs(self.waypoint.location_y) <= 60:
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+               
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
