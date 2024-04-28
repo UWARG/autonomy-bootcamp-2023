@@ -97,7 +97,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 
                 if distance_to_waypoint_squared < self.acceptance_radius**2:
                     self.reached = True
-                    return commands.Command.create_land_command()
                 else:
                     return commands.Command.create_set_relative_destination_command(
                         self.waypoint.location_x - report.position.location_x,
@@ -115,9 +114,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     return commands.Command.create_set_relative_destination_command(
                         self.landing_pad_location.location_x - report.position.location_x,
                         self.landing_pad_location.location_y - report.position.location_y)
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

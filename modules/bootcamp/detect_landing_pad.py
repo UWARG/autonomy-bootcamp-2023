@@ -101,7 +101,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,s
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -113,11 +113,10 @@ class DetectLandingPad:
             # result, box = ...
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             print(box)
-            if result:
-                bounding_boxes.append(box)
+            if not result:
+                return [], image_annotated
+            bounding_boxes.append(box)
 
-        # Remove this when done
-        # raise NotImplementedError
         return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
