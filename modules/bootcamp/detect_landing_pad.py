@@ -8,6 +8,8 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
+import ultralytics.engine
+import ultralytics.engine.results
 
 from .. import bounding_box
 
@@ -85,33 +87,36 @@ class DetectLandingPad:
         # * source
         # * conf
         # * device
-        # * verbose
-        predictions = ...
+        # * verbose (i cant find this param in the docs...)
+        predictions = self.__model.predict(source=image, conf=0.5, device=self.__DEVICE)
 
         # Get the Result object
-        prediction = ...
+        prediction: ultralytics.engine.results.Results = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu: np.ndarray = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+        dimensions = boxes_cpu.shape
+
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
+        for i in range(0, dimensions[0]):
             # Create BoundingBox object and append to list
-            # result, box = ...
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            bounding_boxes.append(box)
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
