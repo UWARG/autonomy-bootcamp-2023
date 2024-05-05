@@ -88,7 +88,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose (i cant find this param in the docs...)
-        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE)
+        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
 
         # Get the Result object
         prediction: ultralytics.engine.results.Results = predictions[0]
