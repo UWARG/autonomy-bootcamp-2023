@@ -106,14 +106,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             
             if self.coords_to_dist(self.get_coords_to(report, self.waypoint)) < self.acceptance_radius:
                 print("I am over something important!!")
+
                 if not self.waypoint_reached:
                     print("I am seeing the waypoint for the first time!!")
                     self.waypoint_reached = True
-                    print("About to find closest landing pad!!!")
                     self.waypoint = self.closest_pad(report, landing_pad_locations)
-                    print("found closest landing pad!!!")
                     move_x, move_y = self.get_coords_to(report, self.waypoint)
-                    print("Got relative coords to landing pad!!!")
                     command = commands.Command.create_set_relative_destination_command(move_x, move_y)
                 
                 else:
@@ -121,7 +119,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     command = commands.Command.create_land_command()
                     self.landing = True
             else:
-                print("I have stopped for some reason and am not over anything important!!!")
                 move_x, move_y = self.get_coords_to(report, self.waypoint)
                 command = commands.Command.create_set_relative_destination_command(move_x, move_y)
             
