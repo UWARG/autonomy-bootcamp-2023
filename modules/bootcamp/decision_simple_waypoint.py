@@ -50,6 +50,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     def get_distance_to(self, report: drone_report.DroneReport, waypoint: location.Location):
         dist_x, dist_y = self.get_coords_to(report, waypoint)
         return ((dist_x**2) + (dist_y**2))**0.5
+    
+    def coords_to_dist(self, x: float, y: float):
+        return ((x**2) + (y**2))**0.5
 
     def run(self,
             report: drone_report.DroneReport,
@@ -83,7 +86,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             move_x, move_y = self.get_coords_to(report, self.waypoint)
 
             # are we halted at the waypoint?
-            if self.get_distance_to(report, self.waypoint) < self.acceptance_radius:
+            if self.coords_to_dist(move_x, move_y) < self.acceptance_radius:
                 command = commands.Command.create_land_command()
                 self.landing = True
             else:
