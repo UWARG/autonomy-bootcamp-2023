@@ -8,8 +8,6 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
-import ultralytics.engine
-import ultralytics.engine.results
 
 from .. import bounding_box
 
@@ -91,7 +89,7 @@ class DetectLandingPad:
         predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
 
         # Get the Result object
-        prediction: ultralytics.engine.results.Results = predictions[0]
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -103,7 +101,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu: np.ndarray = boxes_xyxy.detach().cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
