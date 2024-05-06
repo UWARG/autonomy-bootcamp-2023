@@ -86,8 +86,9 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.7, \
-                                           device=(0 if torch.cuda.is_available() else "cpu"), \
+        predictions = self.__model.predict(image,
+                                           conf=0.7,
+                                           device=self.__DEVICE,
                                            verbose=True)
 
         # Get the Result object
@@ -111,7 +112,10 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             box = boxes_cpu[i]
             result, bbox = bounding_box.BoundingBox.create(box)
-            bounding_boxes.append(bbox)
+            if result:
+                bounding_boxes.append(bbox)
+            else:
+                return None
 
         return bounding_boxes, image_annotated
 

@@ -38,8 +38,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Keeping track of what stage the drone is at:
-        self.at_pad = True
-        self.at_waypoint = False
+        self.waypoint_success = False
+        # Storing the landing pad and whether the pad has reached:
+        self.landing_pad = None
+        self.landing_pad_success = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,46 +72,46 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Finds the closest landing pad to the drone's current location:
-        def distance_to_pad_sqr(pad_loc: location.Location, drone_loc: location.Location) -> float:
-            distance_sqr = ((drone_loc.location_x - pad_loc.location_x) ** 2 +
-                            (drone_loc.location_y - pad_loc.location_y) ** 2)
-            return distance_sqr
-
-        # While the status is HALTED:
+        # If the status is HALTED:
         if report.status == drone_status.DroneStatus.HALTED:
-            # Task 1: Move from initial position to waypoint.
-            #   at initial pad
-            #   not at final waypoint
-            if self.at_pad and not self.at_waypoint:
-                command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y)
-                self.at_pad = False
-                self.at_waypoint = True
-            # Task 2: Move from waypoint to the closest landing pad.
-            #   not at initial pad
-            #   at final waypoint
-            elif not self.at_pad and self.at_waypoint:
-                # Finding the closest landing pad location:
-                best_pad = landing_pad_locations[0]
-                best_dist_sqr = distance_to_pad_sqr(best_pad, self.waypoint)
-                for this_location in landing_pad_locations[1:]:
-                    this_dist_sqr = distance_to_pad_sqr(this_location, self.waypoint)
-                    if this_dist_sqr < best_dist_sqr:
-                        best_pad = this_location
-                        best_dist_sqr = this_dist_sqr
-                # Move to the closest landing pad:
-                command = commands.Command.create_set_relative_destination_command(
-                    best_pad.location_x - report.position.location_x,
-                    best_pad.location_y - report.position.location_y
-                )
-                self.at_waypoint = False
-            # Task 3: Land.
-            #   not at initial pad
-            #   not at final waypoint
-            elif not self.at_pad and not self.at_waypoint:
-                command = commands.Command.create_land_command()
+            # If the drone has not reached the waypoint yet:
+            if not self.waypoint_success:
+                dist_to_waypoint_sqr = ((report.position.location_x - self.waypoint.location_x) ** 2 +
+                                        (report.position.location_y - self.waypoint.location_y) ** 2)
+                # If the drone is sufficiently close to the waypoint:
+                if dist_to_waypoint_sqr <= self.acceptance_radius ** 2:
+                    self.waypoint_success = True
+                    # Calculate and store the nearest landing pad:
+                    best_pad = None
+                    best_dist_sqr = float('inf')
+                    for this_location in landing_pad_locations:
+                        this_dist_sqr = ((this_location.location_x - report.position.location_x) ** 2 +
+                                         (this_location.location_y - report.position.location_y) ** 2)
+                        if this_dist_sqr < best_dist_sqr:
+                            best_pad = this_location
+                            best_dist_sqr = this_dist_sqr
+                    # Store the nearest landing pad:
+                    self.landing_pad = best_pad
+                # Otherwise travel to the waypoint:
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x - report.position.location_x,
+                        self.waypoint.location_y - report.position.location_y
+                    )
+            # Otherwise if waypoint has already been reached:
+            else:
+                dist_to_landing_sqr = ((report.position.location_x - self.landing_pad.location_x) ** 2 +
+                                       (report.position.location_y - self.landing_pad.location_y) ** 2)
+                # If sufficiently close to the landing pad, land:
+                if dist_to_landing_sqr <= self.acceptance_radius ** 2:
+                    self.landing_pad_success = True
+                    command = commands.Command.create_land_command()
+                # Otherwise go to the landing pad:
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.landing_pad.location_x - report.position.location_x,
+                        self.landing_pad.location_y - report.position.location_y
+                    )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
