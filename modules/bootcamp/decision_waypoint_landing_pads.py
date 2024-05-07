@@ -43,7 +43,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def dist_to_pad(self, pad: location.Location):
+    def dist_to_pad_squared(self, pad: location.Location):
         relative_x = pad.location_x - self.waypoint.location_x
         relative_y = pad.location_y - self.waypoint.location_y
         return relative_x ** 2 + relative_y ** 2
@@ -73,30 +73,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        relative_x = self.waypoint.location_x - report.position.location_x
-        relative_y = self.waypoint.location_y - report.position.location_y
-
         if report.status == drone_status.DroneStatus.HALTED:
-            if not self.at_waypoint:
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            relative_x = self.waypoint.location_x - report.position.location_x
+            relative_y = self.waypoint.location_y - report.position.location_y
+            if relative_x ** 2 + relative_y ** 2 < self.acceptance_radius ** 2 and not self.at_waypoint:
                 self.at_waypoint = True
+            elif not self.at_waypoint:
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
             else:
-                min_pad_dist = 10000
-                closest = 0
-                for i in range(len(landing_pad_locations)):
-                    pad_dist = self.dist_to_pad(landing_pad_locations[i])
+                min_pad_dist = float('inf')
+                closest = None
+                for pad in landing_pad_locations:
+                    pad_dist = self.dist_to_pad_squared(pad)
                     if pad_dist < min_pad_dist:
                         min_pad_dist = pad_dist
-                        closest = i
-                if min_pad_dist < 10000:
-                    relative_x = landing_pad_locations[closest].location_x - report.position.location_x
-                    relative_y = landing_pad_locations[closest].location_y - report.position.location_y
+                        closest = pad
+                if closest is not None:
+                    relative_x = closest.location_x - report.position.location_x
+                    relative_y = closest.location_y - report.position.location_y
                 if relative_x ** 2 + relative_y ** 2 <= self.acceptance_radius ** 2:
                     command = commands.Command.create_land_command()
                     self.landing_requested = True
                 else: 
                     command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
