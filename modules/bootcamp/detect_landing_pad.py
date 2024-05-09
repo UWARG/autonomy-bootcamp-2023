@@ -27,7 +27,7 @@ class DetectLandingPad:
     # Chooses the GPU if it exists, otherwise runs on the CPU
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
-    __DEVICE = 0 if torch.cuda.is_available() else "cpu"
+    __DEVICE = 'cuda' if torch.cuda.is_available() else "cpu"
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -77,7 +77,8 @@ class DetectLandingPad:
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        
+        
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -86,32 +87,36 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
-
+        predictions = self.__model.predict(source=image, conf=0.7, device="cpu")
         # Get the Result object
-        prediction = ...
-
+        
+        for prediction in predictions:
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+            image_annotated = prediction.plot(conf=True)
+            #print(image_annotated)
+        
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+            boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
-
+            boxes_cpu = boxes_xyxy.detach().cpu().numpy()
+            #print(boxes_cpu)
+            
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
-
-        # Remove this when done
-        raise NotImplementedError
+        for i in range(boxes_cpu.shape[0]):
+            results, bbox = bounding_box.BoundingBox.create(boxes_cpu[i])
+            bounding_boxes.append(bbox)
+            
+        return bounding_boxes, image_annotated 
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
