@@ -36,9 +36,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Add your own
-
+        self.commands =[commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
+                        commands.Command.create_land_command()]
+        self.at_destination = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -67,11 +67,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        
         # Do something based on the report and the state of this class...
-
+        if report.status == drone_status.DroneStatus.HALTED and not self.at_destination:
+            command = self.commands[0]
+            self.at_destination = True
+        elif report.status == drone_status.DroneStatus.HALTED and self.at_destination:
+            command = self.commands[1]
+    
+        
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
