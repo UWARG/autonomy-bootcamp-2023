@@ -88,6 +88,10 @@ class DetectLandingPad:
         # * verbose (i cant find this param in the docs...)
         predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
 
+        # Sanity check in case invalid result
+        if predictions is None:
+            return False
+
         # Get the Result object
         prediction = predictions[0]
 
@@ -111,6 +115,11 @@ class DetectLandingPad:
         for i in range(0, dimensions[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+
+            # another sanity check
+            if not result or box is None:
+                return False
+            
             bounding_boxes.append(box)
 
         return (bounding_boxes, image_annotated)
