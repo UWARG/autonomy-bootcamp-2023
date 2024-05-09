@@ -78,6 +78,8 @@ class DetectLandingPad:
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        default_retval = ([], image)
+
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -90,7 +92,7 @@ class DetectLandingPad:
 
         # Sanity check in case invalid result
         if predictions is None:
-            return False
+            return default_retval
 
         # Get the Result object
         prediction = predictions[0]
@@ -118,7 +120,7 @@ class DetectLandingPad:
 
             # another sanity check
             if not result or box is None:
-                return False
+                return default_retval
             
             bounding_boxes.append(box)
 
