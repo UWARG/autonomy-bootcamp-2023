@@ -38,11 +38,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-
+        self.commands =[commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
+                        commands.Command.create_land_command()]
+        self.travaling = False
+        self.at_waypoint = False
+        self.go_to_closest_pad = False
+        # ============
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -69,12 +75,45 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        def get_distance(landing_pad_location: "location.Location", 
+                     dron_location: "location.Location" ) -> float:
+            
+            x = landing_pad_location.location_x - dron_location.location_x
+            y = landing_pad_location.location_y - dron_location.location_y
+            result = x ** 2 + y ** 2
+            return result
+    
+        if self.travaling == False:
+
+            if report.status == drone_status.DroneStatus.HALTED and not self.travaling:
+                command = self.commands[0]
+                self.travaling = True
+        
+        elif self.go_to_closest_pad == False and report.status == drone_status.DroneStatus.HALTED:
+
+            min_distance = 100000000000000
+            closest_pad = landing_pad_locations[0]
+            for pad in landing_pad_locations:
+                distance = get_distance(pad, report.position)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_pad = pad
+            
+            position = report.position 
+            command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - position.location_x, closest_pad.location_y - position.location_y)
+            self.go_to_closest_pad = True
+        elif self.go_to_closest_pad == True and report.status == drone_status.DroneStatus.HALTED:
+            command = self.commands[1]
+        
+            
 
         # Remove this when done
-        raise NotImplementedError
+        #raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    
