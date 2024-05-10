@@ -77,9 +77,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED and not self.to_destination:
             command = self.commands[0]
             self.to_destination = True
-        elif report.status == drone_status.DroneStatus.HALTED and (self.get_position_radius(report.position, self.waypoint) <= (self.acceptance_radius ** 2)):
+        elif report.status == drone_status.DroneStatus.HALTED and (self.get_position_radius(report.position, self.waypoint) <= (self.acceptance_radius ** 2)) and self.to_destination == True:
             command = self.commands[1]
-        elif report.status == drone_status.DroneStatus.HALTED and (self.get_position_radius(report.position, self.waypoint) >= (self.acceptance_radius ** 2)):
+        elif report.status == drone_status.DroneStatus.HALTED and (self.get_position_radius(report.position, self.waypoint) >= (self.acceptance_radius ** 2)) and self.to_destination == True:
             command = self.commands[0]
         # Remove this when done
         #raise NotImplementedError
