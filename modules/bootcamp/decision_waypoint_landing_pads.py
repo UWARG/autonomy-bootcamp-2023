@@ -86,10 +86,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if self.travaling == False:
 
             if report.status == drone_status.DroneStatus.HALTED and not self.travaling:
+
                 command = self.commands[0]
                 self.travaling = True
         
         elif self.go_to_closest_pad == False and report.status == drone_status.DroneStatus.HALTED:
+            
 
             min_distance = 100000000000000
             closest_pad = landing_pad_locations[0]

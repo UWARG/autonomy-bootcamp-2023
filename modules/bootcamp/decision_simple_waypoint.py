@@ -67,13 +67,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        
+        def get_position_radius(dron_position: "location.Location") -> float:
+            return dron_position.location_x ** 2 + dron_position.location_y ** 2
+
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED and not self.at_destination:
             command = self.commands[0]
             self.at_destination = True
         elif report.status == drone_status.DroneStatus.HALTED and self.at_destination:
             command = self.commands[1]
+        
+        if report.status == drone_status.DroneStatus.HALTED and get_position_radius(report.position) >= self.acceptance_radius:
+            command = self.commands[1]
+        
     
         
         # Remove this when done
