@@ -76,6 +76,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Modified "decision_example" to work for just one command.
 
+        # If the drone is HALTED and the initial command has not been issued:
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
             # Print some information for debugging
             print(self.counter)
@@ -84,6 +85,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
             command = self.commands[self.command_index]
             self.command_index += 1
+        # Else if the drone is HALTED but the landing command has not been issued:
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
             # !! Check acceptance_radius here
             distance_from_landing_pad_sqr = ((self.waypoint.location_x - report.position.location_x) ** 2 +
@@ -91,7 +93,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if distance_from_landing_pad_sqr <= self.acceptance_radius ** 2:
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
+        # Else the default (null) command is returned.
 
+        # Updating the count of commands issued:
         self.counter += 1
 
         # ============
