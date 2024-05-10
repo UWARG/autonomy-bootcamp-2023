@@ -93,7 +93,7 @@ class DetectLandingPad:
         for prediction in predictions:
         # Plot the annotated image from the Result object
         # Include the confidence value
-            image_annotated = prediction.plot(conf=True)
+            image_annotated = prediction.plot()
             #print(image_annotated)
         
 
@@ -116,6 +116,9 @@ class DetectLandingPad:
             results, bbox = bounding_box.BoundingBox.create(boxes_cpu[i])
             if results:
                 bounding_boxes.append(bbox)
+            else:
+                bounding_boxes = []
+                break
             
         return bounding_boxes, image_annotated 
 

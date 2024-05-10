@@ -48,6 +48,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    # get the radius. 
+    def get_position_radius(self, dron_position: "location.Location") -> float:
+        return dron_position.location_x ** 2 + dron_position.location_y ** 2
+    
+    # get the distance bewteen pad and drone
+    def get_distance(self, landing_pad_location: "location.Location", 
+                     dron_location: "location.Location" ) -> float:
+    
+            x = landing_pad_location.location_x - dron_location.location_x
+            y = landing_pad_location.location_y - dron_location.location_y
+            result = x ** 2 + y ** 2
+            return result
     
     def run(self,
             report: drone_report.DroneReport,
@@ -73,41 +85,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        
         # Do something based on the report and the state of this class...
 
-        # get the distance bewteen pad and drone
-        def get_distance(landing_pad_location: "location.Location", 
-                     dron_location: "location.Location" ) -> float:
-            
-            x = landing_pad_location.location_x - dron_location.location_x
-            y = landing_pad_location.location_y - dron_location.location_y
-            result = x ** 2 + y ** 2
-            return result
-        
-        # get the radius of the drone. 
-        #def get_position_radius(dron_position: "location.Location") -> float:
-        #    return dron_position.location_x ** 2 + dron_position.location_y ** 2
-        
         # Program started and go to the way point
         if self.travaling == False and report.status == drone_status.DroneStatus.HALTED and not self.travaling:
-                command = self.commands[0]
-                self.travaling = True
+            command = self.commands[0]
+            self.travaling = True
         
         #drone is at the waypoint and decide which pad is the closest.
         elif self.go_to_closest_pad == False and self.travaling == True and report.status == drone_status.DroneStatus.HALTED:
             
             # get the closest pad position.
-            min_distance = 100000000000000
             closest_pad = landing_pad_locations[0]
+            min_distance = self.get_distance(closest_pad, report.position)
             for pad in landing_pad_locations:
-                distance = get_distance(pad, report.position)
+                distance = self.get_distance(pad, report.position)
                 if distance < min_distance:
                     min_distance = distance
                     closest_pad = pad
-            
-            position = report.position 
-            # going to the closest point.
+
+            position = report.position
             command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - position.location_x, closest_pad.location_y - position.location_y)
             self.go_to_closest_pad = True
 
@@ -123,5 +121,3 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         return command
-    
-    

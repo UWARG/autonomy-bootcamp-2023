@@ -37,12 +37,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         self.commands =[commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
-                        commands.Command.create_land_command()]
-        self.at_destination = False
+                        commands.Command.create_land_command(),
+                        commands.Command.create_halt_command()]
+        self.to_destination = False
+        self.at_boundary = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
+    def get_position_radius(self, dron_position: "location.Location", waypoint_position: "location.Location") -> float:
+            return (dron_position.location_x - waypoint_position.location_x) ** 2 + (dron_position.location_y - waypoint_position.location_y) ** 2
+    
+    
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -67,21 +72,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        def get_position_radius(dron_position: "location.Location") -> float:
-            return dron_position.location_x ** 2 + dron_position.location_y ** 2
-
+        
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and not self.at_destination:
+        if report.status == drone_status.DroneStatus.HALTED and not self.to_destination:
             command = self.commands[0]
-            self.at_destination = True
-        elif report.status == drone_status.DroneStatus.HALTED and self.at_destination:
+            self.to_destination = True
+        elif report.status == drone_status.DroneStatus.HALTED and (self.get_position_radius(report.position, self.waypoint) <= (self.acceptance_radius ** 2)):
             command = self.commands[1]
-        
-        if report.status == drone_status.DroneStatus.HALTED and get_position_radius(report.position) >= self.acceptance_radius:
-            command = self.commands[1]
-        
-    
-        
+        elif report.status == drone_status.DroneStatus.HALTED and (self.get_position_radius(report.position, self.waypoint) >= (self.acceptance_radius ** 2)):
+            command = self.commands[0]
         # Remove this when done
         #raise NotImplementedError
 
