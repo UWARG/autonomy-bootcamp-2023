@@ -75,6 +75,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # get the distance bewteen pad and drone
         def get_distance(landing_pad_location: "location.Location", 
                      dron_location: "location.Location" ) -> float:
             
@@ -82,17 +84,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             y = landing_pad_location.location_y - dron_location.location_y
             result = x ** 2 + y ** 2
             return result
-    
-        if self.travaling == False:
-
-            if report.status == drone_status.DroneStatus.HALTED and not self.travaling:
-
+        
+        # get the radius of the drone. 
+        #def get_position_radius(dron_position: "location.Location") -> float:
+        #    return dron_position.location_x ** 2 + dron_position.location_y ** 2
+        
+        # Program started and go to the way point
+        if self.travaling == False and report.status == drone_status.DroneStatus.HALTED and not self.travaling:
                 command = self.commands[0]
                 self.travaling = True
         
-        elif self.go_to_closest_pad == False and report.status == drone_status.DroneStatus.HALTED:
+        #drone is at the waypoint and decide which pad is the closest.
+        elif self.go_to_closest_pad == False and self.travaling == True and report.status == drone_status.DroneStatus.HALTED:
             
-
+            # get the closest pad position.
             min_distance = 100000000000000
             closest_pad = landing_pad_locations[0]
             for pad in landing_pad_locations:
@@ -102,13 +107,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_pad = pad
             
             position = report.position 
+            # going to the closest point.
             command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - position.location_x, closest_pad.location_y - position.location_y)
             self.go_to_closest_pad = True
+
+        # drone is above the pad.
         elif self.go_to_closest_pad == True and report.status == drone_status.DroneStatus.HALTED:
             command = self.commands[1]
         
-            
-
         # Remove this when done
         #raise NotImplementedError
 
