@@ -121,3 +121,4 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         return command
+    

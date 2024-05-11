@@ -90,20 +90,19 @@ class DetectLandingPad:
         predictions = self.__model.predict(source=image, conf=0.8, device=self.__DEVICE, verbose=False)
         # Get the Result object
         
-        for prediction in predictions:
+        prediction = predictions[0]
         # Plot the annotated image from the Result object
         # Include the confidence value
-            image_annotated = prediction.plot()
+        image_annotated = prediction.plot()
             #print(image_annotated)
         
-
         # Get the xyxy boxes list from the Boxes object in the Result object
-            boxes_xyxy = prediction.boxes.xyxy
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-            boxes_cpu = boxes_xyxy.detach().cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
             #print(boxes_cpu)
             
         # Loop over the boxes list and create a list of bounding boxes
@@ -118,6 +117,7 @@ class DetectLandingPad:
                 bounding_boxes.append(bbox)
             else:
                 bounding_boxes = []
+                image_annotated = None
                 break
             
         return bounding_boxes, image_annotated 
