@@ -68,7 +68,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         min_distance = 100000000  # Initialize with a large number
         
         for pad_location in landing_pad_locations:
-            distance = self.calculate_distance(current_position, pad_location)
+            distance = self.dist(current_position, pad_location)
             if distance < min_distance:
                 min_distance = distance
                 nearest_pad = pad_location
