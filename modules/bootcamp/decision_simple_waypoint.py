@@ -84,10 +84,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if self.should_move_to_waypoint(report):
+        if self.need_move(report):
             command = self.move_to_waypoint(report)
 
-        elif self.has_reached_waypoint(report):
+        elif self.at_point(report):
             command = commands.Command.create_halt_command()
             
         elif report.status == drone_status.Status.Landed:
