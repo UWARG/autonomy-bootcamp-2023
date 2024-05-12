@@ -42,7 +42,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+    def need_move(self, report: drone_report.DroneReport):
+        if report.status == drone_status.Status.Halted and report.position == report.destination and report.position.distance_to(self.waypoint) > self.acceptance_radius:
+            return True
+        else:
+            return False
 
+    def move(self, report: drone_report.DroneReport):
+        x = self.waypoint.x - report.position.x 
+        y = self.waypoint.y - report.position.y
+        return commands.Command.create_set_relative_destination(x, y)
+    
+    def at_point(self, report: drone_report.DroneReport):
+        if report.status == drone_status.Status.Halted and report.position != report.destination:
+            return True
+        else:
+            return False
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:

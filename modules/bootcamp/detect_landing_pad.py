@@ -11,7 +11,7 @@ import ultralytics
 
 from .. import bounding_box
 
-
+ 
 # This is just an interface
 # pylint: disable=too-few-public-methods
 class DetectLandingPad:
