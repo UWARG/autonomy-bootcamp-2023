@@ -66,7 +66,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     bestpad_dist_squared = current_dist_squared
         
         else:
-            self.best_pad = report.position
+            self.best_pad = None
 
 
     def run(self,
@@ -105,10 +105,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             command = commands.Command.create_set_relative_destination_command(rel_x, rel_y)
 
-            if self.reached and abs(rel_x) < self.acceptance_radius and abs(rel_y) < self.acceptance_radius:
+            if self.reached and (rel_x ** 2 + rel_y ** 2) <= self.acceptance_radius ** 2:
                 command = commands.Command.create_land_command()
             
-            if not self.reached and abs(rel_x) < self.acceptance_radius and abs(rel_y) < self.acceptance_radius:
+            if not self.reached and (rel_x ** 2 + rel_y ** 2) <= self.acceptance_radius ** 2:
                 self.find_best_pad(report, landing_pad_locations) # find nearest landing pad
                 self.reached = True
 
