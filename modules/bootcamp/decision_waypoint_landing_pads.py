@@ -38,10 +38,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.command_index = 0
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
+        ]
+
+        self.has_sent_landing_command = False
+        self.has_arrived_at_waypoint = False
+
+        self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    # def distance_to(self, sx, sy, lx, ly):
+    #     return ((sx - lx) ** 2 + (sy - ly) ** 2) ** 0.5
 
     def run(self,
             report: drone_report.DroneReport,
@@ -69,12 +81,38 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
+            # Print some information for debugging
+            print(self.counter)
+            print(self.command_index)
+            print("Halted at: " + str(report.position))
 
-        # Remove this when done
-        raise NotImplementedError
+            command = self.commands[self.command_index]
+            self.has_arrived_at_waypoint = True
+            self.command_index += 1
+        
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_sent_landing_command:
+
+            command = commands.Command.create_land_command()
+
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_arrived_at_waypoint:
+            nearest_landing_pad = None
+            nearest_distance = None
+
+            for landing_pad in landing_pad_locations:
+                distance = ((report.position.location_x - landing_pad.location_x) ** 2 + (report.position.location_y - landing_pad.location_y) ** 2) ** 0.5
+                if nearest_distance is None or distance < nearest_distance:
+                    nearest_distance = distance
+                    nearest_landing_pad = landing_pad
+                    
+            x_dest = nearest_landing_pad.location_x - report.position.location_x
+            y_dest = nearest_landing_pad.location_y - report.position.location_y
+            # print(x_dest, y_dest)
+            command = commands.Command.create_set_relative_destination_command(x_dest, y_dest)
+            self.has_sent_landing_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
+        
         return command
