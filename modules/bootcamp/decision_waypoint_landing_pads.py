@@ -38,7 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-
+        self.halt_at_init_pos = True
+        self.halt_at_waypoint = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,10 +70,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED and self.halt_at_init_pos:
+            self.halt_at_init_pos = False
+            self.halt_at_waypoint = True 
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, 
+                                                                               self.waypoint.location_y)
+        elif report.status == (drone_status.DroneStatus.HALTED and not 
+        self.halt_at_init_pos and self.halt_at_waypoint):
+            self.halt_at_waypoint = False 
+            max_dist_squared = float('inf')
 
-        # Remove this when done
-        raise NotImplementedError
-
+            for cur_landing_pad in landing_pad_locations:
+                cur_dist_squared = pow((self.waypoint.location_x - 
+                    cur_landing_pad.location_x), 2) + pow((self.waypoint.location_y - 
+                    cur_landing_pad.location_y), 2)
+                if cur_dist_squared < max_dist_squared:
+                    print("thank goodness")
+                    max_dist_squared = cur_dist_squared
+                    self.closest_landing_pad = cur_landing_pad
+            
+            command = commands.Command.create_set_relative_destination_command(self.closest_landing_pad.location_x 
+                        - self.waypoint.location_x, self.closest_landing_pad.location_y - self.waypoint.location_y)
+        elif report.status == drone_status.DroneStatus.HALTED and not self.halt_at_init_pos and not self.half_at_waypoint:
+            command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
