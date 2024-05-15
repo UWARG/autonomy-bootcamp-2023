@@ -52,8 +52,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    # def distance_to(self, sx, sy, lx, ly):
-    #     return ((sx - lx) ** 2 + (sy - ly) ** 2) ** 0.5
 
     def run(self,
             report: drone_report.DroneReport,
@@ -88,6 +86,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             print("Halted at: " + str(report.position))
 
             command = self.commands[self.command_index]
+            # take self position into account
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.has_arrived_at_waypoint = True
             self.command_index += 1
         
@@ -100,11 +100,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             nearest_distance = None
 
             for landing_pad in landing_pad_locations:
-                distance = ((report.position.location_x - landing_pad.location_x) ** 2 + (report.position.location_y - landing_pad.location_y) ** 2) ** 0.5
+                distance = ((report.position.location_x - landing_pad.location_x) ** 2 + (report.position.location_y - landing_pad.location_y) ** 2)
                 if nearest_distance is None or distance < nearest_distance:
                     nearest_distance = distance
                     nearest_landing_pad = landing_pad
-                    
+            # reduced the number of square root operations to one
+            nearest_distance = nearest_distance ** 0.5
             x_dest = nearest_landing_pad.location_x - report.position.location_x
             y_dest = nearest_landing_pad.location_y - report.position.location_y
             # print(x_dest, y_dest)
