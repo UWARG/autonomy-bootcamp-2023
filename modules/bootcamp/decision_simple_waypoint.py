@@ -68,20 +68,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        #flight boundary
-
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            #Finding Distance from current position and waypoint
+            # Finding Distance from current position and waypoint
             delta_x = self.waypoint.location_x - report.position.location_x
             delta_y = self.waypoint.location_y - report.position.location_y
             distance = (delta_x**2 + delta_y**2)**0.5
             
-            #Check if the current position is at the acceptance radius to land
+            # Check if the current position is at the acceptance radius to land
             if distance <= self.acceptance_radius:
                 command = commands.Command.create_land_command()
             
-            #Check if the destination is within the flight boundary
+            # Check if the destination is within the flight boundary
             elif abs(self.waypoint.location_x) <= self.boundary_x and abs(self.waypoint.location_y) <= self.boundary_y:
                 command = commands.Command.create_set_relative_destination_command(delta_x,delta_y)
 
