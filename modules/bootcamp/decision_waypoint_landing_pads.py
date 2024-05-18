@@ -119,7 +119,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif self.travel_to_pad:
             # Once the drone needs to travel to a pad 
-            # closest_pad = landing_pad_locations[self.find_closest_pad_index(report.position, landing_pad_locations)]
 
             if self.get_relative_distance_sqr(report.position, 
                                               self.closest_pad) < self.acceptance_radius ** 2 and report.status == drone_status.DroneStatus.MOVING:
@@ -138,7 +137,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                                                                                    self.closest_pad.location_y - report.position.location_y)
 
 
-        elif report.position == self.waypoint and report.status == drone_status.DroneStatus.HALTED:
+        elif self.get_relative_distance_sqr(report.position, 
+                                            self.waypoint) < self.acceptance_radius and report.status == drone_status.DroneStatus.HALTED:
             # Once we have reached the waypoint, we now want to halt
             command = commands.Command.create_halt_command()
             # After halting, we now want to make the drone fly to the nearest pad on the next command

@@ -109,8 +109,9 @@ class DetectLandingPad:
         bounding_boxes = []
 
         for xyxy in boxes_cpu:
-            new_bound = bounding_box.BoundingBox.create(xyxy)
-            bounding_boxes.append(new_bound[1])
+            result, box = bounding_box.BoundingBox.create(xyxy)
+            if result:
+                bounding_boxes.append(box)
 
         toret = (bounding_boxes, image_annotated)
 
