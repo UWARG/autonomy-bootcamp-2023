@@ -36,7 +36,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        self.reached_waypoint = False
         self.boundary_x, self.boundary_y = 60, 60
 
         # ============
@@ -72,30 +72,44 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         def distance_squared(start: location.Location, end: location.Location) -> float:
             return (end.location_x-start.location_x)**2 + (end.location_y-start.location_y)**2
         
+        # Find differences in x and y between 2 locations
+        def diff_xy(start: location.Location, end: location.Location):
+            return end.location_x - start.location_x, end.location_y - start.location_y
+        
         # Finding the closest landing pads
         def find_closest_lp(cur_pos: location.Location) -> location.Location:
             closest_lp_loc = landing_pad_locations[0]
             for i in range(1,len(landing_pad_locations)):
-                if distance_squared(landing_pad_locations[i], report.position) < distance_squared(closest_lp_loc, report.position):
-                    closest_lp_loc = landing_pad_locations[i]
+                if distance_squared(cur_pos, landing_pad_locations[i]) < distance_squared(cur_pos, closest_lp_loc):
+                    # Check if the landing pad location is within the boundary
+                    if abs(landing_pad_locations[i].location_x) <= self.boundary_x and abs(landing_pad_locations[i].location_y) <= self.boundary_y:
+                        closest_lp_loc = landing_pad_locations[i]
             return closest_lp_loc
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
             
             # Check if the current position is at the acceptance radius to land
-            if distance_squared(report.position, self.waypoint) <= self.acceptance_radius**2:
-                command = commands.Command.create_land_command()
+            if distance_squared(report.position, self.waypoint) <= self.acceptance_radius**2 and not self.reached_waypoint:
+                self.reached_waypoint = True # Reached waypoint, now find closest LP to land
             
             # Check if the destination is within the flight boundary
-            elif abs(self.waypoint.location_x) <= self.boundary_x and abs(self.waypoint.location_y) <= self.boundary_y:
-                delta_x = self.waypoint.location_x - report.position.location_x
-                delta_y = self.waypoint.location_y - report.position.location_y
+            elif abs(self.waypoint.location_x) <= self.boundary_x and abs(self.waypoint.location_y) <= self.boundary_y and not self.reached_waypoint:
+                delta_x, delta_y = diff_xy(report.position, self.waypoint)
                 command = commands.Command.create_set_relative_destination_command(delta_x,delta_y)
+            
+            # If reached waypoint, find shortest LP to land
+            elif self.reached_waypoint:
+                closest_lp_loc = find_closest_lp(report.position)
 
+                if distance_squared(report.position, closest_lp_loc) <= self.acceptance_radius**2:
+                    command = commands.Command.create_land_command()
+
+                else:
+                    delta_x, delta_y = diff_xy(report.position, closest_lp_loc)
+                    command = commands.Command.create_set_relative_destination_command(delta_x,delta_y)
 
         # Remove this when done
-        raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
