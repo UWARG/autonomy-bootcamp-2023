@@ -78,12 +78,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         
         # Finding the closest landing pads
         def find_closest_lp(cur_pos: location.Location) -> location.Location:
-            closest_lp_loc = landing_pad_locations[0]
-            for i in range(1,len(landing_pad_locations)):
-                if distance_squared(cur_pos, landing_pad_locations[i]) < distance_squared(cur_pos, closest_lp_loc):
-                    # Check if the landing pad location is within the boundary
-                    if abs(landing_pad_locations[i].location_x) <= self.boundary_x and abs(landing_pad_locations[i].location_y) <= self.boundary_y:
-                        closest_lp_loc = landing_pad_locations[i]
+            closest_lp_loc = None
+            closest_lp_dist_squared = float('inf')
+            for lp in landing_pad_locations:
+                d =  distance_squared(cur_pos, lp)
+                if (d < closest_lp_dist_squared) and (abs(lp.location_x) <= self.boundary_x and abs(lp.location_y) <= self.boundary_y):
+                    closest_lp_loc = lp
+                    closest_lp_dist_squared = d
             return closest_lp_loc
 
         # Do something based on the report and the state of this class...
