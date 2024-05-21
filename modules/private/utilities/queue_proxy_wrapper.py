@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Queue.
 """
+
 import multiprocessing.managers
 import queue
 import time
@@ -12,6 +13,7 @@ class QueueProxyWrapper:
     """
     Wrapper for an underlying queue proxy which also stores maxsize.
     """
+
     __QUEUE_TIMEOUT = 0.1  # seconds
     __QUEUE_DELAY = 0.1  # seconds
 

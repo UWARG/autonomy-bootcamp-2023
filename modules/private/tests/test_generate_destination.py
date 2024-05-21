@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test generate destination.
 """
+
 import random
 
 from modules import location

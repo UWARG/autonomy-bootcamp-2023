@@ -13,11 +13,11 @@ class BoundingBox:
     """
     A detected landing pad in image space.
     """
+
     __create_key = object()
 
     @classmethod
-    def create(cls,
-               bounds: np.ndarray) -> "tuple[bool, BoundingBox | None]":
+    def create(cls, bounds: np.ndarray) -> "tuple[bool, BoundingBox | None]":
         """
         bounds are of form x1, y1, x2, y2 .
         """
@@ -53,9 +53,9 @@ class BoundingBox:
         return abs(number_a - number_b) <= tolerance
 
     @staticmethod
-    def is_close(bounding_box_1: "BoundingBox",
-                 bounding_box_2: "BoundingBox",
-                 tolerance: float) -> bool:
+    def is_close(
+        bounding_box_1: "BoundingBox", bounding_box_2: "BoundingBox", tolerance: float
+    ) -> bool:
         """
         Whether the bounds are close enough.
         """

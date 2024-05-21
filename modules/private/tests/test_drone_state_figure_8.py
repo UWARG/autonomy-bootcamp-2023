@@ -44,14 +44,14 @@ def figure8() -> int:
     # 7: Centre
     waypoint_index = 0
     waypoints = [
-        commands.Command.create_set_relative_destination_command( 3.0,  4.0),
-        commands.Command.create_set_relative_destination_command( 0.0, -8.0),
-        commands.Command.create_set_relative_destination_command(-3.0,  4.0),
+        commands.Command.create_set_relative_destination_command(3.0, 4.0),
+        commands.Command.create_set_relative_destination_command(0.0, -8.0),
+        commands.Command.create_set_relative_destination_command(-3.0, 4.0),
         commands.Command.create_set_relative_destination_command(-3.0, -4.0),
-        commands.Command.create_set_relative_destination_command( 0.0,  8.0),
-        commands.Command.create_set_relative_destination_command( 3.0, -4.0),
-        commands.Command.create_set_relative_destination_command(-3.0,  0.0),
-        commands.Command.create_set_relative_destination_command( 3.0,  0.0),
+        commands.Command.create_set_relative_destination_command(0.0, 8.0),
+        commands.Command.create_set_relative_destination_command(3.0, -4.0),
+        commands.Command.create_set_relative_destination_command(-3.0, 0.0),
+        commands.Command.create_set_relative_destination_command(3.0, 0.0),
         commands.Command.create_land_command(),
     ]
 

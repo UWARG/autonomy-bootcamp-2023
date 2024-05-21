@@ -14,10 +14,13 @@ class DroneReport:
     """
     Information about current state.
     """
-    def __init__(self,
-                 status: drone_status.DroneStatus,
-                 destination: location.Location,
-                 position: location.Location):
+
+    def __init__(
+        self,
+        status: drone_status.DroneStatus,
+        destination: location.Location,
+        position: location.Location,
+    ):
         """
         Construct report on the state of the drone.
         """
@@ -53,10 +56,17 @@ class DroneReport:
         """
         To string.
         """
-        representation = \
-            "DRONE REPORT:\n" \
-            + "Status: " + str(self.status) + "\n"\
-            + "Position: " + str(self.position) + "\n"\
-            + "Destination: " + str(self.destination) + "\n"
+        representation = (
+            "DRONE REPORT:\n"
+            + "Status: "
+            + str(self.status)
+            + "\n"
+            + "Position: "
+            + str(self.position)
+            + "\n"
+            + "Destination: "
+            + str(self.destination)
+            + "\n"
+        )
 
         return representation

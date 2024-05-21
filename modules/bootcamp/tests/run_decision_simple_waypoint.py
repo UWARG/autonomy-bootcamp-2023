@@ -6,6 +6,7 @@ Test decision simple waypoint.
 You can change the timestep, display scale, and seed, if you wish.
 Do not modify anything else.
 """
+
 import multiprocessing as mp
 import pathlib
 import time
@@ -176,11 +177,9 @@ def main() -> int:
     report = worker_status_queue.queue.get(timeout=TIMEOUT)
 
     # Log results
-    results_text = \
-        str(report) + "\n"\
-        + "Seed: " + str(SEED) + "\n"\
-        + "Waypoint: " + str(waypoint) + "\n"\
-
+    results_text = (
+        str(report) + "\n" + "Seed: " + str(SEED) + "\n" + "Waypoint: " + str(waypoint) + "\n"
+    )
     for landing_pad_location in landing_pad_locations:
         results_text += "Landing pad: " + str(landing_pad_location) + "\n"
 

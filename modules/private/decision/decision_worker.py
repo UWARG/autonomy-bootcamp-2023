@@ -9,13 +9,15 @@ from ..utilities import queue_proxy_wrapper
 from ..utilities import worker_controller
 
 
-def decision_worker(decider: base_decision.BaseDecision,
-                    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                    # Keep for consistency
-                    # pylint: disable-next=unused-argument
-                    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                    controller: worker_controller.WorkerController):
+def decision_worker(
+    decider: base_decision.BaseDecision,
+    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    # Keep for consistency
+    # pylint: disable-next=unused-argument
+    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController,
+):
     """
     Worker process.
 

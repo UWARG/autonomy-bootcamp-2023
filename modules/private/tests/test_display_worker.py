@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test display worker.
 """
+
 import math
 import multiprocessing as mp
 import pathlib
@@ -89,8 +90,9 @@ def main() -> int:
         input_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" \
-            = display_to_decision_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
+            display_to_decision_queue.queue.get()
+        )
         report, output_list, output_image = output_data
 
         assert report == input_report
@@ -110,8 +112,9 @@ def main() -> int:
         input_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" \
-            = display_to_decision_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
+            display_to_decision_queue.queue.get()
+        )
         report, output_list, output_image = output_data
 
         assert report == input_report
@@ -131,8 +134,9 @@ def main() -> int:
         input_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" \
-            = display_to_decision_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
+            display_to_decision_queue.queue.get()
+        )
         report, output_list, output_image = output_data
 
         assert report == input_report
