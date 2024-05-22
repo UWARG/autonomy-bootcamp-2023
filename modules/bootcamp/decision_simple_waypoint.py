@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        run = self.run 
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -54,7 +54,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         This method will be called in an infinite loop, something like this:
 
-        ```py
+        
         while True:
             report, landing_pad_locations = get_input()
             command = Decision.run(report, landing_pad_locations)
@@ -64,14 +64,32 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Do something based on the report and the state of this class...
+        status = report.status
+        square_distance = (self.waypoint.location_x)**2 + (self.waypoint.location_y)**2
+
+        if status == drone_status.DroneStatus.HALTED:
+            if square_distance <= self.acceptance_radius:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, 
+                                                                                   self.waypoint.location_y - report.position.location_y)
+
+        elif status == drone_status.DroneStatus.MOVING:
+            if square_distance <= self.acceptance_radius:
+                command = commands.Command.create_halt_command()
+
+
+        elif status == drone_status.DroneStatus.LANDED:
+                command = commands.Command.create_null_command()
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
