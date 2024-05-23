@@ -80,7 +80,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
+        if report.status == drone_status.DroneStatus.HALTED and str(report.position) != str(self.waypoint):
             # Print some information for debugging
             print(self.counter)
             print(self.command_index)
