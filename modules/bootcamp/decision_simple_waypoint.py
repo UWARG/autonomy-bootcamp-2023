@@ -37,11 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.waypoint = waypoint
-        print("Waypoint: " + str(waypoint))
-
-        self.acceptance_radius = acceptance_radius
-
         self.command_index = 0
         self.commands = [
             commands.Command.create_set_relative_destination_command(-15.0, 15.0),
