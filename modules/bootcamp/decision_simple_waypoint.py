@@ -37,18 +37,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.command_index = 0
         self.commands = [
-            commands.Command.create_set_relative_destination_command(-15.0, 15.0),
-            commands.Command.create_set_relative_destination_command(  0.0,-30.0),
-            commands.Command.create_set_relative_destination_command( 30.0,  0.0),
-            commands.Command.create_set_relative_destination_command(  0.0, 30.0),
-            commands.Command.create_set_relative_destination_command(-15.0,-15.0),
+            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
         ]
 
+        # current_location + x_dist = waypoint_x_loc
+        # if halted and not at waypoint, then find the waypoint and move to it
         self.has_sent_landing_command = False
-
-        self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -80,20 +75,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and str(report.position) != str(self.waypoint):
+        if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
             # Print some information for debugging
-            print(self.counter)
-            print(self.command_index)
             print("Halted at: " + str(report.position))
+            
+            command = self.commands[0]
 
-            command = self.commands[self.command_index]
-            self.command_index += 1
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
             command = commands.Command.create_land_command()
 
             self.has_sent_landing_command = True
 
-        self.counter += 1
 
         # Remove this when done
         # raise NotImplementedError
