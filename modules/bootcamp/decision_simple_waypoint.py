@@ -72,7 +72,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         square_distance = (self.waypoint.location_x)**2 + (self.waypoint.location_y)**2
 
         if status == drone_status.DroneStatus.HALTED:
-            if square_distance <= self.acceptance_radius:
+            if square_distance <= self.acceptance_radius**2:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, 
@@ -84,7 +84,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
 
         elif status == drone_status.DroneStatus.LANDED:
-                command = commands.Command.create_null_command()
+            command = commands.Command.create_null_command()
 
         # Remove this when done
         # raise NotImplementedError
