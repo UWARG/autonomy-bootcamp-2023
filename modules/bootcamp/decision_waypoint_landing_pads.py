@@ -36,13 +36,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
+        ]
+
+        self.has_sent_landing_command = False
+
+        self.landingPad = None
+
 
         # Add your own
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
+        
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -67,14 +76,48 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint and report.position != self.landingPad:
+
+            command = self.commands[0]
+
+        elif report.status == drone_status.DroneStatus.HALTED and report.position == self.waypoint:
+            distance = 1000.0
+            x_final = 0.0
+            y_final = 0.0
+            length = len(landing_pad_locations)
+
+            for i in range(length):
+                loc = landing_pad_locations.pop()
+                x_dist1 = self.waypoint.location_x
+                x_dist2 = loc.location_x
+                y_dist1 = self.waypoint.location_y
+                y_dist2 = loc.location_y
+
+                final_dist = (pow(abs(x_dist2 - x_dist1), 2) + pow(abs(y_dist2 - y_dist1), 2)) ** 0.5
+
+                if final_dist < distance:
+                    distance = final_dist
+                    x_final = x_dist2
+                    y_final = y_dist2
+                    self.landingPad = loc
+        
+            x_pad = x_final - self.waypoint.location_x
+            y_pad = y_final - self.waypoint.location_y
+
+            command = commands.Command.create_set_relative_destination_command((x_pad), (y_pad))
+
+        elif report.status == drone_status.DroneStatus.HALTED and report.position == self.landingPad:    
+            command = commands.Command.create_land_command()
+
+            self.has_sent_landing_command = True
+        
+        return command        
+
 
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
-        return command
