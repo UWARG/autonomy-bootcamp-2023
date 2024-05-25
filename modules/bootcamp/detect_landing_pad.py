@@ -101,19 +101,23 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        for i in range(boxes_cpu.shape[0]):
-            box1 = boxes_cpu[i]
-            new_box = bounding_box.BoundingBox.create(np.array([box1[0], box1[1], box1[2], box1[3]]))[1]
-            bounding_boxes.append(new_box)
+        if len(predictions) == 0:
+            return [], None
+        
+        else:
+            for i in range(boxes_cpu.shape[0]):
+                box1 = boxes_cpu[i]
+                new_box = bounding_box.BoundingBox.create(np.array([box1[0], box1[1], box1[2], box1[3]]))[1]
+                bounding_boxes.append(new_box)
             # Create BoundingBox object and append to list
             # result, box = ...
 
-        return bounding_boxes, image_annotated
+            return bounding_boxes, image_annotated
         # Remove this when done
         # raise NotImplementedError
 
