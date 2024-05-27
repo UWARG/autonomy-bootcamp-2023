@@ -37,13 +37,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.commands = [
-            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
-        ]
+        self.commands = commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y)
+        
 
         # current_location + x_dist = waypoint_x_loc
         # if halted and not at waypoint, then find the waypoint and move to it
         self.has_sent_landing_command = False
+        self.destination = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -73,15 +73,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED and report.position != self.waypoint:
-            # Print some information for debugging
-            print("Halted at: " + str(report.position))
-            
-            command = self.commands[0]
+        if report.status == drone_status.DroneStatus.HALTED and self.destination == False:
+            x_change = self.waypoint.location_x - report.position.location_x
+            y_change = self.waypoint.location_y - report.position.location_y
+            final = (pow(x_change, 2) + pow(y_change, 2)) ** 0.5
 
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            if final <= self.acceptance_radius:
+                self.destination = True
+            
+            command = self.commands
+
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and self.destination == True:
             command = commands.Command.create_land_command()
 
             self.has_sent_landing_command = True
