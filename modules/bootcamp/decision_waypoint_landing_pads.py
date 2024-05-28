@@ -39,6 +39,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
+        self.command_index = 0
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y)
+        ]
+
+        self.has_sent_landing_command = False
+        self.go_to_landing_pad = False
+
+        self.counter = 0
+
+        
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,9 +81,37 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED and not self.go_to_landing_pad:
+            # Print some information for debugging
+            print(self.counter)
+            print(self.command_index)
+            print("Halted at: " + str(report.position))
+
+            
+            command = self.commands[self.command_index]
+
+            self.go_to_landing_pad = True
+        elif report.status == drone_status.DroneStatus.HALTED and self.go_to_landing_pad and not self.has_sent_landing_command:
+            nearest_landing_pad = landing_pad_locations[0]
+            min_distance = ((nearest_landing_pad.location_x - report.position.location_x)**2 + (nearest_landing_pad.location_y - report.position.location_y)**2)**0.5
+            print("123456789")
+            for landing_pad in landing_pad_locations:
+                distance = ((landing_pad.location_x - report.position.location_x)**2 + (landing_pad.location_y - report.position.location_y)**2)**0.5
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_landing_pad = landing_pad
+            position = report.position
+            command = commands.Command.create_set_relative_destination_command(nearest_landing_pad.location_x - position.location_x, nearest_landing_pad.location_y - position.location_y)
+
+            self.has_sent_landing_command = True
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_sent_landing_command:
+            command = commands.Command.create_land_command()
+            
+            
+
+        self.counter += 1
 
         # Remove this when done
-        raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
