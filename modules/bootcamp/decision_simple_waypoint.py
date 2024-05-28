@@ -78,17 +78,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if report.status == drone_status.DroneStatus.HALTED:
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
             # Print some information for debugging
             print(self.counter)
             print(self.command_index)
             print("Halted at: " + str(report.position))
 
             command = self.commands[self.command_index]
-            self.command_index += 1
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
-            command = commands.Command.create_land_command()
             self.has_sent_landing_command = True
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_sent_landing_command:
+            command = commands.Command.create_land_command()
+
 
         self.counter += 1
 
