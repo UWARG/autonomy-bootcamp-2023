@@ -38,6 +38,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.traveled_to_waypoint = False
+        self.has_sent_landing_command = False
+        self.closest_landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,12 +72,52 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.traveled_to_waypoint:
+                # Fly to the waypoint
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y
+                )
+                self.traveled_to_waypoint = True
+            elif not self.closest_landing_pad:
+                # Calculate the closest landing pad
+                self.closest_landing_pad = self.find_closest_landing_pad(report.position, landing_pad_locations)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.closest_landing_pad.location_x - report.position.location_x,
+                    self.closest_landing_pad.location_y - report.position.location_y
+                )
+            elif not self.has_sent_landing_command:
+                # Land the drone at the closest landing pad
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
 
-        # Remove this when done
-        raise NotImplementedError
+        # # Remove this when done
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    def find_closest_landing_pad(self, current_position: location.Location, landing_pads: "list[location.Location]") -> location.Location:
+        """
+        Find the closest landing pad to the current position using L-2 norm.
+        """
+        closest_pad = None
+        min_distance = float('inf')
+
+        for pad in landing_pads:
+            distance = self.calculate_distance(current_position, pad)
+            if distance < min_distance:
+                min_distance = distance
+                closest_pad = pad
+
+        return closest_pad
+
+    def calculate_distance(self, loc1: location.Location, loc2: location.Location) -> float:
+        """
+        Calculate the squared distance between two locations to avoid computing square roots.
+        """
+        return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2
