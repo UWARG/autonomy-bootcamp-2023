@@ -9,3 +9,4 @@ venv/
 
 # Logging
 *log*
+.DS_Store
