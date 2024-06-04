@@ -83,8 +83,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if self.distance(report) < self.acceptance_radius:
                 command = commands.Command.create_halt_command()
             
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

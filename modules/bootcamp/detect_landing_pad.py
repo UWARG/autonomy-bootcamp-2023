@@ -118,9 +118,6 @@ class DetectLandingPad:
 
         return bounding_boxes, image_annotated
 
-        # Remove this when done
-        # raise NotImplementedError
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
