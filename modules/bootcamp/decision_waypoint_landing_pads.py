@@ -43,6 +43,25 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+# Helper function for finding distance
+    def distance_squared(self, start: location.Location, end: location.Location) -> float:
+        return (end.location_x-start.location_x)**2 + (end.location_y-start.location_y)**2
+    
+    # Find differences in x and y between 2 locations
+    def diff_xy(self, start: location.Location, end: location.Location):
+        return end.location_x - start.location_x, end.location_y - start.location_y
+    
+    # Finding the closest landing pads
+    def find_closest_lp(self, cur_pos: location.Location, lp_locations: "list[location.Location]") -> location.Location:
+        closest_lp_loc = None
+        closest_lp_dist_squared = float('inf')
+        for lp in lp_locations:
+            d =  self.distance_squared(cur_pos, lp)
+            if (d < closest_lp_dist_squared) and (abs(lp.location_x) <= self.boundary_x and abs(lp.location_y) <= self.boundary_y):
+                closest_lp_loc = lp
+                closest_lp_dist_squared = d
+        return closest_lp_loc
+    
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -68,46 +87,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         
-        # Helper function for finding distance
-        def distance_squared(start: location.Location, end: location.Location) -> float:
-            return (end.location_x-start.location_x)**2 + (end.location_y-start.location_y)**2
         
-        # Find differences in x and y between 2 locations
-        def diff_xy(start: location.Location, end: location.Location):
-            return end.location_x - start.location_x, end.location_y - start.location_y
-        
-        # Finding the closest landing pads
-        def find_closest_lp(cur_pos: location.Location) -> location.Location:
-            closest_lp_loc = None
-            closest_lp_dist_squared = float('inf')
-            for lp in landing_pad_locations:
-                d =  distance_squared(cur_pos, lp)
-                if (d < closest_lp_dist_squared) and (abs(lp.location_x) <= self.boundary_x and abs(lp.location_y) <= self.boundary_y):
-                    closest_lp_loc = lp
-                    closest_lp_dist_squared = d
-            return closest_lp_loc
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
             
             # Check if the current position is at the acceptance radius to land
-            if distance_squared(report.position, self.waypoint) <= self.acceptance_radius**2 and not self.reached_waypoint:
+            if self.distance_squared(report.position, self.waypoint) <= self.acceptance_radius**2 and not self.reached_waypoint:
                 self.reached_waypoint = True # Reached waypoint, now find closest LP to land
-            
+                
+
             # Check if the destination is within the flight boundary
             elif abs(self.waypoint.location_x) <= self.boundary_x and abs(self.waypoint.location_y) <= self.boundary_y and not self.reached_waypoint:
-                delta_x, delta_y = diff_xy(report.position, self.waypoint)
+                delta_x, delta_y = self.diff_xy(report.position, self.waypoint)
                 command = commands.Command.create_set_relative_destination_command(delta_x,delta_y)
             
             # If reached waypoint, find shortest LP to land
             elif self.reached_waypoint:
-                closest_lp_loc = find_closest_lp(report.position)
-
-                if distance_squared(report.position, closest_lp_loc) <= self.acceptance_radius**2:
+                closest_lp_loc = self.find_closest_lp(report.position, landing_pad_locations)
+                if self.distance_squared(report.position, closest_lp_loc) <= self.acceptance_radius**2:
                     command = commands.Command.create_land_command()
 
                 else:
-                    delta_x, delta_y = diff_xy(report.position, closest_lp_loc)
+                    delta_x, delta_y = self.diff_xy(report.position, closest_lp_loc)
                     command = commands.Command.create_set_relative_destination_command(delta_x,delta_y)
 
         # Remove this when done
