@@ -69,8 +69,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        # print(report)
-
 
         # If halted, move to the waypoint
         if report.position != self.waypoint and report.status == drone_status.DroneStatus.HALTED:
@@ -81,8 +79,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         elif report.position == self.waypoint:
             command = commands.Command.create_halt_command()
             command = commands.Command.create_land_command()
-            
-            
             # print(command)            
 
         # Remove this when done
