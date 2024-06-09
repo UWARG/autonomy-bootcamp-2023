@@ -83,7 +83,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # If at the waypoint, halt and search for the nearest landing pad
             if self._get_distance(report.position, self.waypoint) < self.acceptance_radius:
                 if not self.reached_waypoint:
-                    command = commands.Command.create_halt_command()
                     self.reached_waypoint = True
                     # Find the nearest landing pad
                     for location in landing_pad_locations:
