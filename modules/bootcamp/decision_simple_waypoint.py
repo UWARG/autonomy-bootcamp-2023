@@ -47,7 +47,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         Get the distance between two locations.
         """
-        return ((location1.location_x - location2.location_x) ** 2 + (location1.location_y - location2.location_y) ** 2) ** 0.5
+        return ((location1.location_x - location2.location_x) ** 2 + (location1.location_y - location2.location_y) ** 2)
 
     def run(self,
             report: drone_report.DroneReport,
@@ -79,7 +79,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # If halted, move to the waypoint
         if report.status == drone_status.DroneStatus.HALTED:
 
-            if self._get_distance(report.position, self.waypoint) < self.acceptance_radius:
+            if self._get_distance(report.position, self.waypoint) < (self.acceptance_radius ** 2):
                 command = commands.Command.create_land_command()
 
             else:

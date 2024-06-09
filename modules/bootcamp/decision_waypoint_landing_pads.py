@@ -49,7 +49,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Get the distance between two locations.
         """
-        return ((location1.location_x - location2.location_x) ** 2 + (location1.location_y - location2.location_y) ** 2) ** 0.5
+        return ((location1.location_x - location2.location_x) ** 2 + (location1.location_y - location2.location_y) ** 2)
 
     def run(self,
             report: drone_report.DroneReport,
@@ -82,11 +82,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # If halted, move to the waypoint
         if (report.status == drone_status.DroneStatus.HALTED):
 
-            if (self.nearest_landing_pad is not None) and (self.reached_waypoint) and (self._get_distance(report.position, self.nearest_landing_pad) < self.acceptance_radius):
+            if (self.nearest_landing_pad is not None) and (self.reached_waypoint) and (self._get_distance(report.position, self.nearest_landing_pad) < (self.acceptance_radius ** 2)):
                 command = commands.Command.create_land_command()
             
             # If at the waypoint, halt and search for the nearest landing pad
-            elif self._get_distance(report.position, self.waypoint) < self.acceptance_radius:
+            elif self._get_distance(report.position, self.waypoint) < (self.acceptance_radius ** 2):
                 if not self.reached_waypoint:
                     self.reached_waypoint = True
                     # Find the nearest landing pad
