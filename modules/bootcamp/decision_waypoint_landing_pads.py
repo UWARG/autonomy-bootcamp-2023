@@ -6,7 +6,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
-import math
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -49,7 +48,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Get the distance between two locations.
         """
-        return math.sqrt(pow((location1.location_x - location2.location_x), 2) + pow((location1.location_y - location2.location_y), 2))
+        return ((location1.location_x - location2.location_x) ** 2 + (location1.location_y - location2.location_y) ** 2) ** 0.5
 
     def run(self,
             report: drone_report.DroneReport,
@@ -79,22 +78,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        # print(report)
-
         # If halted, move to the waypoint
-        if (report.position != self.waypoint) and (report.status == drone_status.DroneStatus.HALTED) and (not self.reached_waypoint):
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        if (report.status == drone_status.DroneStatus.HALTED):
+            # If at the waypoint, halt and search for the nearest landing pad
+            if self._get_distance(report.position, self.waypoint) < self.acceptance_radius:
+                if not self.reached_waypoint:
+                    command = commands.Command.create_halt_command()
+                    self.reached_waypoint = True
+                    # Find the nearest landing pad
+                    for location in landing_pad_locations:
+                        distance = self._get_distance(report.position, location)
+                        if (self.nearest_landing_pad is None) or (distance < self._get_distance(report.position, self.nearest_landing_pad)):
+                            self.nearest_landing_pad = location
 
-        # If at the waypoint, find the nearest landing pad
-        if (report.position == self.waypoint) and (not self.reached_waypoint):
-            command = commands.Command.create_halt_command()
-            self.reached_waypoint = True
+                else:
+                    command = commands.Command.create_land_command()
 
-            # Find the nearest landing pad
-            for location in landing_pad_locations:
-                distance = self._get_distance(report.position, location)
-                if (self.nearest_landing_pad is None) or (distance < self._get_distance(report.position, self.nearest_landing_pad)):
-                    self.nearest_landing_pad = location
+            else:
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(relative_x=relative_x, relative_y=relative_y)
+
 
             print("Nearest Landing Pad: ", self.nearest_landing_pad)
 
@@ -106,9 +110,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif (report.position == self.nearest_landing_pad) and (self.reached_waypoint):
             command = commands.Command.create_halt_command()
             command = commands.Command.create_land_command()
-
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

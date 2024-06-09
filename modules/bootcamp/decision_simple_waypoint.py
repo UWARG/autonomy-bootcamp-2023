@@ -43,6 +43,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def _get_distance(self, location1: location.Location, location2: location.Location) -> float:
+        """
+        Get the distance between two locations.
+        """
+        return ((location1.location_x - location2.location_x) ** 2 + (location1.location_y - location2.location_y) ** 2) ** 0.5
+
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -68,21 +74,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        # Do something based on the report and the state of this class...       
 
         # If halted, move to the waypoint
-        if report.position != self.waypoint and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-            # print(command)
+        if report.status == drone_status.DroneStatus.HALTED:
 
-        # If at the waypoint, land
-        elif report.position == self.waypoint:
-            command = commands.Command.create_halt_command()
-            command = commands.Command.create_land_command()
-            # print(command)            
+            if self._get_distance(report.position, self.waypoint) < self.acceptance_radius:
+                command = commands.Command.create_land_command()
 
-        # Remove this when done
-        # raise NotImplementedError
+            else:
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(relative_x=relative_x, relative_y=relative_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
