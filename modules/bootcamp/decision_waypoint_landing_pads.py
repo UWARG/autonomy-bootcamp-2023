@@ -95,7 +95,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         if (self.nearest_landing_pad is None) or (distance < self._get_distance(report.position, self.nearest_landing_pad)):
                             self.nearest_landing_pad = location
 
-                else:
                     relative_x = self.nearest_landing_pad.location_x - report.position.location_x
                     relative_y = self.nearest_landing_pad.location_y - report.position.location_y
                     command = commands.Command.create_set_relative_destination_command(relative_x=relative_x, relative_y=relative_y)
