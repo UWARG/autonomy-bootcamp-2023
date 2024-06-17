@@ -4,7 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Detects landing pads.
 """
 import pathlib
-
 import numpy as np
 import torch
 import ultralytics
