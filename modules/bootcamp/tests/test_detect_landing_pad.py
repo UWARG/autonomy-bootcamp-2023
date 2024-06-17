@@ -12,7 +12,6 @@ import pytest
 from modules import bounding_box
 from modules.bootcamp import detect_landing_pad
 
-
 MODEL_DIRECTORY_PATH = pathlib.Path("models")
 INPUT_IMAGES_PATH = pathlib.Path("modules/bootcamp/tests")
 OUTPUT_IMAGES_PATH = pathlib.Path("modules/bootcamp/tests/log")
