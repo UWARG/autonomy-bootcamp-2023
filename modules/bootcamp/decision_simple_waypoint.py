@@ -30,13 +30,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
-
         self.acceptance_radius = acceptance_radius
-
+        
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        self.on_route = False
         # Add your own
 
         # ============
@@ -64,14 +63,28 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+
+
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        #Send destination command
+        command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
 
+        if (self.on_route == False):
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+            self.on_route = True
+
+        elif (report.status.value == 0):
+            command = commands.Command.create_null_command()
+        else: 
+            command = commands.Command.create_land_command()
+
+
+        # Do something based on the report and the state of this class...
         # Remove this when done
-        raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
