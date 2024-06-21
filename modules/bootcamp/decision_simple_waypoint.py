@@ -31,7 +31,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
         self.acceptance_radius = acceptance_radius
-        
+        print(self.acceptance_radius)
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -70,24 +70,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         #Send destination command
-        command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-
         if (self.on_route == False):
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.on_route = True
-
-        elif (report.status.value == 0):
-            command = commands.Command.create_null_command()
-        else: 
+        elif (getDist(report.position.location_x, report.position.location_y, report.destination.location_x, report.destination.location_y) <= self.acceptance_radius): 
             command = commands.Command.create_land_command()
 
 
+
         # Do something based on the report and the state of this class...
-        # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+def getDist(x1, y1, x2, y2):
+    return abs(x1 - x2) + abs(y1 - y2)

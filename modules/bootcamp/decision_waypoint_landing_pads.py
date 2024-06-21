@@ -12,7 +12,7 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-import math
+
 
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
@@ -71,26 +71,26 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        #Step 1: Travel to waypoint
         if (self.step == 0):
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.step = 1
-        elif (self.step == 1 and report.status.value == 1):
-            self.closest_pad = landing_pad_locations[0]
-            # for i in range (landing_pad_locations):
-            if (getDist(landing_pad_locations[0].location_x, landing_pad_locations[0].location_y, report.position.location_x, report.position.location_y) < getDist(self.closest_pad.location_x, self.closest_pad.location_y, report.position.location_x, report.position.location_y)):
+        elif (self.step == 1 and report.status == drone_status.DroneStatus.HALTED):
+            if (getDist(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y) <= self.acceptance_radius):
                 self.closest_pad = landing_pad_locations[0]
-            command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, self.closest_pad.location_y - report.position.location_y)
-            print("Moving")
-            self.step = 2
-        elif (self.step == 2 and report.status.value == 1):
-            print("Activate")
-            command = commands.Command.create_land_command()
-
-
-        # Remove this when done
-       #raise NotImplementedError
+                for landing_pad in landing_pad_locations:
+                    if (getDist(landing_pad.location_x, landing_pad.location_y, report.position.location_x, report.position.location_y) < getDist(self.closest_pad.location_x, self.closest_pad.location_y, report.position.location_x, report.position.location_y)):
+                        self.closest_pad = landing_pad
+                command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, self.closest_pad.location_y - report.position.location_y)
+                self.step = 2  
+            else:
+                self.step = 0
+        elif (self.step == 2 and report.status == drone_status.DroneStatus.HALTED):
+            if (getDist(report.position.location_x, report.position.location_y, self.closest_pad.location_x, self.closest_pad.location_y) <= self.acceptance_radius):
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, self.closest_pad.location_y - report.position.location_y)
+                
+            
 
         
 
@@ -103,4 +103,4 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
 
 def getDist(x1, y1, x2, y2):
-    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2) 
+    return abs(x1 - x2) + abs(y1 - y2)
