@@ -77,7 +77,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif (self.step == 1 and report.status == drone_status.DroneStatus.HALTED):
             if (getDist(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y) <= self.acceptance_radius):
                 self.closest_pad = landing_pad_locations[0]
-                for landing_pad in landing_pad_locations:
+                for landing_pad in landing_pad_locations[1:]:
                     if (getDist(landing_pad.location_x, landing_pad.location_y, report.position.location_x, report.position.location_y) < getDist(self.closest_pad.location_x, self.closest_pad.location_y, report.position.location_x, report.position.location_y)):
                         self.closest_pad = landing_pad
                 command = commands.Command.create_set_relative_destination_command(self.closest_pad.location_x - report.position.location_x, self.closest_pad.location_y - report.position.location_y)
@@ -103,4 +103,4 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
 
 def getDist(x1, y1, x2, y2):
-    return abs(x1 - x2) + abs(y1 - y2)
+    return (x1 - x2)**2 + (y1 - y2)**2

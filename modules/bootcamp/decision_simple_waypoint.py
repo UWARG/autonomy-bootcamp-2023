@@ -73,7 +73,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if (self.on_route == False):
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y)
             self.on_route = True
-        elif (getDist(report.position.location_x, report.position.location_y, report.destination.location_x, report.destination.location_y) <= self.acceptance_radius): 
+        elif (getDist(report.position.location_x, report.position.location_y, report.destination.location_x, report.destination.location_y) <= self.acceptance_radius and report.status == drone_status.DroneStatus.HALTED): 
             command = commands.Command.create_land_command()
 
 
@@ -87,4 +87,4 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         return command
 
 def getDist(x1, y1, x2, y2):
-    return abs(x1 - x2) + abs(y1 - y2)
+    return (x1 - x2)**2 + (y1 - y2)**2
