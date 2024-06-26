@@ -30,7 +30,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
-        self.acceptance_radius = acceptance_radius
+        self.acceptance_radius = acceptance_radius**2
         print(self.acceptance_radius)
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
