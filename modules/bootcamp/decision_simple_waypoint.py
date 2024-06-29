@@ -7,11 +7,13 @@ Travel to designated waypoint.
 # pylint: disable=unused-import
 
 
+
 from .. import commands
 from .. import drone_report
 from .. import drone_status
-from .. import location
+from .. import location  # Import your Location class
 from ..private.decision import base_decision
+
 
 
 # Disable for bootcamp use
@@ -29,38 +31,33 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
-        print("Waypoint: " + str(waypoint))
-
         self.acceptance_radius = acceptance_radius
-
+        
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Add your own
-
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-    def need_move(self, report: drone_report.DroneReport):
-        if report.status == drone_status.Status.Halted and report.position == report.destination and report.position.distance_to(self.waypoint) > self.acceptance_radius:
-            return True
-        else:
-            return False
 
-    def move(self, report: drone_report.DroneReport):
-        x = self.waypoint.x - report.position.x 
-        y = self.waypoint.y - report.position.y
-        return commands.Command.create_set_relative_destination(x, y)
+    def distance(self, report: drone_report.DroneReport) -> float:
+        return ((self.waypoint.location_x - report.position.location_x) ** 2 + (self.waypoint.location_y - report.position.location_y) ** 2) ** 0.5
     
-    def at_point(self, report: drone_report.DroneReport):
-        if report.status == drone_status.Status.Halted and report.position != report.destination:
-            return True
-        else:
-            return False
-    def run(self,
-            report: drone_report.DroneReport,
-            landing_pad_locations: "list[location.Location]") -> commands.Command:
+    def need_move(self, report: drone_report.DroneReport) -> bool:
+        return self.distance(report) > self.acceptance_radius
+
+    def move(self, report: drone_report.DroneReport) -> commands.Command:
+        x = self.waypoint.location_x - report.position.location_x
+        y = self.waypoint.location_y - report.position.location_y
+        return commands.Command.create_set_relative_destination_command(x, y)
+
+    def at_point(self, report: drone_report.DroneReport) -> bool:
+        return report.status == drone_status.DroneStatus.HALTED
+
+    def run(self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]") -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -84,20 +81,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if self.need_move(report):
-            command = self.move_to_waypoint(report)
+        if self.at_point(report):
+            if self.need_move(report):
+                command = self.move(report)
+            else:
+                command = commands.Command.create_land_command()
 
-        elif self.at_point(report):
-            command = commands.Command.create_halt_command()
-            
-        elif report.status == drone_status.Status.Landed:
-            command = commands.Command.create_land_command()
-       
-        # Remove this when done
-        #raise NotImplementedError
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if not self.need_move(report):
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
         return command
