@@ -6,18 +6,14 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
-
 from .. import commands
 from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-import math
-
 
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
-
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -38,49 +34,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
+        self.waypoint_status = False
+        self.acceptance_radius_sq = self.acceptance_radius ** 2
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-    def need_move(self, report: drone_report.DroneReport):
-        if report.status == drone_status.Status.Halted and report.position == report.destination and report.position.distance_to(self.waypoint) > self.acceptance_radius:
-            return True
-        else:
-            return False
 
-    def move(self, report: drone_report.DroneReport):
-        x = self.waypoint.x - report.position.x 
-        y = self.waypoint.y - report.position.y
-        return commands.Command.create_set_relative_destination(x, y)
-    
-    def at_point(self, report: drone_report.DroneReport):
-        if report.status == drone_status.Status.Halted and report.position != report.destination:
-            return True
-        else:
-            return False
-        
-    def dist(self, position1: location.Location, position2: location.Location):
-        return math.sqrt((position1.x - position2.x)**2 + (position1.y - position2.y)**2)
-    
-    def nearest_pad(self, current_position: location.Location, landing_pad_locations: "list[location.Location]"):
-        nearest_pad = None
-        min_distance = 100000000  # Initialize with a large number
-        
-        for pad_location in landing_pad_locations:
-            distance = self.dist(current_position, pad_location)
-            if distance < min_distance:
-                min_distance = distance
-                nearest_pad = pad_location
-        
-        return nearest_pad
-    
-    def land(self, landing_pad: location.Location, current_position: location.Location):
-        if self.calculate_distance(current_position, landing_pad) < self.acceptance_radius:
-            return commands.Command.create_land_command()
-        else:
-            return commands.Command.create_set_relative_destination(landing_pad.x - current_position.x, landing_pad.y - current_position.y)
-        
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
@@ -106,15 +66,56 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
-
-
-
-        # Remove this when done
-        raise NotImplementedError
-
+        if self.waypoint_status:  # if at waypoint
+            command = self.handle_waypoint_reached(report, landing_pad_locations)
+        else:  # go to waypoint
+            command = self.handle_waypoint_not_reached(report)
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def handle_waypoint_reached(self, report, landing_pad_locations):
+        command = commands.Command.create_null_command()
+        if report.status == drone_status.DroneStatus.HALTED:
+            self.nearest_landing_pad = self.find_nearest_landing_pad(report.position, landing_pad_locations)
+            if self.relative_dist_sq(report.position, self.nearest_landing_pad) > self.acceptance_radius_sq:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.nearest_landing_pad.location_x - report.position.location_x,
+                    self.nearest_landing_pad.location_y - report.position.location_y,
+                )
+            else:
+                command = commands.Command.create_land_command()
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if self.relative_dist_sq(report.position, self.nearest_landing_pad) < self.acceptance_radius_sq:
+                command = commands.Command.create_halt_command()
+        return command
+
+    def handle_waypoint_not_reached(self, report):
+        command = commands.Command.create_null_command()
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.relative_dist_sq(report.position, self.waypoint) > self.acceptance_radius_sq:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if self.relative_dist_sq(report.position, self.waypoint) < self.acceptance_radius_sq:
+                command = commands.Command.create_halt_command()
+                self.waypoint_status = True
+        return command
+
+    def relative_dist_sq(self, position: location.Location, destination: location.Location) -> float:
+        return (position.location_x - destination.location_x) ** 2 + (position.location_y - destination.location_y) ** 2
+
+    def find_nearest_landing_pad(self, position: location.Location, landing_pad_locations: "list[location.Location]") -> location.Location:
+        nearest_landing_pad = None
+        nearest_distance = float("inf")
+        for landing_pad in landing_pad_locations:
+            distance = self.relative_dist_sq(position, landing_pad)
+            if distance < nearest_distance:
+                nearest_landing_pad = landing_pad
+                nearest_distance = distance
+        return nearest_landing_pad
