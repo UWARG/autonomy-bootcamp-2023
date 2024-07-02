@@ -80,7 +80,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def handle_waypoint_reached(self, report, landing_pad_locations):
         command = commands.Command.create_null_command()
         if report.status == drone_status.DroneStatus.HALTED:
-            self.nearest_landing_pad = self.find_nearest_landing_pad(report.position, landing_pad_locations)
+            if self.nearest_landing_pad is None:
+                self.nearest_landing_pad = self.find_nearest_landing_pad(report.position, landing_pad_locations)
             if self.relative_dist_sq(report.position, self.nearest_landing_pad) > self.acceptance_radius_sq:
                 command = commands.Command.create_set_relative_destination_command(
                     self.nearest_landing_pad.location_x - report.position.location_x,
@@ -95,8 +96,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     def handle_waypoint_not_reached(self, report):
         command = commands.Command.create_null_command()
+
+        if self.relative_dist_sq(report.position, self.waypoint) < self.acceptance_radius_sq:
+            self.waypoint_status = True
+
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.relative_dist_sq(report.position, self.waypoint) > self.acceptance_radius_sq:
+            if not self.waypoint_status:  # Only create command if waypoint is not reached
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x,
                     self.waypoint.location_y - report.position.location_y,
@@ -105,6 +110,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if self.relative_dist_sq(report.position, self.waypoint) < self.acceptance_radius_sq:
                 command = commands.Command.create_halt_command()
                 self.waypoint_status = True
+                
         return command
 
     def relative_dist_sq(self, position: location.Location, destination: location.Location) -> float:
