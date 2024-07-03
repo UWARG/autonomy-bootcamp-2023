@@ -8,6 +8,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
+import cv2
 
 from .. import bounding_box
 
@@ -79,30 +80,40 @@ class DetectLandingPad:
         # ============
 
         # Ultralytics has documentation and examples
-
+        
         # Use the model's predict() method to run inference
         # Parameters of interest:
         # * source
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict([image]) 
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = np.copy(image)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.cpu().numpy()
+        bounding_boxes = []
+        for box in boxes_cpu:
+            x1, y1, x2, y2 = map(int, box)
+            cv2.rectangle(image_annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            label = f"{x1}, {y1}, {x2}, {y2}"
+            cv2.putText(image_annotated, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            result_box = bounding_box.BoundingBox.create(np.array([x1, y1, x2, y2]))[1]
+            if result_box is not None:
+                bounding_boxes.append(result_box)
 
+        return bounding_boxes, image_annotated
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
@@ -111,7 +122,7 @@ class DetectLandingPad:
             # result, box = ...
 
         # Remove this when done
-        raise NotImplementedError
+        
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
