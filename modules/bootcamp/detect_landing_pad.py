@@ -8,7 +8,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
-import cv2
+
 
 from .. import bounding_box
 
@@ -66,6 +66,68 @@ class DetectLandingPad:
 
         self.__model = model
 
+    # def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    #     """
+    #     Converts an image into a list of bounding boxes.
+
+    #     image: The image to run on.
+
+    #     Return: A tuple of (list of bounding boxes, annotated image) .
+    #         The list of bounding boxes can be empty.
+    #     """
+    #     # ============
+    #     # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+    #     # ============
+
+    #     # Ultralytics has documentation and examples
+        
+    #     # Use the model's predict() method to run inference
+    #     # Parameters of interest:
+    #     # * source
+    #     # * conf
+    #     # * device
+    #     # * verbose
+    #     predictions = self.__model.predict([image]) 
+
+    #     # Get the Result object
+    #     prediction = predictions[0]
+
+    #     # Plot the annotated image from the Result object
+    #     # Include the confidence value
+    #     image_annotated = np.copy(image)
+
+    #     # Get the xyxy boxes list from the Boxes object in the Result object
+    #     boxes_xyxy = prediction.boxes.xyxy
+
+    #     # Detach the xyxy boxes to make a copy,
+    #     # move the copy into CPU space,
+    #     # and convert to a numpy array
+    #     boxes_cpu = boxes_xyxy.cpu().numpy()
+    #     bounding_boxes = []
+    #     for box in boxes_cpu:
+    #         x1, y1, x2, y2 = map(int, box)
+    #         box.plot
+    #         # cv2.rectangle(image_annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    #         label = f"{x1}, {y1}, {x2}, {y2}"
+    #         cv2.putText(image_annotated, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+    #         result_box = bounding_box.BoundingBox.create(np.array([x1, y1, x2, y2]))[1]
+    #         if result_box is not None:
+    #             bounding_boxes.append(result_box)
+
+    #     return bounding_boxes, image_annotated
+    #     # Loop over the boxes list and create a list of bounding boxes
+    #     bounding_boxes = []
+    #     # Hint: .shape gets the dimensions of the numpy array
+    #     # for i in range(0, ...):
+    #         # Create BoundingBox object and append to list
+    #         # result, box = ...
+
+    #     # Remove this when done
+        
+
+    #     # ============
+    #     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+    #     # ============
     def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
@@ -80,49 +142,45 @@ class DetectLandingPad:
         # ============
 
         # Ultralytics has documentation and examples
-        
+
         # Use the model's predict() method to run inference
         # Parameters of interest:
         # * source
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict([image]) 
-
+        predictions = self.__model.predict([image])
         # Get the Result object
-        prediction = predictions[0]
+        prediction =  prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = np.copy(image)
+        image_annotated = prediction.plot(conf= True, )
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = prediction.boxes.xyxy
+        boxes_xyxy = prediction.boxes.xyxy.detach()
+      
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
         boxes_cpu = boxes_xyxy.cpu().numpy()
-        bounding_boxes = []
-        for box in boxes_cpu:
-            x1, y1, x2, y2 = map(int, box)
-            cv2.rectangle(image_annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            label = f"{x1}, {y1}, {x2}, {y2}"
-            cv2.putText(image_annotated, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            result_box = bounding_box.BoundingBox.create(np.array([x1, y1, x2, y2]))[1]
-            if result_box is not None:
-                bounding_boxes.append(result_box)
 
-        return bounding_boxes, image_annotated
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+        for box in boxes_cpu:         
+            result, result_box = bounding_box.BoundingBox.create(box)
+            if result:
+                bounding_boxes.append(result_box)
+            else:
+                return ([], image_annotated)
+
+        return (bounding_boxes, image_annotated)
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
 
-        # Remove this when done
-        
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
