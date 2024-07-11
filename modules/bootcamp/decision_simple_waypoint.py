@@ -28,6 +28,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     @staticmethod
     def calculate_distance(loc1: location.Location, loc2: location.Location) -> float:
+        """
+        This function calculates the the distance between two locations 
+        """
         return ((loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2) ** 0.5
     @staticmethod
     def calculate_direction(from_loc: location.Location, to_loc: location.Location) -> location.Location:
@@ -37,8 +40,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         direction_x = to_loc.location_x - from_loc.location_x
         direction_y = to_loc.location_y - from_loc.location_y
         return location.Location(location_x=direction_x, location_y=direction_y)
-
-    
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
@@ -80,10 +81,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         distance = DecisionSimpleWaypoint.calculate_distance(report.position, self.waypoint)
-        
         if report.status == drone_status.DroneStatus.HALTED:
 
-            fly_direction = DecisionSimpleWaypoint.calculate_direction(report.position, self.waypoint) 
+            fly_direction = DecisionSimpleWaypoint.calculate_direction(report.position, self.waypoint)
             if distance <= self.acceptance_radius:
                 print("Arrived, Prepare to land")
                 self.has_started_journey = False
@@ -95,23 +95,14 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             else:
                 print('Unexpected halted situation, resume movement')
                 return commands.Command.create_set_relative_destination_command(fly_direction.location_x, fly_direction.location_y)
-            
         if report.status == drone_status.DroneStatus.MOVING and distance <= self.acceptance_radius:
             print('Reaches acceptance_radius, halt the drone')
             return commands.Command.create_halt_command()
-                
-          
         # Do something based on the report and the state of this class...
 
         # Remove this when done
-       
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
         return command
-
     
-
-
-
-

@@ -23,33 +23,36 @@ from ..private.decision import base_decision
 
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
+    """
+    Travel to the designed waypoint and then land at the nearest landing pad.
+    """
     @staticmethod
     def calculate_closest_location(start_loc: location.Location, loc_list:"list[location.Location]") -> location.Location:
+        """
+        This function calculates the closest location among a given list of locations from a given start location 
+        """
         shortest = float('inf')
         shortest_location = None
-        
-        #if loc_list is empty, then we should return the current point 
+        #if loc_list is empty, then we should return the current point
         for landing_loc in loc_list:
             if DecisionWaypointLandingPads.calculate_distance(start_loc, landing_loc) < shortest:
                 shortest = DecisionWaypointLandingPads.calculate_distance(start_loc, landing_loc)
                 shortest_location = landing_loc
-        
         return shortest_location
     @staticmethod
     def calculate_distance(loc1: location.Location, loc2: location.Location) -> float:
+        """
+        This function calculates the the distance between two locations
+        """
         return ((loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2)**0.5
     @staticmethod
     def calculate_direction(from_loc: location.Location, to_loc: location.Location) -> location.Location:
-            """
-            Calculate the direction vector from current location to waypoint.
-            """
-            direction_x = to_loc.location_x - from_loc.location_x
-            direction_y = to_loc.location_y - from_loc.location_y
-            return location.Location(location_x=direction_x, location_y=direction_y)
-    
-    """
-    Travel to the designed waypoint and then land at the nearest landing pad.
-    """
+        """
+        Calculate the direction vector from current location to waypoint.
+        """
+        direction_x = to_loc.location_x - from_loc.location_x
+        direction_y = to_loc.location_y - from_loc.location_y
+        return location.Location(location_x=direction_x, location_y=direction_y)
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
@@ -112,8 +115,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.has_started_journey = False
                     self.has_reached_waypoint = True
                     self.location_closest_landing = DecisionWaypointLandingPads.calculate_closest_location(self.waypoint, landing_pad_locations)
-                    if self.location_closest_landing == None:
-                        self.location_closest_landing = report.position #if the landing_pad_locations is null, we should just land at the current position            
+                    if self.location_closest_landing is None:
+                        self.location_closest_landing = report.position
                     fly_direction = DecisionWaypointLandingPads.calculate_direction(report.position, self.location_closest_landing)
                     return commands.Command.create_set_relative_destination_command(fly_direction.location_x, fly_direction.location_y)
                 elif not self.has_started_journey:
@@ -123,8 +126,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     print('Unexpected halted situation, resume movement')
                     return commands.Command.create_set_relative_destination_command(fly_direction.location_x, fly_direction.location_y)
-       
-       
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
