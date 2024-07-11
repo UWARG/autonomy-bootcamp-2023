@@ -7,7 +7,6 @@ Travel to designated waypoint.
 # pylint: disable=unused-import
 
 
-import math
 from .. import commands
 from .. import drone_report
 from .. import drone_status
