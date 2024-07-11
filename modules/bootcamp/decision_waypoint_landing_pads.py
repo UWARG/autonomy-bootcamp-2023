@@ -23,20 +23,22 @@ from ..private.decision import base_decision
 
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
-    staticmethod
+    @staticmethod
     def calculate_closest_location(start_loc: location.Location, loc_list:"list[location.Location]") -> location.Location:
         shortest = float('inf')
+        shortest_location = None
         
+        #if loc_list is empty, then we should return the current point 
         for landing_loc in loc_list:
             if DecisionWaypointLandingPads.calculate_distance(start_loc, landing_loc) < shortest:
                 shortest = DecisionWaypointLandingPads.calculate_distance(start_loc, landing_loc)
                 shortest_location = landing_loc
         
         return shortest_location
-
+    @staticmethod
     def calculate_distance(loc1: location.Location, loc2: location.Location) -> float:
         return ((loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2)**0.5
-
+    @staticmethod
     def calculate_direction(from_loc: location.Location, to_loc: location.Location) -> location.Location:
             """
             Calculate the direction vector from current location to waypoint.
@@ -60,19 +62,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Add your own
         self.has_started_journey = False
         self.has_reached_waypoint = False
-        self.location_closest_landing = 0
-
+        self.location_closest_landing = None
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
     def run(self,
-        report: drone_report.DroneReport,
-        landing_pad_locations: "list[location.Location]") -> commands.Command:
+            report: drone_report.DroneReport,
+            landing_pad_locations: "list[location.Location]") -> commands.Command:
         """
         Make the drone fly to the waypoint and then land at the nearest landing pad.
 
@@ -97,7 +97,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         distance_to_waypoint = DecisionWaypointLandingPads.calculate_distance(report.position, self.waypoint)
-        fly_direction = DecisionWaypointLandingPads.calculate_direction(report.position, self.waypoint)
         if self.has_reached_waypoint:
             distance_to_landing_pad = DecisionWaypointLandingPads.calculate_distance(report.position, self.location_closest_landing)
             if distance_to_landing_pad <= self.acceptance_radius:
@@ -106,12 +105,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 print('Reaches acceptance_radius, halt the drone')
                 return commands.Command.create_halt_command()
         else:
+            fly_direction = DecisionWaypointLandingPads.calculate_direction(report.position, self.waypoint)
             if report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint:
                 if distance_to_waypoint <= self.acceptance_radius:
                     print("Reached Waypoint, Start journey to closest landing pad")
                     self.has_started_journey = False
                     self.has_reached_waypoint = True
                     self.location_closest_landing = DecisionWaypointLandingPads.calculate_closest_location(self.waypoint, landing_pad_locations)
+                    if self.location_closest_landing == None:
+                        self.location_closest_landing = report.position #if the landing_pad_locations is null, we should just land at the current position            
                     fly_direction = DecisionWaypointLandingPads.calculate_direction(report.position, self.location_closest_landing)
                     return commands.Command.create_set_relative_destination_command(fly_direction.location_x, fly_direction.location_y)
                 elif not self.has_started_journey:

@@ -29,7 +29,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     @staticmethod
     def calculate_distance(loc1: location.Location, loc2: location.Location) -> float:
         return ((loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2) ** 0.5
-
+    @staticmethod
     def calculate_direction(from_loc: location.Location, to_loc: location.Location) -> location.Location:
         """
         Calculate the direction vector from current location to waypoint.
@@ -56,8 +56,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     def run(self,
-        report: drone_report.DroneReport,
-        landing_pad_locations: "list[location.Location]") -> commands.Command:
+            report: drone_report.DroneReport,
+            landing_pad_locations: "list[location.Location]") -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -80,8 +80,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         distance = DecisionSimpleWaypoint.calculate_distance(report.position, self.waypoint)
-        fly_direction = DecisionSimpleWaypoint.calculate_direction(report.position, self.waypoint)
+        
         if report.status == drone_status.DroneStatus.HALTED:
+
+            fly_direction = DecisionSimpleWaypoint.calculate_direction(report.position, self.waypoint) 
             if distance <= self.acceptance_radius:
                 print("Arrived, Prepare to land")
                 self.has_started_journey = False
