@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.reached_waypoint = False
+        self.landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -46,21 +47,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def run(self,
             report: drone_report.DroneReport,
             landing_pad_locations: "list[location.Location]") -> commands.Command:
-        """
-        Make the drone fly to the waypoint and then land at the nearest landing pad.
 
-        You are allowed to create as many helper methods as you want,
-        as long as you do not change the __init__() and run() signatures.
-
-        This method will be called in an infinite loop, something like this:
-
-        ```py
-        while True:
-            report, landing_pad_locations = get_input()
-            command = Decision.run(report, landing_pad_locations)
-            put_output(command)
-        ```
-        """
         # Default command
         command = commands.Command.create_null_command()
 
@@ -68,10 +55,50 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            # Getting distance to waypoint
+            x_diff = self.waypoint.location_x - report.position.location_x
+            y_diff = self.waypoint.location_y - report.position.location_y
+            distance_to_waypoint = (x_diff ** 2 + y_diff ** 2) ** 0.5
 
-        # Remove this when done
-        raise NotImplementedError
+            # Waypoint not reached
+            if not self.reached_waypoint:
+                # Reached waypoint (within acceptance radius)
+                if distance_to_waypoint <= self.acceptance_radius:
+                    self.reached_waypoint = True
+
+                    # Finding closest landing pad
+                    smallest_pad_distance = float('inf')
+                    for pad in landing_pad_locations:
+                        # Getting distance to landing pad
+                        pad_x_diff = pad.location_x - report.position.location_x
+                        pad_y_diff = pad.location_y - report.position.location_y
+                        pad_distance = (pad_x_diff ** 2 + pad_y_diff ** 2) ** 0.5
+
+                        # Comparing to closest landing pad so far
+                        if pad_distance < smallest_pad_distance:
+                            smallest_pad_distance = pad_distance
+                            self.landing_pad = pad
+
+                    x_diff = self.landing_pad.location_x - report.position.location_x
+                    y_diff = self.landing_pad.location_y - report.position.location_y
+                    command = commands.Command.create_set_relative_destination_command(x_diff, y_diff)
+                
+                # Has not reached waypoint yet
+                else:
+                    command = commands.Command.create_set_relative_destination_command(x_diff, y_diff)
+
+            # Waypoint reached, moving to landing pad
+            else:
+                # Distance to landing pad
+                x_diff = self.landing_pad.location_x - report.position.location_x
+                y_diff = self.landing_pad.location_y - report.position.location_y
+                distance_to_landing_pad = (x_diff ** 2 + y_diff ** 2) ** 0.5
+
+                if distance_to_landing_pad <= self.acceptance_radius:
+                    command = commands.Command.create_land_command()
+                else:
+                    command = commands.Command.create_set_relative_destination_command(x_diff, y_diff)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
