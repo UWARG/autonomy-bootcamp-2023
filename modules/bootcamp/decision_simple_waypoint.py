@@ -31,14 +31,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.waypoint = waypoint
         print("Waypoint: " + str(waypoint))
 
-        self.acceptance_radius = acceptance_radius
-
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
+        # Square to compare relative distance
+        self.acceptance_radius = acceptance_radius ** 2
+        
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -68,13 +67,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        drone_halted = (report.status == drone_status.DroneStatus.HALTED)
+        distance_greater = (relative_distance(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y) > self.acceptance_radius)
 
-        # Remove this when done
-        raise NotImplementedError
+        if drone_halted and distance_greater:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
+            )
+        elif drone_halted and not distance_greater:
+            command = commands.Command.create_land_command()
+        elif not drone_halted and not distance_greater:
+            command = commands.Command.create_halt_command()
+
+        # Do something based on the report and the state of this class...
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+def relative_distance(x_coor_1, y_coor_1, x_coor_2, y_coor_2):
+    return (x_coor_2 - x_coor_1)**2 + (y_coor_2 - y_coor_1)**2
