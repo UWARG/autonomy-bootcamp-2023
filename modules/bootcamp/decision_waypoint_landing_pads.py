@@ -59,25 +59,25 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # Getting distance to waypoint
             x_diff = self.waypoint.location_x - report.position.location_x
             y_diff = self.waypoint.location_y - report.position.location_y
-            distance_to_waypoint = (x_diff ** 2 + y_diff ** 2) ** 0.5
+            squared_distance_to_waypoint = (x_diff ** 2 + y_diff ** 2)
 
             # Waypoint not reached
             if not self.reached_waypoint:
                 # Reached waypoint (within acceptance radius)
-                if distance_to_waypoint <= self.acceptance_radius:
+                if squared_distance_to_waypoint <= self.acceptance_radius ** 2:
                     self.reached_waypoint = True
 
                     # Finding closest landing pad
-                    smallest_pad_distance = float('inf')
+                    squared_smallest_pad_distance = float('inf')
                     for pad in landing_pad_locations:
                         # Getting distance to landing pad
                         pad_x_diff = pad.location_x - report.position.location_x
                         pad_y_diff = pad.location_y - report.position.location_y
-                        pad_distance = (pad_x_diff ** 2 + pad_y_diff ** 2) ** 0.5
+                        squared_pad_distance = (pad_x_diff ** 2 + pad_y_diff ** 2) 
 
                         # Comparing to closest landing pad so far
-                        if pad_distance < smallest_pad_distance:
-                            smallest_pad_distance = pad_distance
+                        if squared_pad_distance < squared_smallest_pad_distance:
+                            squared_smallest_pad_distance = squared_pad_distance
                             self.landing_pad = pad
 
                     x_diff = self.landing_pad.location_x - report.position.location_x
@@ -93,9 +93,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 # Distance to landing pad
                 x_diff = self.landing_pad.location_x - report.position.location_x
                 y_diff = self.landing_pad.location_y - report.position.location_y
-                distance_to_landing_pad = (x_diff ** 2 + y_diff ** 2) ** 0.5
+                squared_distance_to_landing_pad = (x_diff ** 2 + y_diff ** 2)
 
-                if distance_to_landing_pad <= self.acceptance_radius:
+                if squared_distance_to_landing_pad <= self.acceptance_radius ** 2:
                     command = commands.Command.create_land_command()
                 else:
                     command = commands.Command.create_set_relative_destination_command(x_diff, y_diff)

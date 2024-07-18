@@ -111,6 +111,9 @@ class DetectLandingPad:
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             if result and box is not None:
                 bounding_boxes.append(box)
+            else:
+                bounding_boxes.clear()
+                break
 
         return bounding_boxes, image_annotated
 

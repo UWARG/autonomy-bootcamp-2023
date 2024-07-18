@@ -57,11 +57,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             x_value_diff = self.waypoint.location_x - report.position.location_x
             y_value_diff = self.waypoint.location_y - report.position.location_y
 
-            # Distance formula
-            distance_from_waypoint = (x_value_diff ** 2 + y_value_diff ** 2) ** 1/2
+            # Squared distance from waypoint
+            squared_distance = (x_value_diff ** 2) + (y_value_diff ** 2)
 
             # Drone has arrived at waypoint
-            if distance_from_waypoint <= self.acceptance_radius:
+            if squared_distance <= self.acceptance_radius ** 2:
                 command = commands.Command.create_land_command()
             
             # Drone has not taken off yet
