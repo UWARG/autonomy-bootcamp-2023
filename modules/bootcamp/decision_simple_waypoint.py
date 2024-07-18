@@ -36,7 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Square to compare relative distance
-        self.acceptance_radius = acceptance_radius ** 2
+        self.acceptance_radius_squared = acceptance_radius ** 2
         
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +68,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         drone_halted = (report.status == drone_status.DroneStatus.HALTED)
-        distance_greater = (relative_distance(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y) > self.acceptance_radius)
+        distance_greater = (dist(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y) > self.acceptance_radius_squared)
 
         if drone_halted and distance_greater:
             command = commands.Command.create_set_relative_destination_command(
@@ -88,5 +88,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return command
 
-def relative_distance(x_coor_1, y_coor_1, x_coor_2, y_coor_2):
+def dist(x_coor_1, y_coor_1, x_coor_2, y_coor_2):
+    """ Calculates the Euclidean distance between two points without using the square root function"""
     return (x_coor_2 - x_coor_1)**2 + (y_coor_2 - y_coor_1)**2
