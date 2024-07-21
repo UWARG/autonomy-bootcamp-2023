@@ -67,8 +67,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         position: the current location of the drone
         landing_pad_locations: a list containing the locations of all the landing pads nearby
 
-        Return: the index of the closest landing pad to the drone in the list 
-                'landing_pad_locations'
+        Return: the location of the closest pad
         """
         min_distance_sqr = float("inf")
         closest_pad = None
@@ -117,7 +116,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             if self.closest_pad is not None and self.get_relative_distance_sqr(report.position, 
                                                                                self.closest_pad) < self.acceptance_radius ** 2 and report.status == drone_status.DroneStatus.MOVING:
-                # If we're on the pad and we're still moving, we want to halt the pad
+                # If we're on the pad and we're still moving, we want to halt the drone
                 command = commands.Command.create_halt_command()
 
             elif self.closest_pad is not None and self.get_relative_distance_sqr(report.position, 
@@ -133,7 +132,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
 
         elif self.get_relative_distance_sqr(report.position, 
-                                            self.waypoint) < self.acceptance_radius and report.status == drone_status.DroneStatus.HALTED:
+                                            self.waypoint) < self.acceptance_radius:
             # Once we have reached the waypoint, we now want to halt
             command = commands.Command.create_halt_command()
             # After halting, we now want to make the drone fly to the nearest pad on the next command

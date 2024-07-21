@@ -94,7 +94,7 @@ class DetectLandingPad:
         # Plot the annotated image from the Result object
         # Include the confidence value
         # We take the result and turn it into a numpy array image
-        image_annotated = prediction.plot() 
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         # Take the Result object and turn it into a list of coordinate lists populated with xy coords
