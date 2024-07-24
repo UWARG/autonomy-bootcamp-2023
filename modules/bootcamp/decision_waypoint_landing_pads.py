@@ -132,7 +132,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
 
         elif self.get_relative_distance_sqr(report.position, 
-                                            self.waypoint) < self.acceptance_radius:
+                                            self.waypoint) < self.acceptance_radius ** 2:
             # Once we have reached the waypoint, we now want to halt
             command = commands.Command.create_halt_command()
             # After halting, we now want to make the drone fly to the nearest pad on the next command
