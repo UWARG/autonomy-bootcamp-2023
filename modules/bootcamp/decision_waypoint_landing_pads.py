@@ -41,11 +41,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.at_waypoint = False
         self.begin_landing = False
 
+    def at_location(self, cur: location.Location, dest: location.Location):
+        return (dest.location_x - cur.location_x) ** 2 + (dest.location_y - cur.location_y) ** 2 <= self.acceptance_radius
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-    def at_location(self, cur: location.Location, dest: location.Location):
-        return (dest.location_x - cur.location_x) ** 2 + (dest.location_y - cur.location_y) ** 2 <= self.acceptance_radius
+
 
     def run(self,
             report: drone_report.DroneReport,
