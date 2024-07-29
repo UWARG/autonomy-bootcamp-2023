@@ -75,37 +75,35 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        if report.status == drone_status.DroneStatus.MOVING and not self.begin_landing:
+        if self.begin_landing: 
+            print("now begin landing!")
+            nearest_landing_pad = None
+            min_dist = float('inf')
+            for i in landing_pad_locations: 
+                dx = i.location_x - report.position.location_x
+                dy = i.location_y - report.position.location_y
+                dist = dx ** 2 + dy ** 2
+                if dist < min_dist: 
+                    min_dist = dist
+                    nearest_landing_pad = i
+            if nearest_landing_pad is not None: 
+                if self.at_location(report.position, nearest_landing_pad): 
+                    command = commands.Command.create_land_command();
+                else: 
+                    command = commands.Command.create_set_relative_destination_command(
+                        nearest_landing_pad.location_x - report.position.location_x, 
+                        nearest_landing_pad.location_y - report.position.location_y
+                    )
+        elif report.status == drone_status.DroneStatus.MOVING:
             if self.at_location(report.position, self.waypoint): 
                 command = commands.Command.create_halt_command()
-                self.at_waypoint = True
-        elif report.status == drone_status.DroneStatus.HALTED or self.begin_landing: 
+                self.begin_landing = True
+        elif report.status == drone_status.DroneStatus.HALTED: 
             if not self.at_waypoint: 
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x, 
                     self.waypoint.location_y - report.position.location_y
-                )
-                self.at_waypoint = True 
-            else: 
-                print("now begin landing!")
-                self.begin_landing = True
-                res = None
-                mn = float('inf')
-                for i in landing_pad_locations: 
-                    dx = i.location_x - report.position.location_x
-                    dy = i.location_y - report.position.location_y
-                    dist = dx ** 2 + dy ** 2
-                    if dist < mn: 
-                        mn = dist
-                        res = i
-                if res is not None: 
-                    if self.at_location(report.position, res): 
-                        command = commands.Command.create_land_command();
-                    else: 
-                        command = commands.Command.create_set_relative_destination_command(
-                            res.location_x - report.position.location_x, 
-                            res.location_y - report.position.location_y
-                        )
+                )            
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
