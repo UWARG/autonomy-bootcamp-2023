@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Detect landing pad worker process.
 """
+
 import pathlib
 
 from .utilities import queue_proxy_wrapper
@@ -13,11 +14,13 @@ from .. import location
 from ..bootcamp import detect_landing_pad
 
 
-def detect_landing_pad_worker(model_directory: pathlib.Path,
-                              input_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                              output_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                              status_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                              controller: worker_controller.WorkerController):
+def detect_landing_pad_worker(
+    model_directory: pathlib.Path,
+    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController,
+):
     """
     Worker process.
 

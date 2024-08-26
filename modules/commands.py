@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Different commands to send to the drone.
 """
+
 import enum
 
 
@@ -19,14 +20,16 @@ class Command:
 
     The Command object can then be used (e.g. passing it to the drone).
     """
+
     class CommandType(enum.Enum):
         """
         Different types of commands.
         """
-        NULL                     = 0  # Stay the course
+
+        NULL = 0  # Stay the course
         SET_RELATIVE_DESTINATION = 1  # Move relative to current position
-        HALT                     = 2  # Stop the drone ASAP
-        LAND                     = 3  # Land at current position
+        HALT = 2  # Stop the drone ASAP
+        LAND = 3  # Land at current position
 
     __create_key = object()
 
@@ -43,9 +46,9 @@ class Command:
         )
 
     @classmethod
-    def create_set_relative_destination_command(cls,
-                                                relative_x: float,
-                                                relative_y: float) -> "Command":
+    def create_set_relative_destination_command(
+        cls, relative_x: float, relative_y: float
+    ) -> "Command":
         """
         Command to set drone destination.
         Drone must be in halted state.
@@ -83,11 +86,13 @@ class Command:
             0.0,
         )
 
-    def __init__(self,
-                 class_private_create_key,
-                 command_type: CommandType,
-                 relative_x: float,
-                 relative_y: float):
+    def __init__(
+        self,
+        class_private_create_key,
+        command_type: CommandType,
+        relative_x: float,
+        relative_y: float,
+    ):
         """
         Private constructor, use create() method.
         """

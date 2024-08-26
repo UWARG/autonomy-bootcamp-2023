@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 For managing workers.
 """
+
 import multiprocessing as mp
 
 
@@ -11,6 +12,7 @@ class WorkerManager:
     For interprocess communication from main to worker.
     Contains exit and pause requests.
     """
+
     def __init__(self, workers: "list[mp.Process] | None" = None):
         """
         Constructor creates internal queue and semaphore.

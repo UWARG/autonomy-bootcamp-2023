@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Unit tests.
 """
+
 import pathlib
 
 import cv2

@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Simulation worker process.
 """
+
 import pathlib
 import time
 
@@ -18,10 +19,9 @@ from ... import drone_status
 from ... import location
 
 
-def run_simulator(command: commands.Command,
-                  drone: drone_state.DroneState,
-                  renderer: map_render.MapRender) \
-    -> "tuple[bool, tuple[drone_report.DroneReport, np.ndarray] | None]":
+def run_simulator(
+    command: commands.Command, drone: drone_state.DroneState, renderer: map_render.MapRender
+) -> "tuple[bool, tuple[drone_report.DroneReport, np.ndarray] | None]":
     """
     Wrapper.
     """
@@ -38,21 +38,23 @@ def run_simulator(command: commands.Command,
 
 # Extra parameters required for worker communication, extra variables required for management
 # pylint: disable-next=too-many-arguments,too-many-locals
-def simulation_worker(time_step_size: float,
-                      drone_initial_position: location.Location,
-                      boundary_bottom_left: location.Location,
-                      boundary_top_right: location.Location,
-                      acceptance_radius: float,
-                      pixels_per_metre: int,
-                      image_resolution_x: int,
-                      image_resolution_y: int,
-                      map_image_directory: pathlib.Path,
-                      landing_pad_image_directory: pathlib.Path,
-                      landing_pad_locations: "list[location.Location]",
-                      input_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                      output_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                      status_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                      controller: worker_controller.WorkerController):
+def simulation_worker(
+    time_step_size: float,
+    drone_initial_position: location.Location,
+    boundary_bottom_left: location.Location,
+    boundary_top_right: location.Location,
+    acceptance_radius: float,
+    pixels_per_metre: int,
+    image_resolution_x: int,
+    image_resolution_y: int,
+    map_image_directory: pathlib.Path,
+    landing_pad_image_directory: pathlib.Path,
+    landing_pad_locations: "list[location.Location]",
+    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController,
+):
     """
     Worker process.
 

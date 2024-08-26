@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Map go brrr.
 """
+
 import pathlib
 import time
 
@@ -34,7 +35,7 @@ def display(renderer: map_render.MapRender, position: location.Location) -> bool
     # Pylint has issues with OpenCV
     # pylint: disable=no-member
     cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
-    cv2.resizeWindow('Map', image.shape[1] // 2, image.shape[0] // 2)
+    cv2.resizeWindow("Map", image.shape[1] // 2, image.shape[0] // 2)
     cv2.imshow("Map", image)
     cv2.waitKey(1)
     # pylint: enable=no-member

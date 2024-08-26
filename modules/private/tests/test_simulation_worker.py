@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test drone state simulation with a figure 8.
 """
+
 import multiprocessing as mp
 import pathlib
 
@@ -97,14 +98,14 @@ def main() -> int:
     # 7: Centre
     waypoint_index = 0
     waypoints = [
-        commands.Command.create_set_relative_destination_command( 50.0,  37.5),
-        commands.Command.create_set_relative_destination_command(  0.0, -75.0),
-        commands.Command.create_set_relative_destination_command(-50.0,  37.5),
+        commands.Command.create_set_relative_destination_command(50.0, 37.5),
+        commands.Command.create_set_relative_destination_command(0.0, -75.0),
+        commands.Command.create_set_relative_destination_command(-50.0, 37.5),
         commands.Command.create_set_relative_destination_command(-50.0, -37.5),
-        commands.Command.create_set_relative_destination_command(  0.0,  75.0),
-        commands.Command.create_set_relative_destination_command( 50.0, -37.5),
-        commands.Command.create_set_relative_destination_command(-50.0,   0.0),
-        commands.Command.create_set_relative_destination_command( 50.0,   0.0),
+        commands.Command.create_set_relative_destination_command(0.0, 75.0),
+        commands.Command.create_set_relative_destination_command(50.0, -37.5),
+        commands.Command.create_set_relative_destination_command(-50.0, 0.0),
+        commands.Command.create_set_relative_destination_command(50.0, 0.0),
         commands.Command.create_land_command(),
     ]
 
@@ -115,8 +116,9 @@ def main() -> int:
     )
     counter = 0
     while counter < 11000:
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = \
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
             simulation_to_detect_queue.queue.get()
+        )
         report, _, camera_image = output_data
 
         # Pylint has issues with OpenCV

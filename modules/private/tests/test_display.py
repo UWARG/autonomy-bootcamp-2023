@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test display.
 """
+
 import math
 import pathlib
 import time

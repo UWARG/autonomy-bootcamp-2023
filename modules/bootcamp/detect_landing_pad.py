@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Detects landing pads.
 """
+
 import pathlib
 
 import numpy as np
@@ -18,6 +19,7 @@ class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
+
     __create_key = object()
 
     # ============
@@ -107,8 +109,8 @@ class DetectLandingPad:
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
+        # Create BoundingBox object and append to list
+        # result, box = ...
 
         # Remove this when done
         raise NotImplementedError

@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Displays the map and drone information.
 """
+
 import pathlib
 import time
 
@@ -17,6 +18,7 @@ class Display:
     """
     Draws the display.
     """
+
     __create_key = object()
 
     __PANE_RESOLUTION_X = 400
@@ -67,10 +69,9 @@ class Display:
     @staticmethod
     # Extra variables required for display
     # pylint: disable-next=too-many-locals
-    def __generate_information_pane(resolution_x: int,
-                                    resolution_y: int,
-                                    report: drone_report.DroneReport,
-                                    seed: int) -> np.ndarray:
+    def __generate_information_pane(
+        resolution_x: int, resolution_y: int, report: drone_report.DroneReport, seed: int
+    ) -> np.ndarray:
         """
         Draws the information pane from the drone report.
         """

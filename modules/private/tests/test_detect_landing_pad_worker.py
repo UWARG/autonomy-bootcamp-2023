@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test landing pad detection worker.
 """
+
 import multiprocessing as mp
 import pathlib
 
@@ -67,8 +68,7 @@ def main() -> int:
 
     camera_images = []
     for i in range(0, 3):
-        input_image_path = \
-            pathlib.Path(INPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
+        input_image_path = pathlib.Path(INPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
         assert input_image_path.exists()
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
@@ -91,14 +91,16 @@ def main() -> int:
         simulation_to_detect_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list[bounding_box.BoundingBox], np.ndarray]" \
-            = detect_to_geolocation_queue.queue.get()
+        output_data: (
+            "tuple[drone_report.DroneReport, list[bounding_box.BoundingBox], np.ndarray]"
+        ) = detect_to_geolocation_queue.queue.get()
         report, bounding_boxes, annotated_image = output_data
 
         assert report == input_report
         assert len(bounding_boxes) == i
-        output_image_path = \
-            pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
+        output_image_path = pathlib.PurePosixPath(
+            OUTPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png"
+        )
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
         cv2.imwrite(str(output_image_path), annotated_image)
