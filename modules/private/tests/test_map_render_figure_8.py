@@ -45,7 +45,7 @@ def display(renderer: map_render.MapRender, position: location.Location) -> bool
 
 # Result checking, basic for loops
 # pylint: disable-next=too-many-return-statements,too-many-branches
-def figure8() -> int:
+def main() -> int:
     """
     main.
     """
@@ -154,10 +154,8 @@ def figure8() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = figure8()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main < 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

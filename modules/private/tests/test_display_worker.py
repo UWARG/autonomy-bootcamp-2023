@@ -159,10 +159,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = main()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main < 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")
