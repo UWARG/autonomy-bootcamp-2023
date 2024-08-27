@@ -20,7 +20,7 @@ class DroneReport:
         status: drone_status.DroneStatus,
         destination: location.Location,
         position: location.Location,
-    ):
+    ) -> None:
         """
         Construct report on the state of the drone.
         """

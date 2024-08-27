@@ -28,7 +28,7 @@ class DroneVelocity:
 
         return True, DroneVelocity(cls.__create_key, speed, direction)
 
-    def __init__(self, class_private_create_key, speed: float, direction: float):
+    def __init__(self, class_private_create_key, speed: float, direction: float) -> None:
         """
         Private constructor, use create() method.
         """

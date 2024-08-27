@@ -38,7 +38,7 @@ class Display:
 
         return True, Display(cls.__create_key, display_scale, seed)
 
-    def __init__(self, class_private_create_key, display_scale: float, seed: int):
+    def __init__(self, class_private_create_key, display_scale: float, seed: int) -> None:
         """
         Private constructor, use create() method.
         """
@@ -50,7 +50,7 @@ class Display:
         self.__seed = seed
 
     @staticmethod
-    def __display(image: np.ndarray, display_scale: float):
+    def __display(image: np.ndarray, display_scale: float) -> None:
         """
         Displays the provided image.
         """
@@ -221,7 +221,7 @@ class Display:
         return image
 
     @staticmethod
-    def __draw_map_ui_elements(map_image: np.ndarray):
+    def __draw_map_ui_elements(map_image: np.ndarray) -> None:
         """
         Draws map UI elements on the provided image.
 

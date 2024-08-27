@@ -14,7 +14,7 @@ from .. import location
 LOG_FILE_DIRECTORY = pathlib.Path("log")
 
 
-def __log_seed(seed: "int | None"):
+def __log_seed(seed: "int | None") -> None:
     """
     Logs the seed at the beginning of the program for future reproducibility.
     """

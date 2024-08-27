@@ -22,7 +22,7 @@ BOUNDING_BOX_TOLERANCE = 1.0  # pixels
 
 
 @pytest.fixture()
-def detector():
+def detector() -> detect_landing_pad.DetectLandingPad:  # type: ignore
     """
     Construct DetectLandingPad.
     """
@@ -39,7 +39,7 @@ def detector():
 # pylint: disable=redefined-outer-name
 
 
-def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
+def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
     """
     1 landing pad.
     """
@@ -75,7 +75,7 @@ def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     cv2.imwrite(str(output_path), output_image)
 
 
-def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad):
+def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
     """
     2 landing pads.
     """
@@ -113,7 +113,7 @@ def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     cv2.imwrite(str(output_path), output_image)
 
 
-def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad):
+def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
     """
     0 landing pads.
     """

@@ -92,7 +92,7 @@ class Command:
         command_type: CommandType,
         relative_x: float,
         relative_y: float,
-    ):
+    ) -> None:
         """
         Private constructor, use create() method.
         """

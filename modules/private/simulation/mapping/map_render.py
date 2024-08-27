@@ -96,7 +96,7 @@ class LandingPadOnMap:
         image_y: int,
         centre_pixel_x: int,
         centre_pixel_y: int,
-    ):
+    ) -> None:
         """
         Private constructor, use create() method.
         """
@@ -179,7 +179,7 @@ class CombinedLocalMap:
         centre_image_x: int,
         centre_image_y: int,
         combined_image: np.ndarray,
-    ):
+    ) -> None:
         """
         Private constructor, use create() method.
         """
@@ -437,7 +437,7 @@ class MapRender:
         map_image_directory: pathlib.Path,
         default_map_image: np.ndarray,
         landing_pads: "list[LandingPadOnMap]",
-    ):
+    ) -> None:
         """
         Private constructor, use create() method.
         """
@@ -455,7 +455,7 @@ class MapRender:
         self.__landing_pads = landing_pads
 
     @staticmethod
-    def __is_image_valid_shape(image: np.ndarray, shape: "tuple[int, int, int]"):
+    def __is_image_valid_shape(image: np.ndarray, shape: "tuple[int, int, int]") -> bool:
         """
         Check to ensure loaded image is correct shape.
         """
@@ -521,14 +521,14 @@ class MapRender:
 
         return image
 
-    def __evict_image_from_cache(self, image_x: int, image_y: int):
+    def __evict_image_from_cache(self, image_x: int, image_y: int) -> None:
         image = self.__cached_images.get((image_x, image_y))
         if image is None:
             return
 
         del self.__cached_images[(image_x, image_y)]
 
-    def __load_image_into_cache(self, image_x: int, image_y: int):
+    def __load_image_into_cache(self, image_x: int, image_y: int) -> None:
         """
         Loads the appropriate image.
         Looks in cache and on failure then reads file.

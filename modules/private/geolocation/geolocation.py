@@ -38,7 +38,7 @@ class Geolocation:
 
     def __init__(
         self, class_private_create_key, pixels_per_metre: int, resolution_x: int, resolution_y: int
-    ):
+    ) -> None:
         """
         Private constructor, use create() method.
         """

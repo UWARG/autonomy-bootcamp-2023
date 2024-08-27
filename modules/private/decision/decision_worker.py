@@ -17,7 +17,7 @@ def decision_worker(
     # pylint: disable-next=unused-argument
     status_queue: queue_proxy_wrapper.QueueProxyWrapper,
     controller: worker_controller.WorkerController,
-):
+) -> None:
     """
     Worker process.
 

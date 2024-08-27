@@ -77,7 +77,7 @@ class DroneState:
         boundary_bottom_left: location.Location,
         boundary_top_right: location.Location,
         acceptance_radius: float,
-    ):
+    ) -> None:
         """
         Private constructor, use create() method.
         """
@@ -126,7 +126,7 @@ class DroneState:
 
         return True
 
-    def __update_intent(self, status: drone_status.DroneStatus, destination: location.Location):
+    def __update_intent(self, status: drone_status.DroneStatus, destination: location.Location) -> None:
         """
         Update intent of drone.
         """

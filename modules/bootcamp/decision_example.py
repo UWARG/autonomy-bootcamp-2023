@@ -22,7 +22,7 @@ class DecisionExample(base_decision.BaseDecision):
     Example of sending commands to the drone.
     """
 
-    def __init__(self, waypoint: location.Location, acceptance_radius: float):
+    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Initialize all persistent variables here with self.
         """

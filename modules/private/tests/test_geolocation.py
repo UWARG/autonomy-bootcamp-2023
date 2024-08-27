@@ -20,7 +20,7 @@ IMAGE_RESOLUTION_Y = 900
 
 
 @pytest.fixture()
-def locator():
+def locator() -> geolocation.Geolocation:
     """
     Construct Geolocation.
     """
@@ -35,7 +35,7 @@ def locator():
 
 
 @pytest.fixture()
-def report():
+def report() -> drone_report.DroneReport:
     """
     Drone report.
     """
@@ -51,7 +51,7 @@ def report():
 # pylint: disable=redefined-outer-name
 
 
-def test_input_empty(locator: geolocation.Geolocation, report: drone_report.DroneReport):
+def test_input_empty(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:
     """
     No bounding boxes.
     """
@@ -66,7 +66,7 @@ def test_input_empty(locator: geolocation.Geolocation, report: drone_report.Dron
     assert actual == expected
 
 
-def test_input_1(locator: geolocation.Geolocation, report: drone_report.DroneReport):
+def test_input_1(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:
     """
     1 bounding box.
     """
@@ -90,7 +90,7 @@ def test_input_1(locator: geolocation.Geolocation, report: drone_report.DroneRep
     assert actual == expected
 
 
-def test_input_2(locator: geolocation.Geolocation, report: drone_report.DroneReport):
+def test_input_2(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:
     """
     2 bounding boxes.
     """

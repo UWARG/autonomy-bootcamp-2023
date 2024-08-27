@@ -21,7 +21,7 @@ def display_worker(
     output_queue: queue_proxy_wrapper.QueueProxyWrapper,
     status_queue: queue_proxy_wrapper.QueueProxyWrapper,
     controller: worker_controller.WorkerController,
-):
+) -> None:
     """
     Worker process.
 
