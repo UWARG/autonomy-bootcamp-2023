@@ -126,7 +126,9 @@ class DroneState:
 
         return True
 
-    def __update_intent(self, status: drone_status.DroneStatus, destination: location.Location) -> None:
+    def __update_intent(
+        self, status: drone_status.DroneStatus, destination: location.Location
+    ) -> None:
         """
         Update intent of drone.
         """
