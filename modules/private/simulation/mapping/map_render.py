@@ -90,7 +90,7 @@ class LandingPadOnMap:
     # pylint: disable-next=too-many-arguments
     def __init__(
         self,
-        class_private_create_key,
+        class_private_create_key: object,
         pad_image: np.ndarray,
         image_x: int,
         image_y: int,
@@ -175,7 +175,7 @@ class CombinedLocalMap:
 
     def __init__(
         self,
-        class_private_create_key,
+        class_private_create_key: object,
         centre_image_x: int,
         centre_image_y: int,
         combined_image: np.ndarray,
@@ -430,7 +430,7 @@ class MapRender:
     # pylint: disable-next=too-many-arguments
     def __init__(
         self,
-        class_private_create_key,
+        class_private_create_key: object,
         pixels_per_metre: int,
         resolution_x: int,
         resolution_y: int,

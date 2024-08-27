@@ -19,7 +19,7 @@ class WorkerManager:
         """
         self.__workers = [] if workers is None else workers
 
-    def create_workers(self, count: int, target, args) -> None:
+    def create_workers(self, count: int, target: "Callable[..., Any]", args: "tuple") -> None:  # type: ignore
         """
         Create identical workers.
 

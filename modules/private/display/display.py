@@ -38,7 +38,7 @@ class Display:
 
         return True, Display(cls.__create_key, display_scale, seed)
 
-    def __init__(self, class_private_create_key, display_scale: float, seed: int) -> None:
+    def __init__(self, class_private_create_key: object, display_scale: float, seed: int) -> None:
         """
         Private constructor, use create() method.
         """

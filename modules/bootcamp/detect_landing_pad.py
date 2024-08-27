@@ -59,7 +59,7 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(self, class_private_create_key, model: ultralytics.YOLO) -> None:
+    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
         """
         Private constructor, use create() method.
         """

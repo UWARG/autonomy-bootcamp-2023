@@ -31,7 +31,7 @@ class BoundingBox:
 
         return True, BoundingBox(cls.__create_key, bounds)
 
-    def __init__(self, class_private_create_key, bounds: np.ndarray) -> None:
+    def __init__(self, class_private_create_key: object, bounds: np.ndarray) -> None:
         """
         Private constructor, use create() method.
         """

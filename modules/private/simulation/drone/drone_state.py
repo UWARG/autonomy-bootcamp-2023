@@ -71,7 +71,7 @@ class DroneState:
     # pylint: disable-next=too-many-arguments
     def __init__(
         self,
-        class_private_create_key,
+        class_private_create_key: object,
         time_step_size: float,
         initial_position: location.Location,
         boundary_bottom_left: location.Location,

@@ -88,7 +88,7 @@ class Command:
 
     def __init__(
         self,
-        class_private_create_key,
+        class_private_create_key: object,
         command_type: CommandType,
         relative_x: float,
         relative_y: float,
