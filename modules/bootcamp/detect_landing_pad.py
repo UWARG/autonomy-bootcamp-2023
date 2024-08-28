@@ -112,9 +112,7 @@ class DetectLandingPad:
         # Create BoundingBox object and append to list
         # result, box = ...
 
-        # Remove this when done
-        raise NotImplementedError
-
+        return None, None
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

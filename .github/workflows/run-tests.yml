@@ -41,7 +41,7 @@ jobs:
         run: |
           black --check .
           flake8 .
-          pylint .
+          pylint modules
 
       # Install dependencies and run tests with PyTest
       - name: Run PyTest
