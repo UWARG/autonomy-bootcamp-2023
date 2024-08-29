@@ -27,7 +27,7 @@ class DecisionExample(base_decision.BaseDecision):
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
-        print("Waypoint: " + str(waypoint))
+        print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
 
@@ -71,7 +71,7 @@ class DecisionExample(base_decision.BaseDecision):
             # Print some information for debugging
             print(self.counter)
             print(self.command_index)
-            print("Halted at: " + str(report.position))
+            print(f"Halted at: {report.position}")
 
             command = self.commands[self.command_index]
             self.command_index += 1

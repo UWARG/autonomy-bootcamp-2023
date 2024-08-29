@@ -18,15 +18,14 @@ def __log_seed(seed: "int | None") -> None:
     """
     Logs the seed at the beginning of the program for future reproducibility.
     """
-    seed_text = str(seed)
-    print("Log seed: " + seed_text)
+    print(f"Log seed: {seed}")
 
     LOG_FILE_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-    file_name = str(int(time.time())) + "_seed.txt"
+    file_name = f"{int(time.time())}_seed.txt"
     file_path = pathlib.Path(LOG_FILE_DIRECTORY, file_name)
     with open(file_path, "w", encoding="utf-8") as file:
-        file.write(seed_text)
+        file.write(str(seed))
 
 
 def __random_between_with_exclusion(

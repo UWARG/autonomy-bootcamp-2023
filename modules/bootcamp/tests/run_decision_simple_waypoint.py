@@ -177,13 +177,11 @@ def main() -> int:
     report = worker_status_queue.queue.get(timeout=TIMEOUT)
 
     # Log results
-    results_text = (
-        str(report) + "\n" + "Seed: " + str(SEED) + "\n" + "Waypoint: " + str(waypoint) + "\n"
-    )
+    results_text = f"{report}\nSeed: {SEED}\nWaypoint: {waypoint}\n"
     for landing_pad_location in landing_pad_locations:
-        results_text += "Landing pad: " + str(landing_pad_location) + "\n"
+        results_text += f"Landing pad: {landing_pad_location}\n"
 
-    file_name = str(int(time.time())) + "_results.txt"
+    file_name = f"{int(time.time())}_results.txt"
     file_path = pathlib.Path(LOG_FILE_DIRECTORY, file_name)
     with open(file_path, "w", encoding="utf-8") as file:
         file.write(results_text)

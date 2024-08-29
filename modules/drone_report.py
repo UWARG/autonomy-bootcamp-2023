@@ -57,16 +57,10 @@ class DroneReport:
         To string.
         """
         representation = (
-            "DRONE REPORT:\n"
-            + "Status: "
-            + str(self.status)
-            + "\n"
-            + "Position: "
-            + str(self.position)
-            + "\n"
-            + "Destination: "
-            + str(self.destination)
-            + "\n"
+            f"DRONE REPORT:\n"
+            f"Status: {self.status}\n"
+            f"Position: {self.position}\n"
+            f"Destination: {self.destination}\n"
         )
 
         return representation

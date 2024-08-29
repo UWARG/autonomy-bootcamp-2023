@@ -504,7 +504,7 @@ class MapRender:
         """
         Writes the coordinates on the image.
         """
-        text = str(image_x) + "," + str(image_y)
+        text = f"{image_x},{image_y}"
         # Pylint has issues with OpenCV
         # pylint: disable-next=no-member
         image = cv2.putText(
@@ -539,7 +539,7 @@ class MapRender:
             return
 
         # Cache miss, load from file
-        image_name = str(image_x) + "," + str(image_y) + ".png"
+        image_name = f"{image_x},{image_y}.png"
         image_path = pathlib.Path(self.__map_image_directory, image_name)
         if image_path.exists():
             # Pylint has issues with OpenCV
@@ -561,7 +561,7 @@ class MapRender:
         assert image is not None
 
         if image.shape != (self.__resolution_y, self.__resolution_x, 3):
-            print("Warning: Image has incorrect shape: " + str(image.shape))
+            print(f"Warning: Image has incorrect shape: {image.shape}")
             print("Warning: Loading default")
             self.__cached_images[(image_x, image_y)] = (
                 self.__generate_default_map_image_with_coordinates(

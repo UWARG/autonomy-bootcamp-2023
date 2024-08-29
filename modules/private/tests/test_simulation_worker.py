@@ -133,7 +133,7 @@ def main() -> int:
         if report.status == drone_status.DroneStatus.HALTED:
             print(counter)
             print(waypoint_index)
-            print("Halt: " + str(report.position))
+            print(f"Halt: {report.position}")
             command = waypoints[waypoint_index]
             waypoint_index += 1
         elif report.status == drone_status.DroneStatus.LANDED:
@@ -154,8 +154,8 @@ def main() -> int:
     simulation_manager.join_workers()
 
     # Test
-    print("At: " + str(report.position))
-    print("Steps: " + str(counter))
+    print(f"At: {report.position}")
+    print(f"Steps: {counter}")
 
     if report.status != drone_status.DroneStatus.LANDED:
         return -2

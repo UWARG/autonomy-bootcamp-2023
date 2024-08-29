@@ -264,8 +264,7 @@ class Display:
 
         # Save landing image
         if not self.__has_saved_landing_image and report.status == drone_status.DroneStatus.LANDED:
-            prefix_text = str(int(time.time()))
-            image_name = prefix_text + "_" + self.__LANDING_IMAGE_NAME
+            image_name = f"{int(time.time())}_{self.__LANDING_IMAGE_NAME}"
             image_path = pathlib.PurePosixPath(self.__IMAGE_SAVE_DIRECTORY, image_name)
             # Pylint has issues with OpenCV
             # pylint: disable-next=no-member

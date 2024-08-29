@@ -118,9 +118,9 @@ class Command:
         """
         To string.
         """
-        representation = "Command: " + str(self.__command_type)
+        representation = f"Command: {self.__command_type}"
 
         if self.__command_type == Command.CommandType.SET_RELATIVE_DESTINATION:
-            representation += " " + str(self.get_relative_destination())
+            representation += f" {self.get_relative_destination()}"
 
         return representation

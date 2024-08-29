@@ -167,7 +167,7 @@ class DroneState:
 
         Returns whether successful.
         """
-        print("Setting relative destination: " + str(relative_x) + "," + str(relative_y))
+        print(f"Setting relative destination: {relative_x},{relative_y}")
 
         # Drone is halted
         if self.__status != drone_status.DroneStatus.HALTED:
@@ -303,12 +303,7 @@ class DroneState:
 
         result, velocity = drone_velocity.DroneVelocity.create(speed, direction)
         if not result:
-            message = (
-                "ERROR: Could not set course with speed: "
-                + str(speed)
-                + ", direction: "
-                + str(direction)
-            )
+            message = f"ERROR: Could not set course with speed: {speed}, direction: {direction}"
 
             print(message)
             return False, None

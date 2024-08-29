@@ -85,6 +85,6 @@ class BoundingBox:
         """
         To string.
         """
-        representation = "Bounding box: " + str((self.x1, self.y1)) + "," + str((self.x2, self.y2))
+        representation = f"Bounding box: ({self.x1}, {self.y1}), ({self.x2}, {self.y2})"
 
         return representation

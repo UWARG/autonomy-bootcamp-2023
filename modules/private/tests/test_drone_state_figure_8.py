@@ -61,14 +61,14 @@ def main() -> int:
         if report.status == drone_status.DroneStatus.HALTED:
             print(step)
             print(waypoint_index)
-            print("Halt: " + str(report.position))
+            print(f"Halt: {report.position}")
             command = waypoints[waypoint_index]
             waypoint_index += 1
 
         report, step = drone.run(command)
 
-    print("At: " + str(report.position))
-    print("Steps: " + str(step))
+    print(f"At: {report.position}")
+    print(f"Steps: {step}")
 
     if report.status != drone_status.DroneStatus.LANDED:
         return -2
