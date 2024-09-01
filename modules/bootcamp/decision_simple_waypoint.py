@@ -4,23 +4,21 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
-# Disable for bootcamp use
-# pylint: disable=unused-import
-
-
 from .. import commands
 from .. import drone_report
+
+# Disable for bootcamp use
+# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
-# pylint: disable=unused-argument,line-too-long
+# No enable
+# pylint: disable=duplicate-code,unused-argument
 
 
-# All logic around the run() method
-# pylint: disable-next=too-few-public-methods
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.

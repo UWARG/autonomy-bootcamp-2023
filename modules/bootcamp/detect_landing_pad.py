@@ -13,8 +13,18 @@ import ultralytics
 from .. import bounding_box
 
 
-# This is just an interface
-# pylint: disable=too-few-public-methods
+# ============
+# ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+# ============
+# Bootcampers remove the following lines:
+# Allow linters and formatters to pass for bootcamp maintainers
+# No enable
+# pylint: disable=unused-argument,unused-private-member,unused-variable
+# ============
+# ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+# ============
+
+
 class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
@@ -116,7 +126,7 @@ class DetectLandingPad:
         # Create BoundingBox object and append to list
         # result, box = ...
 
-        return None, None
+        return [], image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

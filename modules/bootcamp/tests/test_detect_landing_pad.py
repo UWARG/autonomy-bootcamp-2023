@@ -21,6 +21,11 @@ OUTPUT_IMAGES_PATH = pathlib.Path("modules/bootcamp/tests/log")
 BOUNDING_BOX_TOLERANCE = 1.0  # pixels
 
 
+# Test functions use test fixture signature names
+# No enable
+# pylint: disable=redefined-outer-name
+
+
 @pytest.fixture()
 def detector() -> detect_landing_pad.DetectLandingPad:  # type: ignore
     """
@@ -32,11 +37,7 @@ def detector() -> detect_landing_pad.DetectLandingPad:  # type: ignore
     # Hang output directory creation on this as well
     OUTPUT_IMAGES_PATH.mkdir(parents=True, exist_ok=True)
 
-    yield detection
-
-
-# Pytest requires the parameter and fixture names to be identical
-# pylint: disable=redefined-outer-name
+    yield detection  # type: ignore
 
 
 def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
