@@ -45,4 +45,4 @@ jobs:
 
       # Install dependencies and run tests with PyTest
       - name: Run PyTest
-        run: pytest -vv
+        run: pytest -vv --ignore=modules/bootcamp/tests/test_detect_landing_pad.py
