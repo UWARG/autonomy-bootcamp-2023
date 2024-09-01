@@ -23,7 +23,8 @@ from modules.private.utilities import queue_proxy_wrapper
 from modules.private.utilities import worker_controller
 from modules.private.utilities import worker_manager
 
-
+# Shared code with other run_decision_*.py files, but different structure, so no need to combine
+# pylint: disable=duplicate-code
 QUEUE_MAX_SIZE = 1
 TIMEOUT = 1000  # seconds
 LOG_FILE_DIRECTORY = pathlib.Path("log")
@@ -67,7 +68,7 @@ MODEL_DIRECTORY_PATH = pathlib.Path("models")
 
 
 # Extra variables required for management, extra statements required for management
-# pylint: disable-next=too-many-locals,too-many-statements
+# pylint: disable-next=too-many-locals,too-many-statements, duplicate-code
 def main() -> int:
     """
     main.
@@ -253,6 +254,9 @@ def main() -> int:
     decision_manager.join_workers()
 
     return 0
+
+
+# pylint: enable=duplicate-code
 
 
 if __name__ == "__main__":
