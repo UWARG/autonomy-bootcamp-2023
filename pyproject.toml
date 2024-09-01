@@ -85,8 +85,8 @@ disable = [
 
 [tool.pylint.similarities]
 # Minimum lines number of a similarity.
-# Main guard
-min-similarity-lines = 10
+# Main guard and integration tests
+min-similarity-lines = 15
 
 [tool.pytest.ini_options]
 minversion = "6.0"

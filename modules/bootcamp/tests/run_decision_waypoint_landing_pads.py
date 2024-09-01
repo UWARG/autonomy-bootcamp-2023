@@ -7,28 +7,11 @@ You can change the timestep, display scale, and seed, if you wish.
 Do not modify anything else.
 """
 
-import multiprocessing as mp
-import pathlib
 import time
 
-from modules import location
-from modules.bootcamp import decision_waypoint_landing_pads
-from modules.private import detect_landing_pad_worker
-from modules.private import generate_destination
-from modules.private.decision import decision_worker
-from modules.private.display import display_worker
-from modules.private.geolocation import geolocation_worker
-from modules.private.simulation import simulation_worker
-from modules.private.utilities import queue_proxy_wrapper
-from modules.private.utilities import worker_controller
-from modules.private.utilities import worker_manager
+from modules.bootcamp.tests.private import decision_factory
+from modules.bootcamp.tests.private import runner
 
-# Shared code with other run_decision_*.py files, but different structure, so no need to combine
-# pylint: disable=duplicate-code
-QUEUE_MAX_SIZE = 1
-TIMEOUT = 1000  # seconds
-LOG_FILE_DIRECTORY = pathlib.Path("log")
-TIME_WAIT_BEFORE_EXIT = 5  # seconds
 
 # ============
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
@@ -54,209 +37,15 @@ SEED = time.time_ns()
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
 
-DRONE_INITIAL_POSITION = location.Location(0.0, 0.0)
-BOUNDARY_BOTTOM_LEFT = location.Location(-60.0, -60.0)
-BOUNDARY_TOP_RIGHT = location.Location(60.0, 60.0)
-ACCEPTANCE_RADIUS = 0.1  # metres
-PIXELS_PER_METRE = 60
-IMAGE_RESOLUTION_X = 1200
-IMAGE_RESOLUTION_Y = 900
-MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
-LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
 
-MODEL_DIRECTORY_PATH = pathlib.Path("models")
-
-
-# Extra variables required for management, extra statements required for management
-# pylint: disable-next=too-many-locals,too-many-statements, duplicate-code
 def main() -> int:
     """
     main.
     """
-    # Setup
-    controller = worker_controller.WorkerController()
-
-    mp_manager = mp.Manager()
-
-    # Data queues
-    simulation_to_detect_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-        QUEUE_MAX_SIZE,
+    # Run
+    return runner.runner(
+        decision_factory.DecisionEnum.WAYPOINT_LANDING_PADS, TIME_STEP_SIZE, DISPLAY_SCALE, SEED
     )
-    detect_to_geolocation_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-        QUEUE_MAX_SIZE,
-    )
-    geolocation_to_display_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-        QUEUE_MAX_SIZE,
-    )
-    display_to_decision_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-        QUEUE_MAX_SIZE,
-    )
-    decision_to_simulation_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-        QUEUE_MAX_SIZE,
-    )
-
-    # Status queues
-    worker_status_queue = queue_proxy_wrapper.QueueProxyWrapper(
-        mp_manager,
-    )
-
-    # Variables
-    result, data = generate_destination.generate_destination(
-        DRONE_INITIAL_POSITION,
-        BOUNDARY_BOTTOM_LEFT,
-        BOUNDARY_TOP_RIGHT,
-        PIXELS_PER_METRE,
-        IMAGE_RESOLUTION_X,
-        IMAGE_RESOLUTION_Y,
-        SEED,
-    )
-    if not result:
-        print("ERROR: Could not generate waypoint and landing pads")
-        return -1
-
-    # Get Pylance to stop complaining
-    assert data is not None
-
-    waypoint, landing_pad_locations = data
-
-    # Add landing pad at initial position
-    landing_pad_locations.append(DRONE_INITIAL_POSITION)
-
-    decider = decision_waypoint_landing_pads.DecisionWaypointLandingPads(
-        waypoint,
-        ACCEPTANCE_RADIUS,
-    )
-
-    # Managers
-    simulation_manager = worker_manager.WorkerManager()
-    simulation_manager.create_workers(
-        1,
-        simulation_worker.simulation_worker,
-        (
-            TIME_STEP_SIZE,
-            DRONE_INITIAL_POSITION,
-            BOUNDARY_BOTTOM_LEFT,
-            BOUNDARY_TOP_RIGHT,
-            ACCEPTANCE_RADIUS,
-            PIXELS_PER_METRE,
-            IMAGE_RESOLUTION_X,
-            IMAGE_RESOLUTION_Y,
-            MAP_IMAGES_PATH,
-            LANDING_PAD_IMAGES_PATH,
-            landing_pad_locations,
-            decision_to_simulation_queue,
-            simulation_to_detect_queue,
-            worker_status_queue,
-            controller,
-        ),
-    )
-
-    detect_landing_pad_manager = worker_manager.WorkerManager()
-    detect_landing_pad_manager.create_workers(
-        1,
-        detect_landing_pad_worker.detect_landing_pad_worker,
-        (
-            MODEL_DIRECTORY_PATH,
-            simulation_to_detect_queue,
-            detect_to_geolocation_queue,
-            worker_status_queue,
-            controller,
-        ),
-    )
-
-    geolocation_manager = worker_manager.WorkerManager()
-    geolocation_manager.create_workers(
-        1,
-        geolocation_worker.geolocation_worker,
-        (
-            PIXELS_PER_METRE,
-            IMAGE_RESOLUTION_X,
-            IMAGE_RESOLUTION_Y,
-            detect_to_geolocation_queue,
-            geolocation_to_display_queue,
-            worker_status_queue,
-            controller,
-        ),
-    )
-
-    display_manager = worker_manager.WorkerManager()
-    display_manager.create_workers(
-        1,
-        display_worker.display_worker,
-        (
-            DISPLAY_SCALE,
-            SEED,
-            geolocation_to_display_queue,
-            display_to_decision_queue,
-            worker_status_queue,
-            controller,
-        ),
-    )
-
-    decision_manager = worker_manager.WorkerManager()
-    decision_manager.create_workers(
-        1,
-        decision_worker.decision_worker,
-        (
-            decider,
-            display_to_decision_queue,
-            decision_to_simulation_queue,
-            worker_status_queue,
-            controller,
-        ),
-    )
-
-    simulation_manager.start_workers()
-    detect_landing_pad_manager.start_workers()
-    geolocation_manager.start_workers()
-    display_manager.start_workers()
-    decision_manager.start_workers()
-
-    report = worker_status_queue.queue.get(timeout=TIMEOUT)
-
-    # Log results
-    results_text = f"{report}\nSeed: {SEED}\nWaypoint: {waypoint}\n"
-    for landing_pad_location in landing_pad_locations:
-        results_text += f"Landing pad: {landing_pad_location}\n"
-
-    file_name = f"{int(time.time())}_results.txt"
-    file_path = pathlib.Path(LOG_FILE_DIRECTORY, file_name)
-    with open(file_path, "w", encoding="utf-8") as file:
-        file.write(results_text)
-
-    print("Logged results")
-
-    time.sleep(TIME_WAIT_BEFORE_EXIT)
-
-    print("main is requesting exit")
-    controller.request_exit()
-
-    # Teardown
-    print("Start teardown")
-
-    simulation_to_detect_queue.fill_and_drain_queue()
-    detect_to_geolocation_queue.fill_and_drain_queue()
-    geolocation_to_display_queue.fill_and_drain_queue()
-    display_to_decision_queue.fill_and_drain_queue()
-    decision_to_simulation_queue.fill_and_drain_queue()
-
-    worker_status_queue.fill_and_drain_queue()
-
-    simulation_manager.join_workers()
-    detect_landing_pad_manager.join_workers()
-    geolocation_manager.join_workers()
-    display_manager.join_workers()
-    decision_manager.join_workers()
-
-    return 0
-
-
-# pylint: enable=duplicate-code
 
 
 if __name__ == "__main__":
