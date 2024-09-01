@@ -23,6 +23,8 @@ class DetectLandingPad:
     # ============
     # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
     # ============
+    
+    # Nothing to change here -- using CPU
 
     # Chooses the GPU if it exists, otherwise runs on the CPU
     # If you have a CUDA capable GPU but want to force it to
@@ -86,32 +88,41 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(image, conf=0.7, device=self.__DEVICE, verbose=False)
+        # 0.7 is the recommended confidence threshold as specified in the hints
+        # Optionally, use show=True to display the image with bounding boxes on the landing pads
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
-        # Include the confidence value
-        image_annotated = ...
+        # Include the confidence value (Already included in default, but doing so anyways)
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
+        num_boxes, _ = boxes_cpu.shape
         # for i in range(0, ...):
             # Create BoundingBox object and append to list
             # result, box = ...
+        for i in range(num_boxes):
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            if result:
+                bounding_boxes.append(box)
 
-        # Remove this when done
-        raise NotImplementedError
+        return (bounding_boxes, image_annotated)
+                                  
+        # # Remove this when done
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
