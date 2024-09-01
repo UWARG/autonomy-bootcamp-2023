@@ -12,8 +12,6 @@ from ... import drone_status
 from ... import location
 
 
-# Extra parameters required for worker communication
-# pylint: disable-next=too-many-arguments
 def geolocation_worker(
     pixels_per_metre: int,
     resolution_x: int,

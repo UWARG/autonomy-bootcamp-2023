@@ -5,8 +5,6 @@ Simple location struct.
 """
 
 
-# Basically a struct
-# pylint: disable-next=too-few-public-methods
 class Location:
     """
     Location in world space.

@@ -53,8 +53,6 @@ def __random_between_with_exclusion(
     return True, value
 
 
-# Better to be explicit with parameters
-# pylint: disable-next=too-many-arguments
 def __generate_waypoint(
     drone_initial_position: location.Location,
     boundary_bottom_left: location.Location,
@@ -141,8 +139,6 @@ def __generate_landing_pad(
     return True, location.Location(landing_pad_x, landing_pad_y)
 
 
-# Better to be explicit with parameters
-# pylint: disable-next=too-many-arguments
 def generate_destination(
     drone_initial_position: location.Location,
     boundary_bottom_left: location.Location,

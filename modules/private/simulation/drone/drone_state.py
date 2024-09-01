@@ -67,8 +67,6 @@ class DroneState:
             acceptance_radius,
         )
 
-    # Better to be explicit with parameters
-    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         class_private_create_key: object,

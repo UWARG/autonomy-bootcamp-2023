@@ -54,8 +54,6 @@ class Display:
         """
         Displays the provided image.
         """
-        # Pylint has issues with OpenCV
-        # pylint: disable=no-member
         cv2.namedWindow("Display", cv2.WINDOW_KEEPRATIO)
         cv2.resizeWindow(
             "Display",
@@ -64,11 +62,8 @@ class Display:
         )
         cv2.imshow("Display", image)
         cv2.waitKey(1)
-        # pylint: enable=no-member
 
     @staticmethod
-    # Extra variables required for display
-    # pylint: disable-next=too-many-locals
     def __generate_information_pane(
         resolution_x: int, resolution_y: int, report: drone_report.DroneReport, seed: int
     ) -> np.ndarray:
@@ -114,8 +109,6 @@ class Display:
 
         image = np.zeros((resolution_y, resolution_x, 3), dtype=np.uint8)
 
-        # Pylint has issues with OpenCV
-        # pylint: disable=no-member
         _ = cv2.putText(
             image,
             status_text,
@@ -216,7 +209,6 @@ class Display:
             2,
         )
         text_line_counter += 1
-        # pylint: enable=no-member
 
         return image
 
@@ -231,8 +223,6 @@ class Display:
         centre_circle_colour = (0, 255, 0)  # Green, BGR
         centre_circle_line_thickness = 2
 
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         cv2.circle(
             map_image,
             (map_image.shape[1] // 2, map_image.shape[0] // 2),
@@ -266,8 +256,6 @@ class Display:
         if not self.__has_saved_landing_image and report.status == drone_status.DroneStatus.LANDED:
             image_name = f"{int(time.time())}_{self.__LANDING_IMAGE_NAME}"
             image_path = pathlib.PurePosixPath(self.__IMAGE_SAVE_DIRECTORY, image_name)
-            # Pylint has issues with OpenCV
-            # pylint: disable-next=no-member
             cv2.imwrite(str(image_path), display_image)
 
             self.__has_saved_landing_image = True

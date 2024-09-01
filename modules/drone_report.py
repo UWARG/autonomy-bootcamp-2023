@@ -8,8 +8,6 @@ from . import drone_status
 from . import location
 
 
-# Basically a struct
-# pylint: disable-next=too-few-public-methods
 class DroneReport:
     """
     Information about current state.

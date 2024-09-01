@@ -25,8 +25,6 @@ IMAGE_RESOLUTION_X = 1200
 IMAGE_RESOLUTION_Y = 900
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.

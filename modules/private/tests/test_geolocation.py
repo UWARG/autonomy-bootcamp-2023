@@ -19,6 +19,11 @@ IMAGE_RESOLUTION_X = 1200
 IMAGE_RESOLUTION_Y = 900
 
 
+# Test functions use test fixture signature names and access class privates
+# No enable
+# pylint: disable=protected-access,redefined-outer-name
+
+
 @pytest.fixture()
 def locator() -> geolocation.Geolocation:
     """
@@ -45,10 +50,6 @@ def report() -> drone_report.DroneReport:
         location.Location(1.0, 1.0),
     )
     return drone
-
-
-# Pytest requires the parameter and fixture names to be identical
-# pylint: disable=redefined-outer-name
 
 
 def test_input_empty(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:

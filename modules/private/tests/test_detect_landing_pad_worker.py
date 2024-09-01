@@ -27,8 +27,6 @@ INPUT_IMAGES_PATH = pathlib.Path("modules/bootcamp/tests")
 OUTPUT_IMAGES_PATH = pathlib.Path("modules/private/tests/log")
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -70,8 +68,6 @@ def main() -> int:
     for i in range(0, 3):
         input_image_path = pathlib.Path(INPUT_IMAGES_PATH, f"map_{i}_landing_pad.png")
         assert input_image_path.exists()
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         camera_image = cv2.imread(str(input_image_path))
         assert camera_image is not None
         camera_images.append(camera_image)
@@ -99,8 +95,6 @@ def main() -> int:
         assert report == input_report
         assert len(bounding_boxes) == i
         output_image_path = pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, f"map_{i}_landing_pad.png")
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         cv2.imwrite(str(output_image_path), annotated_image)
 
     controller.request_exit()

@@ -9,8 +9,6 @@ from ... import drone_report
 from ... import location
 
 
-# All logic in the run() method
-# pylint: disable-next=too-few-public-methods
 class BaseDecision:
     """
     Required to enforce different decision behaviour in tests.

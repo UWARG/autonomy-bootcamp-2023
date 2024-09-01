@@ -32,19 +32,14 @@ def display(renderer: map_render.MapRender, position: location.Location) -> bool
     # Get Pylance to stop complaining
     assert image is not None
 
-    # Pylint has issues with OpenCV
-    # pylint: disable=no-member
     cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
     cv2.resizeWindow("Map", image.shape[1] // 2, image.shape[0] // 2)
     cv2.imshow("Map", image)
     cv2.waitKey(1)
-    # pylint: enable=no-member
 
     return True
 
 
-# Result checking, basic for loops
-# pylint: disable-next=too-many-return-statements,too-many-branches
 def main() -> int:
     """
     main.

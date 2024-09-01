@@ -30,8 +30,6 @@ IMAGE_PATH = pathlib.Path("modules/private/simulation/mapping/world/default.png"
 DELAY = 0.01  # seconds
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -74,8 +72,6 @@ def main() -> int:
 
     assert IMAGE_PATH.exists()
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     input_image = cv2.imread(str(IMAGE_PATH))
     assert input_image is not None
 

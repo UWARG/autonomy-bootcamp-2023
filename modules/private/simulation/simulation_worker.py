@@ -36,8 +36,6 @@ def run_simulator(
     return True, (report, camera_image)
 
 
-# Extra parameters required for worker communication, extra variables required for management
-# pylint: disable-next=too-many-arguments,too-many-locals
 def simulation_worker(
     time_step_size: float,
     drone_initial_position: location.Location,

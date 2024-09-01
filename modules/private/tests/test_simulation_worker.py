@@ -33,8 +33,6 @@ MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
 LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -121,13 +119,10 @@ def main() -> int:
         )
         report, _, camera_image = output_data
 
-        # Pylint has issues with OpenCV
-        # pylint: disable=no-member
         cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
         cv2.resizeWindow("Map", camera_image.shape[1] // 2, camera_image.shape[0] // 2)
         cv2.imshow("Map", camera_image)
         cv2.waitKey(1)
-        # pylint: enable=no-member
 
         command = commands.Command.create_null_command()
         if report.status == drone_status.DroneStatus.HALTED:

@@ -12,8 +12,6 @@ import numpy as np
 from .... import location
 
 
-# Basically a struct
-# pylint: disable-next=too-few-public-methods
 class LandingPadOnMap:
     """
     Information required to draw the landing pad on the combined image.
@@ -22,8 +20,6 @@ class LandingPadOnMap:
     __create_key = object()
 
     @classmethod
-    # Better to be explicit with parameters, required by checks
-    # pylint: disable-next=too-many-arguments,too-many-return-statements
     def create(
         cls,
         pixels_per_metre: int,
@@ -86,8 +82,6 @@ class LandingPadOnMap:
             pixel_y % resolution_y,
         )
 
-    # Better to be explicit with parameters
-    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         class_private_create_key: object,
@@ -190,8 +184,6 @@ class CombinedLocalMap:
         self.__combined_image = combined_image
 
     @staticmethod
-    # Original code
-    # pylint: disable-next=too-many-locals
     def __add_transparent_image(
         background: np.ndarray, foreground: np.ndarray, x_offset: int, y_offset: int
     ) -> "tuple[bool, bool | None]":
@@ -207,11 +199,8 @@ class CombinedLocalMap:
         bg_h, bg_w, bg_channels = background.shape
         fg_h, fg_w, fg_channels = foreground.shape
 
-        # Original code
-        # pylint: disable=line-too-long
         # assert bg_channels == 3, f'background image should have exactly 3 channels (RGB). found:{bg_channels}'
         # assert fg_channels == 4, f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}'
-        # pylint: enable=line-too-long
         if bg_channels != 3:
             print("ERROR: Background does not have 3 colour channels")
             return False, None
@@ -271,8 +260,6 @@ class CombinedLocalMap:
 
         return True
 
-    # Required by checks
-    # pylint: disable-next=too-many-return-statements
     def get_view(
         self, centre_pixel_x: int, centre_pixel_y: int, resolution_x: int, resolution_y: int
     ) -> "tuple[bool, np.ndarray | None]":
@@ -321,8 +308,6 @@ class MapRender:
     __LANDING_PAD_IMAGE_NAME = "landing_pad.png"
 
     @classmethod
-    # Better to be explicit with parameters, required by checks, required by checks
-    # pylint: disable-next=too-many-arguments,too-many-return-statements,too-many-branches
     def create(
         cls,
         pixels_per_metre: int,
@@ -359,8 +344,6 @@ class MapRender:
         if not default_map_image_path.exists():
             return False, None
 
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         default_map_image = cv2.imread(str(default_map_image_path))
         if default_map_image is None:
             return False, None
@@ -378,8 +361,6 @@ class MapRender:
         if not landing_pad_image_path.exists():
             return False, None
 
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         landing_pad_image = cv2.imread(str(landing_pad_image_path), cv2.IMREAD_UNCHANGED)
         if landing_pad_image is None:
             return False, None
@@ -426,8 +407,6 @@ class MapRender:
             landing_pads,
         )
 
-    # Better to be explicit with parameters
-    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         class_private_create_key: object,
@@ -505,14 +484,10 @@ class MapRender:
         Writes the coordinates on the image.
         """
         text = f"{image_x},{image_y}"
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         image = cv2.putText(
             np.array(image, dtype=np.uint8),
             text,
             (image.shape[1] // 8, image.shape[0] // 2),
-            # Pylint has issues with OpenCV
-            # pylint: disable-next=no-member
             cv2.FONT_HERSHEY_SIMPLEX,
             9.0,
             (0, 0, 0),
@@ -542,8 +517,6 @@ class MapRender:
         image_name = f"{image_x},{image_y}.png"
         image_path = pathlib.Path(self.__map_image_directory, image_name)
         if image_path.exists():
-            # Pylint has issues with OpenCV
-            # pylint: disable-next=no-member
             image = cv2.imread(str(image_path))
         else:
             print("Warning: Could not read image file: " + image_path.name)

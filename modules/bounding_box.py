@@ -7,8 +7,6 @@ Bounding box for detected landing pad.
 import numpy as np
 
 
-# Basically a struct
-# pylint: disable=too-few-public-methods
 class BoundingBox:
     """
     A detected landing pad in image space.

@@ -54,8 +54,6 @@ class Geolocation:
         self.__resolution_y = resolution_y
 
     @staticmethod
-    # Better to be explicit with parameters
-    # pylint: disable-next=too-many-arguments
     def __position_from_pixel_coordinates(
         pixels_per_metre: int,
         resolution_x: int,
