@@ -69,6 +69,7 @@ class DetectLandingPad:
         self.__model = model
         # pylint: enable=unused-private-member
 
+    # The arguemnts and unused variables will be used by the bootcampers
     # pylint: disable=unused-argument, unused-variable
     def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
