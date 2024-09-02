@@ -29,16 +29,14 @@ def create_decision(
     """
     Construct Decision class at runtime.
     """
-    # TODO: Make switch case
-    if decision_enum == DecisionEnum.EXAMPLE:
-        return decision_example.DecisionExample(waypoint, acceptance_radius)
-
-    if decision_enum == DecisionEnum.SIMPLE_WAYPOINT:
-        return decision_simple_waypoint.DecisionSimpleWaypoint(waypoint, acceptance_radius)
-
-    if decision_enum == DecisionEnum.WAYPOINT_LANDING_PADS:
-        return decision_waypoint_landing_pads.DecisionWaypointLandingPads(
-            waypoint, acceptance_radius
-        )
+    match decision_enum:
+        case DecisionEnum.EXAMPLE:
+            return decision_example.DecisionExample(waypoint, acceptance_radius)
+        case DecisionEnum.SIMPLE_WAYPOINT:
+            return decision_simple_waypoint.DecisionSimpleWaypoint(waypoint, acceptance_radius)
+        case DecisionEnum.WAYPOINT_LANDING_PADS:
+            return decision_waypoint_landing_pads.DecisionWaypointLandingPads(
+                waypoint, acceptance_radius
+            )
 
     return base_decision.BaseDecision(waypoint, acceptance_radius)
