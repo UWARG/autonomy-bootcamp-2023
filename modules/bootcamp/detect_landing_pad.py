@@ -74,13 +74,9 @@ class DetectLandingPad:
         Private constructor, use create() method.
         """
         assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
-        # This will be used later by bootcampers
-        # pylint: disable=unused-private-member
-        self.__model = model
-        # pylint: enable=unused-private-member
 
-    # The arguemnts and unused variables will be used by the bootcampers
-    # pylint: disable=unused-argument, unused-variable
+        self.__model = model
+
     def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
@@ -130,8 +126,3 @@ class DetectLandingPad:
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
-    # pylint: enable=unused-argument, unused-variable
-
-
-# pylint: enable=too-few-public-methods
