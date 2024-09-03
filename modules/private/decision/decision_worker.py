@@ -13,7 +13,8 @@ def decision_worker(
     decider: base_decision.BaseDecision,
     input_queue: queue_proxy_wrapper.QueueProxyWrapper,
     output_queue: queue_proxy_wrapper.QueueProxyWrapper,
-    # Keep for consistency
+    # While this worker does not use the status queue, it
+    # is kept here to be consistent with the other workers
     # pylint: disable-next=unused-argument
     status_queue: queue_proxy_wrapper.QueueProxyWrapper,
     controller: worker_controller.WorkerController,

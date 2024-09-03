@@ -18,7 +18,7 @@ class DroneVelocity:
     def create(cls, speed: float, direction: float) -> "tuple[bool, DroneVelocity | None]":
         """
         speed is in m/s .
-        direction is in radians between -pi and pi . 0 is in the x direction.
+        direction is in radians between -pi and pi (inclusive). 0 is in the x direction. Counterclockwise is positive.
         """
         if not cls.__is_speed_valid(speed):
             return False, None
