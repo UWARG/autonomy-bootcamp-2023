@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Randomly generates destination waypoint and landing pad(s).
 """
+
 import pathlib
 import random
 import time
@@ -13,25 +14,23 @@ from .. import location
 LOG_FILE_DIRECTORY = pathlib.Path("log")
 
 
-def __log_seed(seed: "int | None"):
+def __log_seed(seed: "int | None") -> None:
     """
     Logs the seed at the beginning of the program for future reproducibility.
     """
-    seed_text = str(seed)
-    print("Log seed: " + seed_text)
+    print(f"Log seed: {seed}")
 
     LOG_FILE_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-    file_name = str(int(time.time())) + "_seed.txt"
+    file_name = f"{int(time.time())}_seed.txt"
     file_path = pathlib.Path(LOG_FILE_DIRECTORY, file_name)
     with open(file_path, "w", encoding="utf-8") as file:
-        file.write(seed_text)
+        file.write(str(seed))
 
 
-def __random_between_with_exclusion(lower_bound: float,
-                                    upper_bound: float,
-                                    exclusion_lower: float,
-                                    exclusion_upper: float) -> "tuple[bool, float | None]":
+def __random_between_with_exclusion(
+    lower_bound: float, upper_bound: float, exclusion_lower: float, exclusion_upper: float
+) -> "tuple[bool, float | None]":
     """
     Generates a random number between the bounds (inclusive) with exclusion zone (inclusive).
     """
@@ -54,14 +53,14 @@ def __random_between_with_exclusion(lower_bound: float,
     return True, value
 
 
-# Better to be explicit with parameters
-# pylint: disable-next=too-many-arguments
-def __generate_waypoint(drone_initial_position: location.Location,
-                        boundary_bottom_left: location.Location,
-                        boundary_top_right: location.Location,
-                        pixels_per_metre: int,
-                        resolution_x: int,
-                        resolution_y: int) -> "tuple[bool, location.Location | None]":
+def __generate_waypoint(
+    drone_initial_position: location.Location,
+    boundary_bottom_left: location.Location,
+    boundary_top_right: location.Location,
+    pixels_per_metre: int,
+    resolution_x: int,
+    resolution_y: int,
+) -> "tuple[bool, location.Location | None]":
     """
     Generate a waypoint within the boundary and away from the initial position.
     """
@@ -95,10 +94,12 @@ def __generate_waypoint(drone_initial_position: location.Location,
     return True, location.Location(waypoint_x, waypoint_y)
 
 
-def __generate_landing_pad(waypoint_position: location.Location,
-                           pixels_per_metre: int,
-                           resolution_x: int,
-                           resolution_y: int) -> "tuple[bool, location.Location | None]":
+def __generate_landing_pad(
+    waypoint_position: location.Location,
+    pixels_per_metre: int,
+    resolution_x: int,
+    resolution_y: int,
+) -> "tuple[bool, location.Location | None]":
     """
     Generate landing pad location around the waypoint position.
     """
@@ -138,16 +139,15 @@ def __generate_landing_pad(waypoint_position: location.Location,
     return True, location.Location(landing_pad_x, landing_pad_y)
 
 
-# Better to be explicit with parameters
-# pylint: disable-next=too-many-arguments
-def generate_destination(drone_initial_position: location.Location,
-                         boundary_bottom_left: location.Location,
-                         boundary_top_right: location.Location,
-                         pixels_per_metre: int,
-                         resolution_x: int,
-                         resolution_y: int,
-                         seed: "int | None" = None) \
-    -> "tuple[bool, tuple[location.Location, list[location.Location]] | None]":
+def generate_destination(
+    drone_initial_position: location.Location,
+    boundary_bottom_left: location.Location,
+    boundary_top_right: location.Location,
+    pixels_per_metre: int,
+    resolution_x: int,
+    resolution_y: int,
+    seed: "int | None" = None,
+) -> "tuple[bool, tuple[location.Location, list[location.Location]] | None]":
     """
     Generates a waypoint and between 1 and 3 landing pads around it (inclusive).
 

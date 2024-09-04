@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Displays the map and drone information.
 """
+
 import pathlib
 import time
 
@@ -17,6 +18,7 @@ class Display:
     """
     Draws the display.
     """
+
     __create_key = object()
 
     __PANE_RESOLUTION_X = 400
@@ -36,7 +38,7 @@ class Display:
 
         return True, Display(cls.__create_key, display_scale, seed)
 
-    def __init__(self, class_private_create_key, display_scale: float, seed: int):
+    def __init__(self, class_private_create_key: object, display_scale: float, seed: int) -> None:
         """
         Private constructor, use create() method.
         """
@@ -48,12 +50,10 @@ class Display:
         self.__seed = seed
 
     @staticmethod
-    def __display(image: np.ndarray, display_scale: float):
+    def __display(image: np.ndarray, display_scale: float) -> None:
         """
         Displays the provided image.
         """
-        # Pylint has issues with OpenCV
-        # pylint: disable=no-member
         cv2.namedWindow("Display", cv2.WINDOW_KEEPRATIO)
         cv2.resizeWindow(
             "Display",
@@ -62,15 +62,11 @@ class Display:
         )
         cv2.imshow("Display", image)
         cv2.waitKey(1)
-        # pylint: enable=no-member
 
     @staticmethod
-    # Extra variables required for display
-    # pylint: disable-next=too-many-locals
-    def __generate_information_pane(resolution_x: int,
-                                    resolution_y: int,
-                                    report: drone_report.DroneReport,
-                                    seed: int) -> np.ndarray:
+    def __generate_information_pane(
+        resolution_x: int, resolution_y: int, report: drone_report.DroneReport, seed: int
+    ) -> np.ndarray:
         """
         Draws the information pane from the drone report.
         """
@@ -113,8 +109,6 @@ class Display:
 
         image = np.zeros((resolution_y, resolution_x, 3), dtype=np.uint8)
 
-        # Pylint has issues with OpenCV
-        # pylint: disable=no-member
         _ = cv2.putText(
             image,
             status_text,
@@ -215,12 +209,11 @@ class Display:
             2,
         )
         text_line_counter += 1
-        # pylint: enable=no-member
 
         return image
 
     @staticmethod
-    def __draw_map_ui_elements(map_image: np.ndarray):
+    def __draw_map_ui_elements(map_image: np.ndarray) -> None:
         """
         Draws map UI elements on the provided image.
 
@@ -230,8 +223,6 @@ class Display:
         centre_circle_colour = (0, 255, 0)  # Green, BGR
         centre_circle_line_thickness = 2
 
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         cv2.circle(
             map_image,
             (map_image.shape[1] // 2, map_image.shape[0] // 2),
@@ -263,11 +254,8 @@ class Display:
 
         # Save landing image
         if not self.__has_saved_landing_image and report.status == drone_status.DroneStatus.LANDED:
-            prefix_text = str(int(time.time()))
-            image_name = prefix_text + "_" + self.__LANDING_IMAGE_NAME
+            image_name = f"{int(time.time())}_{self.__LANDING_IMAGE_NAME}"
             image_path = pathlib.PurePosixPath(self.__IMAGE_SAVE_DIRECTORY, image_name)
-            # Pylint has issues with OpenCV
-            # pylint: disable-next=no-member
             cv2.imwrite(str(image_path), display_image)
 
             self.__has_saved_landing_image = True

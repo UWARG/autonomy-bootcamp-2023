@@ -12,14 +12,14 @@ from ... import drone_status
 from ... import location
 
 
-# Extra parameters required for worker communication
-# pylint: disable-next=too-many-arguments
-def display_worker(display_scale: float,
-                   seed: int,
-                   input_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                   output_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                   status_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                   controller: worker_controller.WorkerController):
+def display_worker(
+    display_scale: float,
+    seed: int,
+    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController,
+) -> None:
     """
     Worker process.
 

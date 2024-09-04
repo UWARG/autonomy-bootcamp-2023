@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test drone state simulation with a figure 8.
 """
+
 import multiprocessing as mp
 import pathlib
 
@@ -32,8 +33,6 @@ MAP_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/world")
 LANDING_PAD_IMAGES_PATH = pathlib.Path("modules/private/simulation/mapping/assets")
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -97,14 +96,14 @@ def main() -> int:
     # 7: Centre
     waypoint_index = 0
     waypoints = [
-        commands.Command.create_set_relative_destination_command( 50.0,  37.5),
-        commands.Command.create_set_relative_destination_command(  0.0, -75.0),
-        commands.Command.create_set_relative_destination_command(-50.0,  37.5),
+        commands.Command.create_set_relative_destination_command(50.0, 37.5),
+        commands.Command.create_set_relative_destination_command(0.0, -75.0),
+        commands.Command.create_set_relative_destination_command(-50.0, 37.5),
         commands.Command.create_set_relative_destination_command(-50.0, -37.5),
-        commands.Command.create_set_relative_destination_command(  0.0,  75.0),
-        commands.Command.create_set_relative_destination_command( 50.0, -37.5),
-        commands.Command.create_set_relative_destination_command(-50.0,   0.0),
-        commands.Command.create_set_relative_destination_command( 50.0,   0.0),
+        commands.Command.create_set_relative_destination_command(0.0, 75.0),
+        commands.Command.create_set_relative_destination_command(50.0, -37.5),
+        commands.Command.create_set_relative_destination_command(-50.0, 0.0),
+        commands.Command.create_set_relative_destination_command(50.0, 0.0),
         commands.Command.create_land_command(),
     ]
 
@@ -115,23 +114,21 @@ def main() -> int:
     )
     counter = 0
     while counter < 11000:
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = \
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
             simulation_to_detect_queue.queue.get()
+        )
         report, _, camera_image = output_data
 
-        # Pylint has issues with OpenCV
-        # pylint: disable=no-member
         cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
         cv2.resizeWindow("Map", camera_image.shape[1] // 2, camera_image.shape[0] // 2)
         cv2.imshow("Map", camera_image)
         cv2.waitKey(1)
-        # pylint: enable=no-member
 
         command = commands.Command.create_null_command()
         if report.status == drone_status.DroneStatus.HALTED:
             print(counter)
             print(waypoint_index)
-            print("Halt: " + str(report.position))
+            print(f"Halt: {report.position}")
             command = waypoints[waypoint_index]
             waypoint_index += 1
         elif report.status == drone_status.DroneStatus.LANDED:
@@ -152,8 +149,8 @@ def main() -> int:
     simulation_manager.join_workers()
 
     # Test
-    print("At: " + str(report.position))
-    print("Steps: " + str(counter))
+    print(f"At: {report.position}")
+    print(f"Steps: {counter}")
 
     if report.status != drone_status.DroneStatus.LANDED:
         return -2
@@ -162,10 +159,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = main()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main != 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

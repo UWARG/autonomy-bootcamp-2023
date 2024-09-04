@@ -12,15 +12,15 @@ from ... import drone_status
 from ... import location
 
 
-# Extra parameters required for worker communication
-# pylint: disable-next=too-many-arguments
-def geolocation_worker(pixels_per_metre: int,
-                       resolution_x: int,
-                       resolution_y: int,
-                       input_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                       output_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                       status_queue: queue_proxy_wrapper.QueueProxyWrapper,
-                       controller: worker_controller.WorkerController):
+def geolocation_worker(
+    pixels_per_metre: int,
+    resolution_x: int,
+    resolution_y: int,
+    input_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    output_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    status_queue: queue_proxy_wrapper.QueueProxyWrapper,
+    controller: worker_controller.WorkerController,
+) -> None:
     """
     Worker process.
 

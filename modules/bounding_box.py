@@ -7,17 +7,15 @@ Bounding box for detected landing pad.
 import numpy as np
 
 
-# Basically a struct
-# pylint: disable=too-few-public-methods
 class BoundingBox:
     """
     A detected landing pad in image space.
     """
+
     __create_key = object()
 
     @classmethod
-    def create(cls,
-               bounds: np.ndarray) -> "tuple[bool, BoundingBox | None]":
+    def create(cls, bounds: np.ndarray) -> "tuple[bool, BoundingBox | None]":
         """
         bounds are of form x1, y1, x2, y2 .
         """
@@ -31,7 +29,7 @@ class BoundingBox:
 
         return True, BoundingBox(cls.__create_key, bounds)
 
-    def __init__(self, class_private_create_key, bounds: np.ndarray):
+    def __init__(self, class_private_create_key: object, bounds: np.ndarray) -> None:
         """
         Private constructor, use create() method.
         """
@@ -53,9 +51,9 @@ class BoundingBox:
         return abs(number_a - number_b) <= tolerance
 
     @staticmethod
-    def is_close(bounding_box_1: "BoundingBox",
-                 bounding_box_2: "BoundingBox",
-                 tolerance: float) -> bool:
+    def is_close(
+        bounding_box_1: "BoundingBox", bounding_box_2: "BoundingBox", tolerance: float
+    ) -> bool:
         """
         Whether the bounds are close enough.
         """
@@ -85,6 +83,6 @@ class BoundingBox:
         """
         To string.
         """
-        representation = "Bounding box: " + str((self.x1, self.y1)) + "," + str((self.x2, self.y2))
+        representation = f"Bounding box: ({self.x1}, {self.y1}), ({self.x2}, {self.y2})"
 
         return representation

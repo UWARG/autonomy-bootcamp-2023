@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test display worker.
 """
+
 import math
 import multiprocessing as mp
 import pathlib
@@ -29,8 +30,6 @@ IMAGE_PATH = pathlib.Path("modules/private/simulation/mapping/world/default.png"
 DELAY = 0.01  # seconds
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -73,8 +72,6 @@ def main() -> int:
 
     assert IMAGE_PATH.exists()
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     input_image = cv2.imread(str(IMAGE_PATH))
     assert input_image is not None
 
@@ -89,8 +86,9 @@ def main() -> int:
         input_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" \
-            = display_to_decision_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
+            display_to_decision_queue.queue.get()
+        )
         report, output_list, output_image = output_data
 
         assert report == input_report
@@ -110,8 +108,9 @@ def main() -> int:
         input_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" \
-            = display_to_decision_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
+            display_to_decision_queue.queue.get()
+        )
         report, output_list, output_image = output_data
 
         assert report == input_report
@@ -131,8 +130,9 @@ def main() -> int:
         input_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" \
-            = display_to_decision_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list, np.ndarray]" = (
+            display_to_decision_queue.queue.get()
+        )
         report, output_list, output_image = output_data
 
         assert report == input_report
@@ -155,10 +155,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = main()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main != 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

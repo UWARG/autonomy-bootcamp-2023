@@ -3,33 +3,33 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint.
 """
-# Disable for bootcamp use
-# pylint: disable=unused-import
-
 
 from .. import commands
 from .. import drone_report
+
+# Disable for bootcamp use
+# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
-# pylint: disable=unused-argument,line-too-long
+# No enable
+# pylint: disable=duplicate-code,unused-argument
 
 
-# All logic around the run() method
-# pylint: disable-next=too-few-public-methods
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.
     """
-    def __init__(self, waypoint: location.Location, acceptance_radius: float):
+
+    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
-        print("Waypoint: " + str(waypoint))
+        print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
 
@@ -43,9 +43,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def run(self,
-            report: drone_report.DroneReport,
-            landing_pad_locations: "list[location.Location]") -> commands.Command:
+    def run(
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+    ) -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -69,9 +69,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        # Remove this when done
-        raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

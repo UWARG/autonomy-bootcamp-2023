@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test landing pad detection worker.
 """
+
 import multiprocessing as mp
 import pathlib
 
@@ -26,8 +27,6 @@ INPUT_IMAGES_PATH = pathlib.Path("modules/bootcamp/tests")
 OUTPUT_IMAGES_PATH = pathlib.Path("modules/private/tests/log")
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -67,11 +66,8 @@ def main() -> int:
 
     camera_images = []
     for i in range(0, 3):
-        input_image_path = \
-            pathlib.Path(INPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
+        input_image_path = pathlib.Path(INPUT_IMAGES_PATH, f"map_{i}_landing_pad.png")
         assert input_image_path.exists()
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
         camera_image = cv2.imread(str(input_image_path))
         assert camera_image is not None
         camera_images.append(camera_image)
@@ -91,16 +87,14 @@ def main() -> int:
         simulation_to_detect_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list[bounding_box.BoundingBox], np.ndarray]" \
-            = detect_to_geolocation_queue.queue.get()
+        output_data: (
+            "tuple[drone_report.DroneReport, list[bounding_box.BoundingBox], np.ndarray]"
+        ) = detect_to_geolocation_queue.queue.get()
         report, bounding_boxes, annotated_image = output_data
 
         assert report == input_report
         assert len(bounding_boxes) == i
-        output_image_path = \
-            pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, "map_" + str(i) + "_landing_pad.png")
-        # Pylint has issues with OpenCV
-        # pylint: disable-next=no-member
+        output_image_path = pathlib.PurePosixPath(OUTPUT_IMAGES_PATH, f"map_{i}_landing_pad.png")
         cv2.imwrite(str(output_image_path), annotated_image)
 
     controller.request_exit()
@@ -117,10 +111,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = main()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main != 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

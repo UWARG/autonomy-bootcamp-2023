@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Map go brrr.
 """
+
 import pathlib
 import time
 
@@ -31,20 +32,15 @@ def display(renderer: map_render.MapRender, position: location.Location) -> bool
     # Get Pylance to stop complaining
     assert image is not None
 
-    # Pylint has issues with OpenCV
-    # pylint: disable=no-member
     cv2.namedWindow("Map", cv2.WINDOW_KEEPRATIO)
-    cv2.resizeWindow('Map', image.shape[1] // 2, image.shape[0] // 2)
+    cv2.resizeWindow("Map", image.shape[1] // 2, image.shape[0] // 2)
     cv2.imshow("Map", image)
     cv2.waitKey(1)
-    # pylint: enable=no-member
 
     return True
 
 
-# Result checking, basic for loops
-# pylint: disable-next=too-many-return-statements,too-many-branches
-def figure8() -> int:
+def main() -> int:
     """
     main.
     """
@@ -153,10 +149,8 @@ def figure8() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = figure8()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main != 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Detects landing pads.
 """
+
 import pathlib
 
 import numpy as np
@@ -12,12 +13,23 @@ import ultralytics
 from .. import bounding_box
 
 
-# This is just an interface
-# pylint: disable=too-few-public-methods
+# ============
+# ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+# ============
+# Bootcampers remove the following lines:
+# Allow linters and formatters to pass for bootcamp maintainers
+# No enable
+# pylint: disable=unused-argument,unused-private-member,unused-variable
+# ============
+# ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+# ============
+
+
 class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
+
     __create_key = object()
 
     # ============
@@ -36,7 +48,7 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(cls, model_directory: pathlib.Path):
+    def create(cls, model_directory: pathlib.Path) -> "tuple[bool, DetectLandingPad | None]":
         """
         model_directory: Directory to models.
         """
@@ -57,7 +69,7 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(self, class_private_create_key, model: ultralytics.YOLO):
+    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
         """
         Private constructor, use create() method.
         """
@@ -107,12 +119,10 @@ class DetectLandingPad:
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
+        #     # Create BoundingBox object and append to list
+        #     result, box = ...
 
-        # Remove this when done
-        raise NotImplementedError
-
+        return [], image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

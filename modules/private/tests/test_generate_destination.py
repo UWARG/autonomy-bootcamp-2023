@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test generate destination.
 """
+
 import random
 
 from modules import location
@@ -17,6 +18,11 @@ DISTANCE_IMAGE_X = IMAGE_RESOLUTION_X / PIXELS_PER_METRE
 DISTANCE_IMAGE_Y = IMAGE_RESOLUTION_Y / PIXELS_PER_METRE
 
 TEST_COUNT = 1000
+
+
+# Test functions access class privates
+# No enable
+# pylint: disable=protected-access
 
 
 if __name__ == "__main__":
@@ -34,8 +40,6 @@ if __name__ == "__main__":
     )
 
     for i in range(0, TEST_COUNT):
-        # Access required for test
-        # pylint: disable=protected-access
         result, waypoint = generate_destination.__generate_waypoint(  # type: ignore
             drone_initial_position,
             boundary_bottom_left,
@@ -60,8 +64,6 @@ if __name__ == "__main__":
 
     waypoint_position = location.Location(10.0, -7.5)
     for i in range(0, TEST_COUNT):
-        # Access required for test
-        # pylint: disable=protected-access
         result, landing_pad = generate_destination.__generate_landing_pad(  # type: ignore
             waypoint_position,
             PIXELS_PER_METRE,

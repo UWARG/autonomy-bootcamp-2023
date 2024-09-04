@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Test geolocation worker.
 """
+
 import multiprocessing as mp
 
 import numpy as np
@@ -24,8 +25,6 @@ IMAGE_RESOLUTION_X = 1200
 IMAGE_RESOLUTION_Y = 900
 
 
-# Extra variables required for management
-# pylint: disable-next=too-many-locals
 def main() -> int:
     """
     main.
@@ -67,9 +66,7 @@ def main() -> int:
 
     bounding_boxes_list = [
         [],
-        [
-            bounding_box.BoundingBox.create(np.array([540.0, 510.0, 540.0, 510.0]))[1]
-        ],
+        [bounding_box.BoundingBox.create(np.array([540.0, 510.0, 540.0, 510.0]))[1]],
         [
             bounding_box.BoundingBox.create(np.array([480.0, 450.0, 480.0, 450.0]))[1],
             bounding_box.BoundingBox.create(np.array([600.0, 570.0, 600.0, 570.0]))[1],
@@ -91,8 +88,9 @@ def main() -> int:
         detect_to_geolocation_queue.queue.put(input_data)
 
         # Test
-        output_data: "tuple[drone_report.DroneReport, list[location.Location], np.ndarray]" \
-            = geolocation_to_display_queue.queue.get()
+        output_data: "tuple[drone_report.DroneReport, list[location.Location], np.ndarray]" = (
+            geolocation_to_display_queue.queue.get()
+        )
         report, positions, annotated_image = output_data
 
         assert report == input_report
@@ -113,10 +111,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = main()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main != 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

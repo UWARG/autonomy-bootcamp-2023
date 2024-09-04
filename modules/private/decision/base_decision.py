@@ -9,21 +9,20 @@ from ... import drone_report
 from ... import location
 
 
-# All logic in the run() method
-# pylint: disable-next=too-few-public-methods
 class BaseDecision:
     """
     Required to enforce different decision behaviour in tests.
     """
-    def __init__(self, waypoint: location.Location, acceptance_radius: float):
+
+    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Nothing to do.
         """
         raise NotImplementedError
 
-    def run(self,
-            report: drone_report.DroneReport,
-            landing_pad_locations: "list[location.Location]") -> commands.Command:
+    def run(
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+    ) -> commands.Command:
         """
         Virtual method.
         """

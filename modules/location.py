@@ -4,13 +4,13 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 Simple location struct.
 """
 
-# Basically a struct
-# pylint: disable-next=too-few-public-methods
+
 class Location:
     """
     Location in world space.
     """
-    def __init__(self, location_x: float, location_y: float):
+
+    def __init__(self, location_x: float, location_y: float) -> None:
         """
         location is in metres from world origin.
         """

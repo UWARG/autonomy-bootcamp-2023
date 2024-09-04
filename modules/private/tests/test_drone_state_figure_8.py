@@ -14,7 +14,7 @@ TIME_STEP_SIZE = 0.01  # seconds
 ACCEPTANCE_RADIUS = 0.1  # metres
 
 
-def figure8() -> int:
+def main() -> int:
     """
     main.
     """
@@ -44,14 +44,14 @@ def figure8() -> int:
     # 7: Centre
     waypoint_index = 0
     waypoints = [
-        commands.Command.create_set_relative_destination_command( 3.0,  4.0),
-        commands.Command.create_set_relative_destination_command( 0.0, -8.0),
-        commands.Command.create_set_relative_destination_command(-3.0,  4.0),
+        commands.Command.create_set_relative_destination_command(3.0, 4.0),
+        commands.Command.create_set_relative_destination_command(0.0, -8.0),
+        commands.Command.create_set_relative_destination_command(-3.0, 4.0),
         commands.Command.create_set_relative_destination_command(-3.0, -4.0),
-        commands.Command.create_set_relative_destination_command( 0.0,  8.0),
-        commands.Command.create_set_relative_destination_command( 3.0, -4.0),
-        commands.Command.create_set_relative_destination_command(-3.0,  0.0),
-        commands.Command.create_set_relative_destination_command( 3.0,  0.0),
+        commands.Command.create_set_relative_destination_command(0.0, 8.0),
+        commands.Command.create_set_relative_destination_command(3.0, -4.0),
+        commands.Command.create_set_relative_destination_command(-3.0, 0.0),
+        commands.Command.create_set_relative_destination_command(3.0, 0.0),
         commands.Command.create_land_command(),
     ]
 
@@ -61,14 +61,14 @@ def figure8() -> int:
         if report.status == drone_status.DroneStatus.HALTED:
             print(step)
             print(waypoint_index)
-            print("Halt: " + str(report.position))
+            print(f"Halt: {report.position}")
             command = waypoints[waypoint_index]
             waypoint_index += 1
 
         report, step = drone.run(command)
 
-    print("At: " + str(report.position))
-    print("Steps: " + str(step))
+    print(f"At: {report.position}")
+    print(f"Steps: {step}")
 
     if report.status != drone_status.DroneStatus.LANDED:
         return -2
@@ -77,10 +77,8 @@ def figure8() -> int:
 
 
 if __name__ == "__main__":
-    # Not a constant
-    # pylint: disable-next=invalid-name
-    status = figure8()
-    if status < 0:
-        print("ERROR: Status code: " + str(status))
+    result_main = main()
+    if result_main != 0:
+        print(f"ERROR: Status code: {result_main}")
 
     print("Done!")

@@ -19,8 +19,13 @@ IMAGE_RESOLUTION_X = 1200
 IMAGE_RESOLUTION_Y = 900
 
 
+# Test functions use test fixture signature names and access class privates
+# No enable
+# pylint: disable=protected-access,redefined-outer-name
+
+
 @pytest.fixture()
-def locator():
+def locator() -> geolocation.Geolocation:
     """
     Construct Geolocation.
     """
@@ -35,7 +40,7 @@ def locator():
 
 
 @pytest.fixture()
-def report():
+def report() -> drone_report.DroneReport:
     """
     Drone report.
     """
@@ -47,11 +52,7 @@ def report():
     return drone
 
 
-# Pytest requires the parameter and fixture names to be identical
-# pylint: disable=redefined-outer-name
-
-
-def test_input_empty(locator: geolocation.Geolocation, report: drone_report.DroneReport):
+def test_input_empty(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:
     """
     No bounding boxes.
     """
@@ -66,7 +67,7 @@ def test_input_empty(locator: geolocation.Geolocation, report: drone_report.Dron
     assert actual == expected
 
 
-def test_input_1(locator: geolocation.Geolocation, report: drone_report.DroneReport):
+def test_input_1(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:
     """
     1 bounding box.
     """
@@ -90,7 +91,7 @@ def test_input_1(locator: geolocation.Geolocation, report: drone_report.DroneRep
     assert actual == expected
 
 
-def test_input_2(locator: geolocation.Geolocation, report: drone_report.DroneReport):
+def test_input_2(locator: geolocation.Geolocation, report: drone_report.DroneReport) -> None:
     """
     2 bounding boxes.
     """

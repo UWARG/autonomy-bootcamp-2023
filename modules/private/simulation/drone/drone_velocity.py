@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Kinematics calculations.
 """
+
 import math
 
 
@@ -10,15 +11,14 @@ class DroneVelocity:
     """
     Speed and direction.
     """
+
     __create_key = object()
 
     @classmethod
-    def create(cls,
-               speed: float,
-               direction: float) -> "tuple[bool, DroneVelocity | None]":
+    def create(cls, speed: float, direction: float) -> "tuple[bool, DroneVelocity | None]":
         """
         speed is in m/s .
-        direction is in radians between -pi and pi . 0 is in the x direction.
+        direction is in radians between -pi and pi (inclusive). 0 is in the x direction. Counterclockwise is positive.
         """
         if not cls.__is_speed_valid(speed):
             return False, None
@@ -28,7 +28,7 @@ class DroneVelocity:
 
         return True, DroneVelocity(cls.__create_key, speed, direction)
 
-    def __init__(self, class_private_create_key, speed: float, direction: float):
+    def __init__(self, class_private_create_key: object, speed: float, direction: float) -> None:
         """
         Private constructor, use create() method.
         """

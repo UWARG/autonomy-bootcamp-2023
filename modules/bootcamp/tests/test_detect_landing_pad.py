@@ -3,6 +3,7 @@ BOOTCAMPERS DO NOT MODIFY THIS FILE.
 
 Unit tests.
 """
+
 import pathlib
 
 import cv2
@@ -20,8 +21,13 @@ OUTPUT_IMAGES_PATH = pathlib.Path("modules/bootcamp/tests/log")
 BOUNDING_BOX_TOLERANCE = 1.0  # pixels
 
 
+# Test functions use test fixture signature names and access class privates
+# No enable
+# pylint: disable=protected-access,redefined-outer-name
+
+
 @pytest.fixture()
-def detector():
+def detector() -> detect_landing_pad.DetectLandingPad:  # type: ignore
     """
     Construct DetectLandingPad.
     """
@@ -31,14 +37,10 @@ def detector():
     # Hang output directory creation on this as well
     OUTPUT_IMAGES_PATH.mkdir(parents=True, exist_ok=True)
 
-    yield detection
+    yield detection  # type: ignore
 
 
-# Pytest requires the parameter and fixture names to be identical
-# pylint: disable=redefined-outer-name
-
-
-def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
+def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
     """
     1 landing pad.
     """
@@ -48,8 +50,6 @@ def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     assert input_path.exists()
     output_path = pathlib.Path(OUTPUT_IMAGES_PATH, image_name)
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     input_image = cv2.imread(str(input_path))
     assert input_image is not None
 
@@ -69,12 +69,10 @@ def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
         assert expected is not None
         assert bounding_box.BoundingBox.is_close(actual_box, expected, BOUNDING_BOX_TOLERANCE)
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     cv2.imwrite(str(output_path), output_image)
 
 
-def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad):
+def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
     """
     2 landing pads.
     """
@@ -84,8 +82,6 @@ def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     assert input_path.exists()
     output_path = pathlib.Path(OUTPUT_IMAGES_PATH, image_name)
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     input_image = cv2.imread(str(input_path))
     assert input_image is not None
 
@@ -107,12 +103,10 @@ def test_double_landing_pad(detector: detect_landing_pad.DetectLandingPad):
         assert expected is not None
         assert bounding_box.BoundingBox.is_close(actual_box, expected, BOUNDING_BOX_TOLERANCE)
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     cv2.imwrite(str(output_path), output_image)
 
 
-def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad):
+def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad) -> None:
     """
     0 landing pads.
     """
@@ -122,8 +116,6 @@ def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     assert input_path.exists()
     output_path = pathlib.Path(OUTPUT_IMAGES_PATH, image_name)
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     input_image = cv2.imread(str(input_path))
     assert input_image is not None
 
@@ -133,6 +125,4 @@ def test_zero_landing_pad(detector: detect_landing_pad.DetectLandingPad):
     # Test
     assert len(actual_boxes) == 0
 
-    # Pylint has issues with OpenCV
-    # pylint: disable-next=no-member
     cv2.imwrite(str(output_path), output_image)
