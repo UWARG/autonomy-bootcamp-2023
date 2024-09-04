@@ -17,15 +17,14 @@ pytest
 # If you are on MacOS, don't have a CUDA capable GPU,
 # or if things don't work and you just want to use the CPU,
 # comment out the "--extra-index-url" option
---extra-index-url https://download.pytorch.org/whl/cu121
+--extra-index-url https://download.pytorch.org/whl/cu124
 
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
 
-# TODO: Update to 2.4.1 or later
-torch==2.3.1
-torchvision==0.18.1
+torch==2.4.1
+torchvision==0.19.1
 
 ultralytics
 
