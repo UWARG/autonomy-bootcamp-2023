@@ -48,10 +48,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
     def distance_to_waypoint(self, report: drone_report.DroneReport) -> float:
         """
-        Calculate the distance between the drone and the waypoint (in pixels - returns the maximum of the x and y distances).
+        Calculate the distance between the drone and the waypoint - unsquare-rooted.
         """
         drone_location = report.position
-        return ((drone_location.location_x - self.waypoint.location_x)**2 + (drone_location.location_y - self.waypoint.location_y)**2) ** (1/2)
+        return ((drone_location.location_x - self.waypoint.location_x)**2 + (drone_location.location_y - self.waypoint.location_y)**2)
 
     def get_relative_displacement(self, report: drone_report.DroneReport) -> location.Location:
         """
@@ -101,10 +101,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             return commands.Command.create_land_command()
 
         # checks if the drone is within the acceptance radius
-        print(self.distance_to_waypoint(report))
-        print(self.acceptance_radius)
-        print("----------------")
-        if self.distance_to_waypoint(report) <= self.acceptance_radius:
+        if self.distance_to_waypoint(report) <= self.acceptance_radius ** 2:
             print("Waypoint reached")
             self.waypoint_reached = True
             command = commands.Command.create_halt_command()
