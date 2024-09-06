@@ -114,8 +114,8 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            if not result or not box:
-                raise Exception("Error creating bounding box! Tried using data: ", boxes_cpu[i])
+            if not result:
+                box = []
             bounding_boxes.append(box)
 
         
