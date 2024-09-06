@@ -106,7 +106,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = np.array(boxes_xyxy.detach().clone()) # <--- first dimension is number of bounding box
+        boxes_cpu = boxes_xyxy.cpu().numpy()  # <--- first dimension is number of bounding box
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
