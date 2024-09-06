@@ -17,6 +17,12 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
+def get_distance(x_dist: float, y_dist: float) -> float:
+        '''
+        get_distance returns the straight line distances between the position and destination
+        '''
+        distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
+        return distance
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -74,10 +80,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Remove this when done
         # raise NotImplementedError
-
-        # get_distance returns the straight line distances between the position and destination
-        def get_distance(x_dist, y_dist):
-            return (x_dist ** 2 + y_dist ** 2) ** 0.5
         
         # Assume the closest landing pad is the first one and the distance is infinity, modify accordingly
         closest_landing_pad_index = 0

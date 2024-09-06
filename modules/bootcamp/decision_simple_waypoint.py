@@ -17,6 +17,12 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # pylint: disable=unused-argument,line-too-long
 
+def get_distance(x_dist: float, y_dist: float) -> float:
+        '''
+        get_distance returns the straight line distances between the position and destination
+        '''
+        distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
+        return distance
 
 # All logic around the run() method
 # pylint: disable-next=too-few-public-methods
@@ -71,14 +77,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         # Remove this when done
-        # raise NotImplementedError
-
-        # get_distance returns the straight line distances between the position and destination
-        def get_distance(x_dist, y_dist):
-
-            distance = (x_dist ** 2 + y_dist ** 2) ** 0.5
-
-            return distance
+        # raise 
         
         relative_x = self.waypoint.location_x - report.position.location_x
         relative_y = self.waypoint.location_y - report.position.location_y
