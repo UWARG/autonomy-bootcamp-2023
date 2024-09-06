@@ -39,8 +39,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
         self.waypoint_reached = False
-        self.waypoint_reached_count = 0
-        self.waypoint_landed = False 
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -97,7 +95,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # if waypoint is reached, we land
         if self.waypoint_reached:
             print("Landing")
-            self.waypoint_landed = True
             return commands.Command.create_land_command()
 
         # checks if the drone is within the acceptance radius
@@ -116,12 +113,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 relative_destination_from_current_position.location_x,
                 relative_destination_from_current_position.location_y
             )
-        # return command
-        
-
-
-        # # Remove this when done
-        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

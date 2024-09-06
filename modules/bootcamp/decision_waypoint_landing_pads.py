@@ -170,8 +170,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 relative_destination_from_current_position.location_x,
                 relative_destination_from_current_position.location_y
             )
-            # Remove this when done
-            # raise NotImplementedError
+
 
             # ============
             # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
