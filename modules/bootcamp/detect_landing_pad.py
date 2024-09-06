@@ -97,10 +97,8 @@ class DetectLandingPad:
         prediction = predictions[0]
         # print(prediction)
 
-        # Plot the annotated image from the Result object
-        # Include the confidence value
-        # image_annotated = prediction.masks
-        image_annotated = prediction.plot()
+        # plot with confidence values
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
