@@ -117,7 +117,7 @@ class DetectLandingPad:
         bounding_boxes = []
 
         for box in boxes_cpu:
-            bounding_boxes.append(bounding_box.BoundingBox.create(box))
+            bounding_boxes.append(bounding_box.BoundingBox.create(box)[1])
 
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
