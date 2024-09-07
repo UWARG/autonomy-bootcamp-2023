@@ -112,17 +112,13 @@ class DetectLandingPad:
         # move the copy into CPU space,
         # and convert to a numpy array
         boxes_cpu = boxes_xyxy.cpu().numpy()
-        
-        print(boxes_cpu)
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        
-        for i in range(len(boxes_cpu)):
-            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i])[1])
-        
-        print(bounding_boxes)
-        
+
+        for box in boxes_cpu:
+            bounding_boxes.append(bounding_box.BoundingBox.create(box))
+
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
