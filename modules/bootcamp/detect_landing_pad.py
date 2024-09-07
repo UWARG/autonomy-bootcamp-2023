@@ -113,12 +113,6 @@ class DetectLandingPad:
             bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
-
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-            # Create BoundingBox object and append to list
-            # result, box = ...
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

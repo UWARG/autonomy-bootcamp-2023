@@ -39,7 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.at_waypoint = False
-        self.bestpad = 0
+        self.bestpad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -58,11 +58,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.bestpad = landing_pad_locations[0]
             bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
         
-            for i in landing_pad_locations:
-                dist_total_squared = self.calc_dis_squared(report.position, i)
+            for pad in landing_pad_locations:
+                dist_total_squared = self.calc_dis_squared(report.position, pad)
                 if bestpad_dist_total_squared > dist_total_squared:
-                    self.bestpad = i
-                    bestpad_dist_total_squared = self.calc_dis_squared(report.position, self.bestpad)
+                    self.bestpad = pad
+                    bestpad_dist_total_squared = dist_total_squared
         else:
             self.bestpad = report.position
      
@@ -92,19 +92,23 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        tolerance = self.acceptance_radius
         if report.status == drone_status.DroneStatus.HALTED:
-            relative_x = self.waypoint.location_x - report.position.location_x
-            relative_y = self.waypoint.location_y - report.position.location_y
+            squared_distance = 0
             if self.at_waypoint:
                 relative_x = self.bestpad.location_x - report.position.location_x
                 relative_y = self.bestpad.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                squared_distance = self.calc_dis_squared(report.position, self.bestpad)
+            else:
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                squared_distance = self.calc_dis_squared(report.position, self.waypoint)
+            
+            if squared_distance > self.acceptance_radius ** 2:
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
 
-            if self.at_waypoint and abs(relative_x) < tolerance and abs(relative_y) < tolerance:
+            if self.at_waypoint and squared_distance <= self.acceptance_radius ** 2:
                 command = commands.Command.create_land_command()
-
-            if not self.at_waypoint and abs(relative_x) < tolerance and abs(relative_y) < tolerance:
+            elif not self.at_waypoint and squared_distance <= self.acceptance_radius ** 2:
                 # find which one is closest
                 self.find_pad(report, landing_pad_locations)
                 self.at_waypoint = True
