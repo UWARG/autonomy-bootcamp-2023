@@ -37,10 +37,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-        self.waypoint_reached = False
-        self.reached_landing_pad = False
-        self.moving_to_landing_pad = False
+        
+        self.waypoint_reached = False # if the waypoint is reached, pivot to moving to landing pad
+        self.reached_landing_pad = False # if the landing pad is reached, pivot to landing
+        self.moving_to_landing_pad = False # if the drone is moving to the landing pad
         self.target_landing_pad = None
 
         # ============
