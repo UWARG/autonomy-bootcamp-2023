@@ -38,11 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         self.landed_at_waypoint = False
 
-    def __get_distance(self, position_1: location.Location, position_2: location.Location) -> float:
-        return (
-            (position_1.location_x - position_2.location_x) ** 2
-            + (position_1.location_y - position_2.location_y) ** 2
-        ) ** 0.5
+    def __get_distance_squared(self, position_1: location.Location, position_2: location.Location) -> float:
+        return (position_1.location_x - position_2.location_x) ** 2 + (position_1.location_y - position_2.location_y) ** 2
 
     def __get_closest_landing_pad(
         self, drone_location: location.Location, landing_pad_locations: "list[location.Location]"
@@ -51,7 +48,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         closest_landing_pad_index = 0
 
         for i, landing_pad in enumerate(landing_pad_locations):
-            distance = self.__get_distance(drone_location, landing_pad)
+            distance = self.__get_distance_squared(drone_location, landing_pad)
 
             if minimum_distance > distance:
                 closest_landing_pad_index = i
