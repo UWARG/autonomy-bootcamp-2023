@@ -38,8 +38,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         self.landed_at_waypoint = False
 
-    def __get_distance_squared(self, position_1: location.Location, position_2: location.Location) -> float:
-        return (position_1.location_x - position_2.location_x) ** 2 + (position_1.location_y - position_2.location_y) ** 2
+    def __get_distance_squared(
+        self, position_1: location.Location, position_2: location.Location
+    ) -> float:
+        return (position_1.location_x - position_2.location_x) ** 2 + (
+            position_1.location_y - position_2.location_y
+        ) ** 2
 
     def __get_closest_landing_pad(
         self, drone_location: location.Location, landing_pad_locations: "list[location.Location]"
@@ -85,7 +89,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if self.waypoint.location_x - report.position.location_x < 0.1 and self.waypoint.location_y - report.position.location_y < 0.1:
+        if (
+            self.waypoint.location_x - report.position.location_x < 0.1
+            and self.waypoint.location_y - report.position.location_y < 0.1
+        ):
             if self.landed_at_waypoint:
                 return commands.Command.create_land_command()
 
