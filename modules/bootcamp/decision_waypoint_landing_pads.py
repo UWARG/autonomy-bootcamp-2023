@@ -47,8 +47,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def __get_closest_landing_pad(
         self, drone_location: location.Location, landing_pad_locations: "list[location.Location]"
     ) -> location.Location:
-        print("getting closest...")
-
         minimum_distance = float("inf")
         closest_landing_pad_index = 0
 
@@ -90,13 +88,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if self.waypoint == report.position:
+        if self.waypoint.location_x - report.position.location_x < 0.1 and self.waypoint.location_y - report.position.location_y < 0.1:
             if self.landed_at_waypoint:
-                command = commands.Command.create_land_command()
+                return commands.Command.create_land_command()
 
             self.landed_at_waypoint = True
-
-            print("trying to find closest...")
             self.waypoint = self.__get_closest_landing_pad(report.position, landing_pad_locations)
         elif report.status == drone_status.DroneStatus.HALTED:
             relative_destination_x = self.waypoint.location_x - report.position.location_x
