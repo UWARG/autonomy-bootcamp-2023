@@ -118,7 +118,7 @@ class DetectLandingPad:
 
         for box in boxes_cpu:
             bounding_box_output = bounding_box.BoundingBox.create(box)
-            
+
             if bounding_box_output[0]:
                 bounding_boxes.append(bounding_box_output[1])
 
