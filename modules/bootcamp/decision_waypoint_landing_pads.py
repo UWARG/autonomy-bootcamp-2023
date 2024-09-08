@@ -89,10 +89,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if (
-            abs(self.waypoint.location_x - report.position.location_x) < 0.1
-            and abs(self.waypoint.location_y - report.position.location_y) < 0.1
-        ):
+        if (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2 < self.acceptance_radius**2:
             if self.landed_at_waypoint:
                 return commands.Command.create_land_command()
 

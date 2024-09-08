@@ -68,10 +68,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if (
-            abs(self.waypoint.location_x - report.position.location_x) < 0.1
-            and abs(self.waypoint.location_y - report.position.location_y) < 0.1
-        ):
+        if (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2 < self.acceptance_radius**2:
             command = commands.Command.create_land_command()
         elif report.status == drone_status.DroneStatus.HALTED:
             relative_destination_x = self.waypoint.location_x - report.position.location_x
