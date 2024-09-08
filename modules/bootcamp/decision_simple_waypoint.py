@@ -69,8 +69,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         if (
-            self.waypoint.location_x - report.position.location_x < 0.1
-            and self.waypoint.location_y - report.position.location_y < 0.1
+            abs(self.waypoint.location_x - report.position.location_x) < 0.1
+            and abs(self.waypoint.location_y - report.position.location_y) < 0.1
         ):
             command = commands.Command.create_land_command()
         elif report.status == drone_status.DroneStatus.HALTED:
