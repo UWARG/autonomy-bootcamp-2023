@@ -39,6 +39,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
+        self.has_sent_landing_command = False
+
+        self.commands = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+
+        self.halt_counter = 0
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,6 +75,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        if report.status == drone_status.DroneStatus.HALTED and self.halt_counter == 0:
+            command = self.commands
+            self.halt_counter += 1 
+        
+        elif report.status == drone_status.DroneStatus.HALTED and self.halt_counter == 1:
+            min_norm, min_location = float('inf'), []
+            
+            for location in landing_pad_locations:
+                x, y = location.location_x - self.waypoint.location_x, location.location_y - self.waypoint.location_y
+                curr_norm = x ** 2 + y ** 2
+
+                if min_norm > curr_norm:
+                    min_norm, min_location = curr_norm, [x, y]
+
+            command = commands.Command.create_set_relative_destination_command(min_location[0], min_location[1])
+
+            self.halt_counter += 1 
+
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and self.halt_counter == 2:
+            command = commands.Command.create_land_command()
+            self.has_sent_landing_command = True
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
