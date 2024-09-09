@@ -46,6 +46,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
 
         self.reached_waypoint = False
+        self.moving_to_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -85,17 +86,23 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         closest_landing_pad_index = 0
         closest_landing_pad_distance = float('inf')
         
+        # True when desired destination ("landing pad zone") has been reached
         if self.reached_waypoint:
+
+            # True if the drone's current command is moving to the closest landing pad
+            if self.moving_to_landing_pad:
+                # Then the drone should be moving towards or at the landing pad
+                if report.status == drone_status.DroneStatus.HALTED:
+                    command = commands.Command.create_land_command()
+                    return command
+                # If not halted, then moving, so do nothing
+
             # If reached waypoint, then find nearest landing pad and move towards it
             for landing_pad in landing_pad_locations:
-
                 relative_x = landing_pad.location_x - report.position.location_x
                 relative_y = landing_pad.location_y - report.position.location_y
                 distance = get_distance(relative_x, relative_y)
-                # If distance < acceptance radius, then the current position (waypoint) is a landing pad, so land
-                if distance < self.acceptance_radius:
-                    command = commands.Command.create_land_command()
-                    return command
+
                 # Logic to set the closest landing pad
                 if distance < closest_landing_pad_distance:
                     closest_landing_pad_distance = distance
@@ -105,12 +112,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             relative_x = closest_landing_pad.location_x - report.position.location_x
             relative_y = closest_landing_pad.location_y - report.position.location_y
 
-            # Repeat previous steps for the landing pad, set the new 'waypoint' as the landing pad
-            self.reached_waypoint = False
-            self.waypoint = closest_landing_pad
-
             # Move towards the closest landing pad
             command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            self.moving_to_landing_pad = True
             return command
             
         
