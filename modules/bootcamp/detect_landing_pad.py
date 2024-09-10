@@ -3,7 +3,6 @@ BOOTCAMPERS TO COMPLETE.
 
 Detects landing pads.
 """
-
 import pathlib
 
 import numpy as np
@@ -13,23 +12,12 @@ import ultralytics
 from .. import bounding_box
 
 
-# ============
-# ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-# ============
-# Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
-# ============
-# ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-# ============
-
-
+# This is just an interface
+# pylint: disable=too-few-public-methods
 class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
-
     __create_key = object()
 
     # ============
@@ -48,7 +36,7 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(cls, model_directory: pathlib.Path) -> "tuple[bool, DetectLandingPad | None]":
+    def create(cls, model_directory: pathlib.Path):
         """
         model_directory: Directory to models.
         """
@@ -69,7 +57,7 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
+    def __init__(self, class_private_create_key, model: ultralytics.YOLO):
         """
         Private constructor, use create() method.
         """
@@ -98,31 +86,32 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(source=image, conf=0.7, device="cpu")
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot()
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
+        for i in range(0, len(boxes_cpu)):
+            _result, _box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            bounding_boxes.append(_box)
 
-        return [], image_annotated
+        return bounding_boxes, image_annotated
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

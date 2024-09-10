@@ -3,33 +3,33 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint.
 """
+# Disable for bootcamp use
+# pylint: disable=unused-import
+
 
 from .. import commands
 from .. import drone_report
-
-# Disable for bootcamp use
-# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
-# No enable
-# pylint: disable=duplicate-code,unused-argument
+# pylint: disable=unused-argument,line-too-long
 
 
+# All logic around the run() method
+# pylint: disable-next=too-few-public-methods
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.
     """
-
-    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
+    def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
-        print(f"Waypoint: {waypoint}")
+        print("Waypoint: " + str(waypoint))
 
         self.acceptance_radius = acceptance_radius
 
@@ -38,14 +38,25 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.command_index = 0
+        
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x,
+                self.waypoint.location_y
+            )
+        ]
+
+        self.has_sent_landing_command = False
+        self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def run(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
-    ) -> commands.Command:
+    def run(self,
+            report: drone_report.DroneReport,
+            landing_pad_locations: "list[location.Location]") -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -69,6 +80,23 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
+            # Print some information for debugging
+            print("Stopped moving at: " + str(report.position))
+
+            command = self.commands[self.command_index]
+            self.command_index += 1
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            # Print some information for debugging
+            print("Landing the drone at: " + str(report.position))
+
+            command = commands.Command.create_land_command()
+
+            self.has_sent_landing_command = True
+
+
+        self.counter += 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
