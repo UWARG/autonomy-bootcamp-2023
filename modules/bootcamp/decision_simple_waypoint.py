@@ -77,12 +77,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED and self.starting_halt:
             command = self.commands
-            self.starting_halt = False 
-        
+            self.starting_halt = False
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
             command = commands.Command.create_land_command()
             self.has_sent_landing_command = True
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
