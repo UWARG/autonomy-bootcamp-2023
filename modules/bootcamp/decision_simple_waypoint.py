@@ -42,10 +42,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.commands = []
 
-        self.has_sent_landing_command = False
-
-        self.counter = 0
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

@@ -87,7 +87,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.command_index += 1
             elif not self.has_found_landing_pad:
                 # uses simple minimum value search to find closest pad and goes there
-                dist_min = 30000
+                dist_min = float("inf")
                 index = 0
                 for i in len(landing_pad_locations):
                     dist = (landing_pad_locations[i].location_x - report.position.location_x)**2+(landing_pad_locations[i].location_y - report.position.location_y)**2
