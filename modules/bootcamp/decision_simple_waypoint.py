@@ -40,6 +40,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Add your own
         self.command_index = 0
 
+        self.commands = []
+
         self.has_sent_landing_command = False
 
         self.counter = 0

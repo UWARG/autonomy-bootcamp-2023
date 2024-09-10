@@ -123,11 +123,6 @@ class DetectLandingPad:
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             if result:
                 bounding_boxes.append(box)
-
-            
+        # pylint: disable-next=broad-exception-caught
         return bounding_boxes, image_annotated
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
-
-        
+    

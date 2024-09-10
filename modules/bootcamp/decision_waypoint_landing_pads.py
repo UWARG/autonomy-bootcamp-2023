@@ -40,6 +40,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.command_index = 0
 
+        self.commands = []
+
         self.has_sent_landing_command = False
         self.has_found_landing_pad = False
 
@@ -87,7 +89,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 # uses simple minimum value search to find closest pad and goes there
                 dist_min = 30000
                 index = 0
-                for i in range(0, len(landing_pad_locations)):
+                for i in len(landing_pad_locations):
                     dist = (landing_pad_locations[i].location_x - report.position.location_x)**2+(landing_pad_locations[i].location_y - report.position.location_y)**2
                     if dist < dist_min:
                         dist_min = dist
@@ -96,7 +98,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 closest_landing_pad_location = landing_pad_locations[index]
 
                 command = commands.Command.create_set_relative_destination_command(closest_landing_pad_location.location_x - report.position.location_x, closest_landing_pad_location.location_y - report.position.location_y)
-                drone_report.location
 
                 self.has_found_landing_pad = True
             # only runs when on top of landing pad
