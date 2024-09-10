@@ -61,7 +61,7 @@ def test_single_landing_pad(detector: detect_landing_pad.DetectLandingPad):
 
     # Run
     actual_boxes, output_image = detector.run(input_image)
-
+    
     # Test
     assert len(actual_boxes) == 1
     for i, actual_box in enumerate(actual_boxes):
