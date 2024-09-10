@@ -45,9 +45,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def calc_dis_squared(self, drone, pad):
-        dist_x = abs(pad.location_x - drone.location_x)
-        dist_y = abs(pad.location_y - drone.location_y)
+    def calc_dis_squared(self, position: location.Location, pad: location.Location) -> float:
+        dist_x = abs(pad.location_x - position.location_x)
+        dist_y = abs(pad.location_y - position.location_y)
         return dist_x ** 2 + dist_y ** 2
 
     def find_pad(self,
