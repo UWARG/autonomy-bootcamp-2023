@@ -63,6 +63,7 @@ class DetectLandingPad:
         try:
             model = ultralytics.YOLO(str(model_path))
         # Library can throw any exception
+        # pylint: disable-next=broad-exception-caught
         except Exception:
             return False, None
 
@@ -108,7 +109,7 @@ class DetectLandingPad:
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
-    
+
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
@@ -124,8 +125,7 @@ class DetectLandingPad:
 
         for i in range(0, boxes_cpu.shape[0]):
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            
-            if result: 
+            if result:
                 bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
