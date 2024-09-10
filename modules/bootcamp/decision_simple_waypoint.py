@@ -41,7 +41,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.has_sent_landing_command = False
 
-        self.commands = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        self.commands = commands.Command.create_set_relative_destination_command(
+            self.waypoint.location_x, self.waypoint.location_y
+        )
 
         self.starting_halt = True
 

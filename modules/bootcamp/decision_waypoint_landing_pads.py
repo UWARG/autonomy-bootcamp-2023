@@ -81,8 +81,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             elif self.halt_counter == 1:
                 for landing_pads in landing_pad_locations:
-                    x, y = landing_pads.location_x - self.waypoint.location_x, landing_pads.location_y - self.waypoint.location_y
-                    curr_norm = x ** 2 + y ** 2
+                    x, y = (
+                        landing_pads.location_x - self.waypoint.location_x,
+                        landing_pads.location_y - self.waypoint.location_y,
+                    )
+                    curr_norm = x**2 + y**2
 
                     if curr_norm < min_norm:
                         min_norm, min_location = curr_norm, (x, y)
