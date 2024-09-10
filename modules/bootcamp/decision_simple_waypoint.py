@@ -38,6 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.has_sent_landing_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,6 +70,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            if report.position != self.waypoint:
+                print(f"Halted at: {report.position}, moving to destination")
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
+            elif not self.has_sent_landing_command:
+                print(f"Halted at: {report.position}, landing")
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+        else:
+            # If the drone is moving, send a null command to continue the simulation
+            command = commands.Command.create_null_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
