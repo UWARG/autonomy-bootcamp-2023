@@ -71,8 +71,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        min_norm = float("inf")
-        min_location = []
+        min_norm, min_location = float("inf"), []
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
@@ -82,16 +81,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             elif self.halt_counter == 1:
                 for landing_pads in landing_pad_locations:
-                    x = landing_pads.location_x - self.waypoint.location_x
-                    y = landing_pads.location_y - self.waypoint.location_y
+                    x, y = landing_pads.location_x - self.waypoint.location_x, landing_pads.location_y - self.waypoint.location_y
                     curr_norm = x ** 2 + y ** 2
 
                     if curr_norm < min_norm:
-                        min_norm = curr_norm
-                        min_location = (x, y)
+                        min_norm, min_location = curr_norm, (x, y)
 
                 command = self.travel_to(min_location[0], min_location[1])
-                self.halt_counter += 1 
+                self.halt_counter += 1
 
             elif self.halt_counter == 2 and not self.has_sent_landing_command:
                 command = commands.Command.create_land_command()
