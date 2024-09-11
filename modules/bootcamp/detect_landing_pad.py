@@ -38,7 +38,7 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(cls, model_directory: pathlib.Path):
+    def create(cls, model_directory: pathlib.Path) -> tuple:
         """
         model_directory: Directory to models.
         """
@@ -59,7 +59,7 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(self, class_private_create_key, model: ultralytics.YOLO):
+    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
         """
         Private constructor, use create() method.
         """
