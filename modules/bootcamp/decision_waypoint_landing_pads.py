@@ -26,7 +26,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     Travel to the designed waypoint and then land at the nearest landing pad.
     """
 
-    def __init__(self, waypoint: location.Location, acceptance_radius: float):
+    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Initialize all persistent variables here with self.
         """
@@ -42,9 +42,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Initialising a boolean variable to check arrival status, and deal with unplanned halts along the way (bonus)
         self.arrived = False
 
-    def squared_distance(
-        self, location1: location.Location, location2: location.Location
-    ) -> float:
+    def squared_distance(self, location1: location.Location, location2: location.Location) -> float:
         """
         Calculate the squared Euclidean distance without square roots
         """
@@ -122,9 +120,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if not self.arrived:
             current_position = report.position
-            squared_distance_to_waypoint = self.squared_distance(
-                current_position, self.waypoint
-            )
+            squared_distance_to_waypoint = self.squared_distance(current_position, self.waypoint)
 
             # Check acceptance radius
             if squared_distance_to_waypoint <= self.acceptance_radius**2:
@@ -138,14 +134,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Repeating process but for closest landing pad, after reaching waypoint
         if self.arrived:
-            closest_pad = self.find_closest_landing_pad(
-                report.position, landing_pad_locations
-            )
+            closest_pad = self.find_closest_landing_pad(report.position, landing_pad_locations)
 
             # Calculate squared distance to the closest landing pad
-            squared_distance_to_pad = self.squared_distance(
-                report.position, closest_pad
-            )
+            squared_distance_to_pad = self.squared_distance(report.position, closest_pad)
 
             # If within the acceptance radius of the landing pad, land the drone
             if squared_distance_to_pad <= self.acceptance_radius**2:

@@ -63,15 +63,11 @@ class DetectLandingPad:
         """
         Private constructor, use create() method.
         """
-        assert (
-            class_private_create_key is DetectLandingPad.__create_key
-        ), "Use create() method"
+        assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
 
         self.__model = model
 
-    def run(
-        self, image: np.ndarray
-    ) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
 
