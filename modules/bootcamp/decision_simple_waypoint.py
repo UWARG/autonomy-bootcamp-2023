@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint.
 """
+
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
@@ -24,6 +25,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     """
     Travel to the designed waypoint.
     """
+
     def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
@@ -41,8 +43,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.command_index = 0
         self.commands = [
             commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x,
-                self.waypoint.location_y
+                self.waypoint.location_x, self.waypoint.location_y
             )
         ]
 
@@ -53,9 +54,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def run(self,
-            report: drone_report.DroneReport,
-            landing_pad_locations: "list[location.Location]") -> commands.Command:
+    def run(
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+    ) -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -80,7 +81,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
+            self.commands
+        ):
             # Print some information for debugging
             print("Stopped moving at: " + str(report.position))
 
@@ -93,7 +96,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.Command.create_land_command()
 
             self.has_sent_landing_command = True
-
 
         self.counter += 1
 

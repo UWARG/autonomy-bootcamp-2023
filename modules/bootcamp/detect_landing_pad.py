@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Detects landing pads.
 """
+
 import pathlib
 
 import numpy as np
@@ -18,6 +19,7 @@ class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
     """
+
     __create_key = object()
 
     # ============
