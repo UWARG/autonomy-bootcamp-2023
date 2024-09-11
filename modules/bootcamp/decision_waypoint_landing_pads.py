@@ -27,7 +27,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     Travel to the designed waypoint and then land at the nearest landing pad.
     """
 
-    def __init__(self, waypoint: location.Location, acceptance_radius: float):
+    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Initialize all persistent variables here with self.
         """
