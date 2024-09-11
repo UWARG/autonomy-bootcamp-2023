@@ -79,10 +79,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
 
         if report.status == drone_status.DroneStatus.HALTED:
+            #In this case, the drone need to head to the waypoint
             if not self.clearance(report):
                 print(f"Departed for waypoint mission from halted position : {report.position}")
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
             elif not self.has_sent_landing_command:
+                #In this case, the drone need to land
                 print("send landing command")
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
