@@ -37,11 +37,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.has_sent_landing_command = False
+        self.mission_completed = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+    def clearance(self, report: drone_report.DroneReport) -> bool:
+        """Function checks whether the drone has reached waypoint without using square root operation"""
+        distance_x = self.waypoint.location_x - report.position.location_x
+        distance_y = self.waypoint.location_y - report.position.location_y
+        distance_squared = distance_x**2 + distance_y**2
+        clear = distance_squared < self.acceptance_radius**2
+        return clear
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -68,7 +76,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+
+
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.clearance(report):
+                print(f"Departed for waypoint mission from halted position : {report.position}")
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+            elif not self.has_sent_landing_command:
+                print("send landing command")
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+        elif report.status == drone_status.DroneStatus.MOVING and self.clearance(report):
+            command = commands.Command.create_halt_command()
+            print("HALT COMMAND SENT")
+
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
