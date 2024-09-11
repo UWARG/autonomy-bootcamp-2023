@@ -69,7 +69,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
+        if (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2 <= self.acceptance_radius**2:
+            if report.status == report.status.HALTED:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_halt_command()
+        elif not report.status == report.status.MOVING:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
+            )
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
