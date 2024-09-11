@@ -38,10 +38,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.travel_to = commands.Command.create_set_relative_destination_command
-        self.commands = self.travel_to(self.waypoint.location_x, self.waypoint.location_y)
+        self.commands = commands.Command.create_set_relative_destination_command(
+            self.waypoint.location_x, self.waypoint.location_y
+        )
         self.has_sent_landing_command = False
-        self.halt_counter = 0
+
+        self.min_norm, self.relative_min_location = float("inf"), []
+        self.landing_locations = [float("inf"), float("inf")]
+        self.starting_halt, self.waypoint_halt = True, True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -71,15 +75,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        min_norm, min_location = float("inf"), []
+
+        dist_to_waypoint_x = self.landing_locations[0] - report.position.location_x
+        dist_to_waypoint_y = self.landing_locations[1] - report.position.location_y
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.halt_counter == 0:
+            if self.starting_halt:
                 command = self.commands
-                self.halt_counter += 1
+                self.starting_halt = False
 
-            elif self.halt_counter == 1:
+            elif self.waypoint_halt:
                 for landing_pads in landing_pad_locations:
                     x, y = (
                         landing_pads.location_x - self.waypoint.location_x,
@@ -87,15 +93,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     )
                     curr_norm = x**2 + y**2
 
-                    if curr_norm < min_norm:
-                        min_norm, min_location = curr_norm, (x, y)
+                    if curr_norm < self.min_norm:
+                        self.min_norm, self.relative_min_location = curr_norm, (x, y)
+                        self.landing_locations = [landing_pads.location_x, landing_pads.location_y]
 
-                command = self.travel_to(min_location[0], min_location[1])
-                self.halt_counter += 1
+                command = commands.Command.create_set_relative_destination_command(
+                    self.relative_min_location[0], self.relative_min_location[1]
+                )
+                self.waypoint_halt = False
 
-            elif self.halt_counter == 2 and not self.has_sent_landing_command:
-                command = commands.Command.create_land_command()
-                self.has_sent_landing_command = True
+        if (
+            not self.has_sent_landing_command
+            and dist_to_waypoint_x**2 + dist_to_waypoint_y**2 <= self.acceptance_radius**2
+        ):
+            command = commands.Command.create_land_command()
+            self.has_sent_landing_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
