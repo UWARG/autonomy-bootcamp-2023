@@ -40,7 +40,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.landing_pad = None
         self.has_reached_waypoint = False
-        self.has_sent_landing_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -73,46 +72,45 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if not self.has_reached_waypoint and report.position != self.waypoint:
-                print(f"Halted at: {report.position}, moving to waypoint")
-                command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
-                )
-            elif not self.has_reached_waypoint and report.position == self.waypoint:
-                self.has_reached_waypoint = True
-                print(f"Halted at: {report.position}, reached waypoint")
-                self.waypoint = self.determine_closest_landing_pad(
-                    self.waypoint, landing_pad_locations
-                )
+            if not self.has_reached_waypoint:
                 if (
-                    self.calculate_distance(report.position, self.landing_pad)
+                    self.calculate_distance_squared(report.position, self.waypoint)
                     < self.acceptance_radius**2
                 ):
-                    print(f"Already at the closest landing pad: {report.position}, landing")
-                    command = commands.Command.create_land_command()
-                    self.has_sent_landing_command = True
-                else:
-                    command = commands.Command.create_set_relative_destination_command(
-                        self.landing_pad.location_x, self.landing_pad.location_y
+                    self.has_reached_waypoint = True
+                    print(f"Halted at: {report.position}, reached waypoint")
+                    self.waypoint = self.determine_closest_landing_pad(
+                        self.waypoint, landing_pad_locations
                     )
-            elif (
-                self.has_reached_waypoint
-                and self.calculate_distance(report.position, self.landing_pad)
-                < self.acceptance_radius**2
-                and not self.has_sent_landing_command
-            ):
-                print(f"Halted at: {report.position}, landing")
-                command = commands.Command.create_land_command()
-                self.has_sent_landing_command = True
-            elif (
-                self.has_reached_waypoint
-                and self.calculate_distance(report.position, self.landing_pad)
-                >= self.acceptance_radius**2
-            ):
-                print(f"Halted at: {report.position}, moving to landing pad")
-                command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
-                )
+                    # Check if already at the landing pad
+                    if (
+                        self.calculate_distance_squared(report.position, self.landing_pad)
+                        < self.acceptance_radius**2
+                    ):
+                        print(f"Already at the closest landing pad: {report.position}, landing")
+                        command = commands.Command.create_land_command()
+                    else:
+                        # Otherwise fly to the landing pad
+                        command = commands.Command.create_set_relative_destination_command(
+                            self.landing_pad.location_x, self.landing_pad.location_y
+                        )
+                else:
+                    print(f"Halted at: {report.position}, moving to waypoint")
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x, self.waypoint.location_y
+                    )
+            else:
+                if (
+                    self.calculate_distance_squared(report.position, self.landing_pad)
+                    < self.acceptance_radius**2
+                ):
+                    print(f"Halted at: {report.position}, landing")
+                    command = commands.Command.create_land_command()
+                else:
+                    print(f"Halted at: {report.position}, moving to landing pad")
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x, self.waypoint.location_y
+                    )
         else:
             # If the drone is moving, send a null command to continue the simulation
             command = commands.Command.create_null_command()
@@ -131,7 +129,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         max_distance = float("inf")
         for landing_pad_location in landing_pad_locations:
-            distance = self.calculate_distance(waypoint_location, landing_pad_location)
+            distance = self.calculate_distance_squared(waypoint_location, landing_pad_location)
             if distance < max_distance:
                 max_distance = distance
                 self.landing_pad = landing_pad_location
@@ -141,8 +139,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.landing_pad.location_y - waypoint_location.location_y,
         )
 
-    def calculate_distance(self, loc1: location.Location, loc2: location.Location) -> float:
+    @staticmethod
+    def calculate_distance_squared(loc1: location.Location, loc2: location.Location) -> float:
         """
-        Calculate the L-2 norm (Euclidean distance) between two locations.
+        Returns the L-2 norm squared (Euclidean distance) between two locations
         """
         return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2
