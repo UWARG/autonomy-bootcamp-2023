@@ -41,10 +41,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.commands = commands.Command.create_set_relative_destination_command(
             self.waypoint.location_x, self.waypoint.location_y
         )
+
         self.has_sent_landing_command = False
 
-        self.min_norm, self.relative_min_location = float("inf"), []
-        self.landing_locations = [float("inf"), float("inf")]
+        self.min_location = [float("inf"), float("inf")]
         self.starting_halt, self.waypoint_halt = True, True
 
         # ============
@@ -76,8 +76,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        dist_to_waypoint_x = self.landing_locations[0] - report.position.location_x
-        dist_to_waypoint_y = self.landing_locations[1] - report.position.location_y
+        dist_to_waypoint_x = self.min_location[0] - report.position.location_x
+        dist_to_waypoint_y = self.min_location[1] - report.position.location_y
+        min_norm = float("inf")
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
@@ -93,12 +94,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     )
                     curr_norm = x**2 + y**2
 
-                    if curr_norm < self.min_norm:
-                        self.min_norm, self.relative_min_location = curr_norm, (x, y)
-                        self.landing_locations = [landing_pads.location_x, landing_pads.location_y]
+                    if curr_norm < min_norm:
+                        min_norm, self.min_location = curr_norm, (
+                            landing_pads.location_x,
+                            landing_pads.location_y,
+                        )
 
                 command = commands.Command.create_set_relative_destination_command(
-                    self.relative_min_location[0], self.relative_min_location[1]
+                    self.min_location[0] - self.waypoint.location_x,
+                    self.min_location[1] - self.waypoint.location_y,
                 )
                 self.waypoint_halt = False
 
