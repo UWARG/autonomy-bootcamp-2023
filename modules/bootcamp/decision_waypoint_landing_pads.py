@@ -77,7 +77,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
             self.created_waypoint_command = True
 
-        elif report.status == drone_status.DroneStatus.HALTED and self.selected_landing_pad == None:
+        elif report.status == drone_status.DroneStatus.HALTED and self.selected_landing_pad is None:
 
             print("selecting closest landing pad")
             # select a landing pad that's closest to current position
@@ -88,15 +88,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if distance < min_distance:
                     min_distance = distance
                     self.selected_landing_pad = landing_pad
-            
             # add a new command
             command = commands.Command.create_set_relative_destination_command(
-                self.selected_landing_pad.location_x - report.position.location_x, 
+                self.selected_landing_pad.location_x - report.position.location_x,
                 self.selected_landing_pad.location_y - report.position.location_y
             )
             print("Selected landing pad: " + str(self.selected_landing_pad))
 
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and self.selected_landing_pad != None:
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and self.selected_landing_pad is not None:
             print("Landing at: " + str(report.position))
             # is landing the drone
             command = commands.Command.create_land_command()

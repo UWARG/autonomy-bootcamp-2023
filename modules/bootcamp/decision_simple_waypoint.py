@@ -39,7 +39,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
         self.command_index = 0
-        
         self.commands = [
             commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x,
