@@ -13,18 +13,8 @@ import ultralytics
 from .. import bounding_box
 
 
-# ============
-# ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-# ============
-# Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
-# ============
-# ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-# ============
-
-
+# This is just an interface
+# pylint: disable=too-few-public-methods
 class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
@@ -48,7 +38,7 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(cls, model_directory: pathlib.Path) -> "tuple[bool, DetectLandingPad | None]":
+    def create(cls, model_directory: pathlib.Path):
         """
         model_directory: Directory to models.
         """
@@ -69,15 +59,19 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
+    def __init__(self, class_private_create_key, model: ultralytics.YOLO):
         """
         Private constructor, use create() method.
         """
-        assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
+        assert (
+            class_private_create_key is DetectLandingPad.__create_key
+        ), "Use create() method"
 
         self.__model = model
 
-    def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    def run(
+        self, image: np.ndarray
+    ) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
 
@@ -98,31 +92,41 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
 
-        # Get the Result object
-        prediction = ...
+        # using 0.7 based on provided hint
+        predictions = self.__model.predict(image, conf=0.7, device=self.__DEVICE)
+
+        # Get the Result object from the output tensor
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot()
 
-        # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        # Get the xyxy-boxes list from the Boxes object in the Result object
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+
+        # Use a range-based for-loop based on number of elements
+        for i in range(boxes_cpu.shape[0]):
+            box = boxes_cpu[i, :]
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            if result:
+                bounding_boxes.append(box)
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
+        # Create BoundingBox object and append to list
+        # result, box = ...
 
-        return [], image_annotated
+        return bounding_boxes, image_annotated
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
