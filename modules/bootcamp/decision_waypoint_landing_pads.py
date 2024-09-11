@@ -82,7 +82,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
             elif self.stage == 1:
                 self.stage += 1
-                closest_landing_pad_dx, closest_landing_pad_dy = 120, 120
+                closest_landing_pad_dx, closest_landing_pad_dy = float("inf"), float("inf")
                 min_dist = closest_landing_pad_dx**2 + closest_landing_pad_dy**2
                 for landing_pad in landing_pad_locations:
                     x, y = landing_pad.location_x, landing_pad.location_y
@@ -96,7 +96,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
             else:
                 command = commands.Command.create_land_command()
-                self.has_sent_landing_command = True
+                self.has_sent_landing_command, self.stage = True, 0
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
