@@ -90,7 +90,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             else:
                 if (
                     self.calculate_distance_squared(report.position, self.landing_pad)
-                    < self.acceptance_radius ** 2
+                    < self.acceptance_radius**2
                 ):
                     print(f"Halted at: {report.position}, landing")
                     command = commands.Command.create_land_command()
@@ -116,13 +116,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Returns relative location to nearest landing pad
         """
         max_distance = float("inf")
-        if landing_pad_locations:
-            for landing_pad_location in landing_pad_locations:
-                distance = self.calculate_distance_squared(waypoint_location, landing_pad_location)
-                if distance < max_distance:
-                    max_distance = distance
-                    self.landing_pad = landing_pad_location
-        
+        for landing_pad_location in landing_pad_locations:
+            distance = self.calculate_distance_squared(waypoint_location, landing_pad_location)
+            if distance < max_distance:
+                max_distance = distance
+                self.landing_pad = landing_pad_location
+
         return location.Location(
             self.landing_pad.location_x - waypoint_location.location_x,
             self.landing_pad.location_y - waypoint_location.location_y,

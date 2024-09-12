@@ -70,10 +70,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if (
-                (report.position.location_x - self.waypoint.location_x) ** 2 +  (report.position.location_y - self.waypoint.location_y) ** 2
-                < self.acceptance_radius ** 2
-            ):
+            if (report.position.location_x - self.waypoint.location_x) ** 2 + (
+                report.position.location_y - self.waypoint.location_y
+            ) ** 2 < self.acceptance_radius**2:
                 # If halted, check if above landing pad
                 print(f"Halted at: {report.position}, landing")
                 command = commands.Command.create_land_command()
