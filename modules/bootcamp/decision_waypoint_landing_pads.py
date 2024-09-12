@@ -82,27 +82,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.waypoint = self.determine_closest_landing_pad(
                         self.waypoint, landing_pad_locations
                     )
-                    # Check if already at the landing pad
-                    if (
-                        self.calculate_distance_squared(report.position, self.landing_pad)
-                        < self.acceptance_radius**2
-                    ):
-                        print(f"Already at the closest landing pad: {report.position}, landing")
-                        command = commands.Command.create_land_command()
-                    else:
-                        # Otherwise fly to the landing pad
-                        command = commands.Command.create_set_relative_destination_command(
-                            self.landing_pad.location_x, self.landing_pad.location_y
-                        )
                 else:
                     print(f"Halted at: {report.position}, moving to waypoint")
-                    command = commands.Command.create_set_relative_destination_command(
-                        self.waypoint.location_x, self.waypoint.location_y
-                    )
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
             else:
                 if (
                     self.calculate_distance_squared(report.position, self.landing_pad)
-                    < self.acceptance_radius**2
+                    < self.acceptance_radius ** 2
                 ):
                     print(f"Halted at: {report.position}, landing")
                     command = commands.Command.create_land_command()
@@ -128,12 +116,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Returns relative location to nearest landing pad
         """
         max_distance = float("inf")
-        for landing_pad_location in landing_pad_locations:
-            distance = self.calculate_distance_squared(waypoint_location, landing_pad_location)
-            if distance < max_distance:
-                max_distance = distance
-                self.landing_pad = landing_pad_location
-
+        if landing_pad_locations:
+            for landing_pad_location in landing_pad_locations:
+                distance = self.calculate_distance_squared(waypoint_location, landing_pad_location)
+                if distance < max_distance:
+                    max_distance = distance
+                    self.landing_pad = landing_pad_location
+        
         return location.Location(
             self.landing_pad.location_x - waypoint_location.location_x,
             self.landing_pad.location_y - waypoint_location.location_y,
