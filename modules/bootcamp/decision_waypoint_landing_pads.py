@@ -38,8 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.has_sent_landing_command = False
-        self.landing_procedure = False
-        self.mission_completed = False
+        self.commenced_landing_procedure = False
+        self.pad_location = location.Location(0.0, 0.0)
         self.pad_location_x = 0.0
         self.pad_location_y = 0.0
 
@@ -64,7 +64,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Find the closest landing pad and return its location
         """
         closest_index = 0
-        smallest_distance_squared = 5000000
+        smallest_distance_squared = float("inf")
         for i, curr in enumerate(landing_pad_locations):
             distance_x = curr.location_x - current_location.location_x
             distance_y = curr.location_y - current_location.location_y
@@ -101,39 +101,37 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if report.status == drone_status.DroneStatus.HALTED:
             # If the drone is halted, then get it to the proper stage of action
-            if not self.clearance(report.position) and not self.landing_procedure:
+            if not self.clearance(report.position) and not self.commenced_landing_procedure:
                 # In this case, the drone need to head to the waypoint
-                print(f"Departed for waypoint mission from halted position : {report.position}")
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x,
                     self.waypoint.location_y - report.position.location_y,
                 )
             elif self.clearance(report.position):
                 # The drone need to head to the landing pad
+                # If no landing pad spotted, land directly
+                if len(landing_pad_locations) == 0:
+                    command = commands.Command.create_land_command()
                 closest_landing_pad = self.findpad(report.position, landing_pad_locations)
-                self.pad_location_x = closest_landing_pad.location_x
-                self.pad_location_y = closest_landing_pad.location_y
+                self.pad_location.location_x = closest_landing_pad.location_x
+                self.pad_location.location_y = closest_landing_pad.location_y
                 command = commands.Command.create_set_relative_destination_command(
-                    self.pad_location_x - report.position.location_x,
-                    self.pad_location_y - report.position.location_y,
+                    self.pad_location.location_x - report.position.location_x,
+                    self.pad_location.location_y - report.position.location_y,
                 )
-                print("moving toward nearest landing pad")
                 # Indicate that the drone is heading to landing pad
-                self.landing_procedure = True
+                self.commenced_landing_procedure = True
             elif not self.has_sent_landing_command:
                 # In this case, the drone need to land
-                print("send landing command")
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
         elif report.status == drone_status.DroneStatus.MOVING:
-            if self.clearance(report.position) and not self.landing_procedure:
+            if self.clearance(report.position) and not self.commenced_landing_procedure:
                 # stop the drone if it reaches the waypoint
                 command = commands.Command.create_halt_command()
-                print("HALT COMMAND SENT: reached waypoint")
-            elif self.clearance(location.Location(self.pad_location_x, self.pad_location_y)):
+            elif self.clearance(self.pad_location):
                 # stop the drone if it reaches the waypoint
                 command = commands.Command.create_halt_command()
-                print("HALT COMMAND SENT: reached landing pad")
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
