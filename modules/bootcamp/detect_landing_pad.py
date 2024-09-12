@@ -38,7 +38,7 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(cls, model_directory: pathlib.Path) -> tuple:
+    def create(cls, model_directory: pathlib.Path) -> "tuple[bool, DetectLandingPad | None]":
         """
         model_directory: Directory to models.
         """
@@ -97,7 +97,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot()
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy-boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -105,15 +105,13 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
 
-        # Use a range-based for-loop based on number of elements
-        for i in range(boxes_cpu.shape[0]):
-            box = boxes_cpu[i, :]
-            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+        for box in boxes_cpu:
+            result, box = bounding_box.BoundingBox.create(box)
             if result:
                 bounding_boxes.append(box)
         # Hint: .shape gets the dimensions of the numpy array

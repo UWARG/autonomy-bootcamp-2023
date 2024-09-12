@@ -7,7 +7,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
-import sys
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -58,13 +57,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self,
         current_position: location.Location,
         landing_pad_locations: "list[location.Location]",
-    ) -> location.Location:
+    ) -> location.Location | None:
         """
         Find the closest landing pad
         """
+
+        # Handle case when no landing pads present
+        if len(landing_pad_locations) == 0:
+            return None
+
         closest_pad = None
         # Setting default to maximum integer value for easy troubleshooting
-        min_distance = sys.maxsize
+        min_distance = float("inf")
 
         # Trivial sorter to determine the closest landing pad
         for lander in landing_pad_locations:
@@ -118,9 +122,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        # Removed redundant variable current_position
         if not self.arrived:
-            current_position = report.position
-            squared_distance_to_waypoint = self.squared_distance(current_position, self.waypoint)
+            squared_distance_to_waypoint = self.squared_distance(report.position, self.waypoint)
 
             # Check acceptance radius
             if squared_distance_to_waypoint <= self.acceptance_radius**2:
@@ -135,6 +139,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Repeating process but for closest landing pad, after reaching waypoint
         if self.arrived:
             closest_pad = self.find_closest_landing_pad(report.position, landing_pad_locations)
+
+            # Keep simulation running if no landing pad found
+            if closest_pad is None:
+                return commands.Command.create_null_command()
 
             # Calculate squared distance to the closest landing pad
             squared_distance_to_pad = self.squared_distance(report.position, closest_pad)
