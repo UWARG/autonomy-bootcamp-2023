@@ -6,7 +6,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 
 from .. import commands
 from .. import drone_report
-import math
 
 # Disable for bootcamp use
 # pylint: disable-next=unused-import
@@ -101,20 +100,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             # stuff when landed @ waypoint
             closest_location = None
-            min_distance = float("inf")
+            min_distance_sq = float("inf")
 
-            for location in landing_pad_locations:
+            for pad_location in landing_pad_locations:
                 print("report position: " + str(report.position))
-                print(str(location))
+                print(str(pad_location))
 
-                distance = math.sqrt(
-                    (report.position.location_x - location.location_x) ** 2
-                    + (report.position.location_y - location.location_y) ** 2
-                )
+                # no square root!
+                distance_sq = (report.position.location_x - pad_location.location_x) ** 2 + (
+                    report.position.location_y - pad_location.location_y
+                ) ** 2
 
-                if distance < min_distance:
-                    min_distance = distance
-                    closest_location = location
+                if distance_sq < min_distance_sq:
+                    min_distance_sq = distance_sq
+                    closest_location = pad_location
 
             if closest_location is not None:
                 command = commands.Command.create_set_relative_destination_command(
