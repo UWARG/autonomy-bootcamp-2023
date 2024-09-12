@@ -46,6 +46,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
     def clearance(self, position: location.Location) -> bool:
         """Function checks whether the drone has reached waypoint without using square root operation"""
         distance_x = self.waypoint.location_x - position.location_x
@@ -54,8 +55,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         clear = distance_squared < self.acceptance_radius**2
         return clear
 
-    def findpad(self,
-        current_location: "location.Location", landing_pad_locations: "list[location.Location]") -> location.Location:
+    def findpad(
+        self,
+        current_location: "location.Location",
+        landing_pad_locations: "list[location.Location]",
+    ) -> location.Location:
         """
         Find the closest landing pad and return its location
         """
@@ -69,7 +73,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 closest_index = i
                 smallest_distance_squared = distance_squared
         return landing_pad_locations[closest_index]
-
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -96,34 +99,39 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-
         if report.status == drone_status.DroneStatus.HALTED:
-            #If the drone is halted, then get it to the proper stage of action
+            # If the drone is halted, then get it to the proper stage of action
             if not self.clearance(report.position) and not self.landing_procedure:
-                #In this case, the drone need to head to the waypoint
+                # In this case, the drone need to head to the waypoint
                 print(f"Departed for waypoint mission from halted position : {report.position}")
-                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
             elif self.clearance(report.position):
-                #The drone need to head to the landing pad
+                # The drone need to head to the landing pad
                 closest_landing_pad = self.findpad(report.position, landing_pad_locations)
                 self.pad_location_x = closest_landing_pad.location_x
                 self.pad_location_y = closest_landing_pad.location_y
-                command = commands.Command.create_set_relative_destination_command(self.pad_location_x-report.position.location_x, self.pad_location_y-report.position.location_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.pad_location_x - report.position.location_x,
+                    self.pad_location_y - report.position.location_y,
+                )
                 print("moving toward nearest landing pad")
-                #Indicate that the drone is heading to landing pad
+                # Indicate that the drone is heading to landing pad
                 self.landing_procedure = True
             elif not self.has_sent_landing_command:
-                #In this case, the drone need to land
+                # In this case, the drone need to land
                 print("send landing command")
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
         elif report.status == drone_status.DroneStatus.MOVING:
             if self.clearance(report.position) and not self.landing_procedure:
-                #stop the drone if it reaches the waypoint
+                # stop the drone if it reaches the waypoint
                 command = commands.Command.create_halt_command()
                 print("HALT COMMAND SENT: reached waypoint")
             elif self.clearance(location.Location(self.pad_location_x, self.pad_location_y)):
-                #stop the drone if it reaches the waypoint
+                # stop the drone if it reaches the waypoint
                 command = commands.Command.create_halt_command()
                 print("HALT COMMAND SENT: reached landing pad")
 

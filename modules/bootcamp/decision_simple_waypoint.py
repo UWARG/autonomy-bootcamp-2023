@@ -43,6 +43,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
     def clearance(self, report: drone_report.DroneReport) -> bool:
         """Function checks whether the drone has reached waypoint without using square root operation"""
         distance_x = self.waypoint.location_x - report.position.location_x
@@ -76,23 +77,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-
-
         if report.status == drone_status.DroneStatus.HALTED:
-            #In this case, the drone need to head to the waypoint
+            # In this case, the drone need to head to the waypoint
             if not self.clearance(report):
                 print(f"Departed for waypoint mission from halted position : {report.position}")
-                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
             elif not self.has_sent_landing_command:
-                #In this case, the drone need to land
+                # In this case, the drone need to land
                 print("send landing command")
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
         elif report.status == drone_status.DroneStatus.MOVING and self.clearance(report):
             command = commands.Command.create_halt_command()
             print("HALT COMMAND SENT")
-
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

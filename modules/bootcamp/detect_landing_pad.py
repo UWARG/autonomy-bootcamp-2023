@@ -96,7 +96,9 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source=image, conf=0.75, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(
+            source=image, conf=0.75, device=self.__DEVICE, verbose=False
+        )
         # Get the Result object
         prediction = predictions[0]
         # Plot the annotated image from the Result object
