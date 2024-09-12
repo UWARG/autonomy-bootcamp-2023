@@ -76,7 +76,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_halt_command()
-        elif not report.status == report.status.MOVING:
+        elif report.status != report.status.MOVING:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x - report.position.location_x,
                 self.waypoint.location_y - report.position.location_y,
