@@ -36,7 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-    def relative_location_from_waypoint(self, current_x, current_y):
+    def relative_location_from_waypoint(self, current_x: float, current_y: float) -> float:
         """
         Finds how far you are from the waypoint based off your current location
         """
@@ -44,7 +44,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return (waypoint_x - current_x), (waypoint_y - current_y)
 
-    def at_waypoint(self, current_x, current_y):
+    def at_waypoint(self, current_x: float, current_y: float) -> bool:
         """
         Returns if you are at the waypoint or not
         """

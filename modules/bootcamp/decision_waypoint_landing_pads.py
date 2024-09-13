@@ -42,7 +42,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # ============
 
-    def find_closest_landing_pad(self, landing_pad_list: location.Location, current_x, current_y):
+    def find_closest_landing_pad(
+        self, landing_pad_list: location.Location, current_x: float, current_y: float
+    ) -> location.Location:
         """
         When given a list of landing pads, it will find the one closest to your current location
         """
@@ -66,14 +68,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return closest_landing_pad
 
     def relative_distance_to_location(
-        self, current_x, current_y, desired_location: location.Location
-    ):
+        self, current_x: float, current_y: float, desired_location: location.Location
+    ) -> float:
         """
         Finds how far you are from the location you want to get to based off your current location
         """
         return (desired_location.location_x - current_x), (desired_location.location_y - current_y)
 
-    def at_location(self, current_x, current_y, desired_location: location.Location):
+    def at_location(
+        self, current_x: float, current_y: float, desired_location: location.Location
+    ) -> bool:
         """
         Returns if you are at the location you wanted or not
         """
