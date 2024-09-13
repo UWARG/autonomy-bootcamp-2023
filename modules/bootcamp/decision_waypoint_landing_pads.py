@@ -135,12 +135,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
 
             else:
+                self.arrived_at_waypoint = True
                 self.destination = self.find_closest_landing_pad(
                     landing_pad_locations, current_x, current_y
                 )
 
-        else:
-            print("Something goofed RIP")
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
