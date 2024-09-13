@@ -38,12 +38,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         self.landing_pad = None
         self.destination = self.waypoint
-        self.arrived_at_waypoint = False
+        self.traveling_to_landing_pad = False
 
         # ============
 
     def find_closest_landing_pad(
-        self, landing_pad_list: location.Location, current_x: float, current_y: float
+        self, landing_pad_list: "list[location.Location]", current_x: float, current_y: float
     ) -> location.Location:
         """
         When given a list of landing pads, it will find the one closest to your current location
@@ -135,11 +135,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             current_x, current_y, self.destination
         ):
 
-            if self.arrived_at_waypoint:
+            if self.traveling_to_landing_pad:
                 command = commands.Command.create_land_command()
 
             else:
-                self.arrived_at_waypoint = True
+                self.traveling_to_landing_pad = True
                 self.destination = self.find_closest_landing_pad(
                     landing_pad_locations, current_x, current_y
                 )

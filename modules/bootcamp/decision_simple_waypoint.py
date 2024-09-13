@@ -51,7 +51,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         dist_to_waypoint = sum(
             dist**2 for dist in self.relative_location_from_waypoint(current_x, current_y)
         )
-        if dist_to_waypoint**0.5 <= self.acceptance_radius:
+        if dist_to_waypoint <= self.acceptance_radius**2:
             return True
         return False
         # ============
