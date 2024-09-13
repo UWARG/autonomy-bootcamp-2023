@@ -7,8 +7,6 @@ Travel to designated waypoint and then land at a nearby landing pad.
 # Disable for bootcamp use
 # pylint: disable=unused-import
 
-import math
-
 from .. import commands
 from .. import drone_report
 from .. import drone_status
@@ -42,8 +40,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.created_waypoint_command = False
-        self.selected_landing_pad = None
         self.has_sent_landing_command = False
+        self.selected_landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -77,7 +75,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED and not self.created_waypoint_command:
             print("Reached waypoint: " + str(report.position))
             command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
             )
             self.created_waypoint_command = True
 
@@ -87,13 +86,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # select a landing pad that's closest to current position
             min_distance = float("inf")
             for landing_pad in landing_pad_locations:
-                print("Checking distance for: ", landing_pad)
-                distance = math.sqrt(
-                    (landing_pad.location_x - report.position.location_x) ** 2
-                    + (landing_pad.location_y - report.position.location_y) ** 2
-                )
-                if distance < min_distance:
-                    min_distance = distance
+                xdif = (landing_pad.location_x - report.position.location_x) ** 2
+                ydif = (landing_pad.location_y - report.position.location_y) ** 2
+                diff = xdif + ydif
+
+                if diff < min_distance:
+                    min_distance = diff
                     self.selected_landing_pad = landing_pad
             # add a new command
             command = commands.Command.create_set_relative_destination_command(

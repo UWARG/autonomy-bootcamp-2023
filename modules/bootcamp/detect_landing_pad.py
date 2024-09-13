@@ -110,6 +110,9 @@ class DetectLandingPad:
         # Hint: .shape gets the dimensions of the numpy array
         for box in boxes_cpu:
             _result, _box = bounding_box.BoundingBox.create(box)
+            if not _result:
+                # a box failed to be created
+                continue
             bounding_boxes.append(_box)
 
         return bounding_boxes, image_annotated
