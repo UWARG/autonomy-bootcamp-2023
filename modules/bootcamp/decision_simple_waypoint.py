@@ -32,13 +32,28 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
-
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+    def relative_location_from_waypoint(self, current_x, current_y):
+        """
+        Finds how far you are from the waypoint based off your current location
+        """
+        waypoint_x, waypoint_y = self.waypoint.location_x, self.waypoint.location_y
 
+        return (waypoint_x - current_x), (waypoint_y - current_y)
+
+    def at_waypoint(self, current_x, current_y):
+        """
+        Returns if you are at the waypoint or not
+        """
+        dist_to_waypoint = sum(
+            dist**2 for dist in self.relative_location_from_waypoint(current_x, current_y)
+        )
+        if dist_to_waypoint**0.5 <= self.acceptance_radius:
+            return True
+        return False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -63,12 +78,29 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        current_x, current_y = report.position.location_x, report.position.location_y
+
+        if report.status == drone_status.DroneStatus.HALTED and self.at_waypoint(
+            current_x, current_y
+        ):
+            command = commands.Command.create_land_command()
+
+        elif report.status == drone_status.DroneStatus.HALTED and not self.at_waypoint(
+            current_x, current_y
+        ):
+            relative_x_dist_to_waypoint, relative_y_dist_to_waypoint = (
+                self.relative_location_from_waypoint(current_x, current_y)
+            )
+            command = commands.Command.create_set_relative_destination_command(
+                relative_x_dist_to_waypoint, relative_y_dist_to_waypoint
+            )
+
+        else:
+            print("Something goofed RIP")
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
