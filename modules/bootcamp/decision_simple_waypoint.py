@@ -36,10 +36,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-       
+
         self.command_index = 0
         self.commands = [
-            commands.Command.create_set_relative_destination_command(waypoint.location_x,waypoint.location_y)
+            commands.Command.create_set_relative_destination_command(
+                waypoint.location_x, waypoint.location_y
+            )
         ]
 
         self.has_sent_landing_command = False
@@ -79,12 +81,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ):
             command = self.commands[self.command_index]
             self.command_index += 1
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and (
+                (report.position.location_x - self.waypoint.location_x) ** 2
+                + (report.position.location_y - self.waypoint.location_y)
+            )
+            <= self.acceptance_radius**2
+        ):
             command = commands.Command.create_land_command()
 
             self.has_sent_landing_command = True
-
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
