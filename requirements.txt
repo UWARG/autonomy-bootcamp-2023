@@ -17,7 +17,7 @@ pytest
 # If you are on MacOS, don't have a CUDA capable GPU,
 # or if things don't work and you just want to use the CPU,
 # comment out the "--extra-index-url" option
---extra-index-url https://download.pytorch.org/whl/cu124
+#--extra-index-url https://download.pytorch.org/whl/cu124
 
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

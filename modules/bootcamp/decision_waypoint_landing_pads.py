@@ -82,7 +82,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status ==  drone_status.DroneStatus.HALTED:
-            print(self.is_halt_at_waypoint)
             if self.initializing_halt:
                 command = self.commands[self.command_index]
                 self.initializing_halt = False
@@ -95,10 +94,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         self.smallestnorm[0],self.smallestnorm[1] = (landingpad.location_x, landingpad.location_y)
                 command = commands.Command.create_set_relative_destination_command(self.smallestnorm[0]-self.waypoint.location_x,
                                                                                    self.smallestnorm[1]-self.waypoint.location_y)
-                #print(landingpad)
                 self.is_halt_at_waypoint = False
             else:
-                print(self.acceptance_radius)
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
 
