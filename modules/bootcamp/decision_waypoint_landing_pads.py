@@ -115,9 +115,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return command
 
     def _calc_distance_squared(
-        self, report: drone_report.DroneReport, location: location.Location
+        self, report: drone_report.DroneReport, destination: location.Location
     ) -> int:
-        dx, dy = self._calc_relative_dist(report.position, location)
+        dx, dy = self._calc_relative_dist(report.position, destination)
         return dx**2 + dy**2
 
     def _calc_relative_dist(
