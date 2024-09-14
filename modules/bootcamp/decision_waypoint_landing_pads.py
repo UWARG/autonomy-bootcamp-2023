@@ -40,7 +40,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.has_sent_landing_command = False
         self.halt_at_initialization = True
         self.is_halt_at_waypoint = False
-
+        self.closest_pad = location.Location
+        self.shortest_distance = [float("inf"), float("inf")]
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -90,7 +91,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.is_halt_at_waypoint = True
 
             elif self.is_halt_at_waypoint:
-                self.shortest_distance = [float("inf"), float("inf")]
                 for landing_pad in landing_pad_locations:
 
                     if (
@@ -112,8 +112,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif (report.position.location_x ** 2 + report.position.location_y ** 2) / (
                 self.closest_pad.location_x ** 2 + self.closest_pad.location_y ** 2
             ) <= (
-                1 + self.acceptance_radius
-            ) ** 2:  # checks if current position is in acceptable radius of landing pad by making them a ratio
+                (1 + self.acceptance_radius)**2
+            ):  # checks if current position is in acceptable radius of landing pad by making them a ratio
 
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
