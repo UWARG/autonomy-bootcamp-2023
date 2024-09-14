@@ -130,9 +130,14 @@ class DetectLandingPad:
 
         bounding_boxes = []
         for box in boxes_xyxy:
+            # left for now
             x1, y1, x2, y2 = box[:4]
             box_coords = np.array([x1, y1, x2, y2])
-            bounding_box_obj = bounding_box.BoundingBox.create(box_coords)[1]
+
+            # the 0th index is a boolean return whether or not the object was successfully created
+            if bounding_box.BoundingBox.create(box_coords)[0]:
+                bounding_box_obj = bounding_box.BoundingBox.create(box_coords)[1]
+
             bounding_boxes.append(bounding_box_obj)
 
         # Return the list of bounding boxes and the annotated image

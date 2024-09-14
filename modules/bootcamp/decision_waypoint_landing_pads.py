@@ -39,14 +39,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         print(str(waypoint.location_x) + ", " + str(waypoint.location_y))
 
-        # assuming this is to give destinations n stuff
+        # index to ensure only one command is sent: self.command
         self.command_index = 0
-        self.commands = [
-            commands.Command.create_set_relative_destination_command(
-                waypoint.location_x, waypoint.location_y
-            ),
-            # commands.Command.create_set_relative_destination_command(1.0, 1.0),
-        ]
+
+        # commented out for now, if more commands needed we can use this
+
+        # self.commands = [
+        #     commands.Command.create_set_relative_destination_command(
+        #         waypoint.location_x, waypoint.location_y
+        #     ),
+        # ]
+
+        self.command = commands.Command.create_set_relative_destination_command(
+            waypoint.location_x, waypoint.location_y
+        )
 
         self.has_sent_landing_command = False
 
@@ -81,20 +87,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Default command
-        command = commands.Command.create_null_command()
+        # command_index is used here so that the command is sent only once
+        # it is also to keep parity with the rest of the bootcamp; where self.commands is an array
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < 1:
 
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
-            self.commands
-        ):
-            # Print some information for debugging
-            print("Landing Pad Locations:")
-
-            print(self.counter)
-            print(self.command_index)
-            print("Halted at: " + str(report.position))
-
-            command = self.commands[self.command_index]
+            command = self.command
             self.command_index += 1
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
 
