@@ -44,8 +44,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         Check if the drone has reached the waypoint.
         """
-        return (self.waypoint.location_x - pos_x) ** 2 + (self.waypoint.location_y - pos_y) ** 2 <= self.acceptance_radius ** 2
-
+        return (self.waypoint.location_x - pos_x) ** 2 + (
+            self.waypoint.location_y - pos_y
+        ) ** 2 <= self.acceptance_radius**2
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -71,27 +72,25 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-    
+
         # Do something based on the report and the state of this class...
 
-        if report.status == drone_status.DroneStatus.HALTED and self.reached_waypoint(report.position.location_x, report.position.location_y):
-            """
-            Land the drone
-            """
+        if report.status == drone_status.DroneStatus.HALTED and self.reached_waypoint(
+            report.position.location_x, report.position.location_y
+        ):
+
             command = commands.Command.create_land_command()
-    
-        elif report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint(report.position.location_x, report.position.location_y):
-            """
-            Move to waypoint
-            """
+
+        elif report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint(
+            report.position.location_x, report.position.location_y
+        ):
+
             dx = self.waypoint.location_x - report.position.location_x
             dy = self.waypoint.location_y - report.position.location_y
             command = commands.Command.create_set_relative_destination_command(dx, dy)
 
         else:
-            """
-            Let the simulation keep running if the drone is moving
-            """
+
             command = commands.Command.create_null_command()
 
         # ============
