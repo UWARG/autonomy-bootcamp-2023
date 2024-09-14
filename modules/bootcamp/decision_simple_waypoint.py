@@ -36,17 +36,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        self.has_reached_waypoint = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def reached_waypoint(self, pos_x: float, pos_y: float) -> bool:
+    def reached_waypoint(self, position_x: float, position_y: float) -> bool:
         """
         Check if the drone has reached the waypoint.
         """
-        return (self.waypoint.location_x - pos_x) ** 2 + (
-            self.waypoint.location_y - pos_y
-        ) ** 2 <= self.acceptance_radius**2
+        distance_squared = (self.waypoint.location_x - position_x) ** 2 + (
+            self.waypoint.location_y - position_y
+        ) ** 2
+        return distance_squared <= self.acceptance_radius**2
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -73,26 +75,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        # Do something based on the report and the state of this class...  
 
-        if report.status == drone_status.DroneStatus.HALTED and self.reached_waypoint(
-            report.position.location_x, report.position.location_y
-        ):
+        self.has_reached_waypoint = self.reached_waypoint(report.position.location_x, report.position.location_y)
+
+        if report.status == drone_status.DroneStatus.HALTED and self.has_reached_waypoint:
 
             command = commands.Command.create_land_command()
 
-        elif report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint(
-            report.position.location_x, report.position.location_y
-        ):
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint:
 
-            dx = self.waypoint.location_x - report.position.location_x
-            dy = self.waypoint.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(dx, dy)
-
+            relative_x = self.waypoint.location_x - report.position.location_x
+            relative_y = self.waypoint.location_y - report.position.location_y
+            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
         else:
-
-            command = commands.Command.create_null_command()
-
+            pass
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

@@ -38,48 +38,48 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.heading_to_landing_pad = False
+        self.has_reached_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def reached_waypoint(self, pos_x: float, pos_y: float) -> bool:
+    def reached_waypoint(self, position_x: float, position_y: float) -> bool:
         """
         Check if the drone has reached the waypoint.
         """
-        return (self.waypoint.location_x - pos_x) ** 2 + (
-            self.waypoint.location_y - pos_y
-        ) ** 2 <= self.acceptance_radius**2
+        distance_squared = (self.waypoint.location_x - position_x) ** 2 + (
+            self.waypoint.location_y - position_y
+        ) ** 2
+        return distance_squared <= self.acceptance_radius**2
 
-    def reached_landing_pad(
-        self, pos_x: float, pos_y: float, landing_pad: location.Location
-    ) -> bool:
+    def reached_landing_pad(self, position_x: float, position_y: float, landing_pad: location.Location) -> bool:
         """
         Calculate the distance between the drone and a landing pad.
         """
-        return (landing_pad.location_x - pos_x) ** 2 + (
-            landing_pad.location_y - pos_y
-        ) ** 2 <= self.acceptance_radius**2
+        distance_squared = (landing_pad.location_x - position_x) ** 2 + (
+            landing_pad.location_y - position_y
+        ) ** 2
+        return distance_squared <= self.acceptance_radius**2
 
     def pick_nearest_landing_pad(
-        self, pos_x: float, pos_y: float, landing_pad_locations: "list[location.Location]"
+        self, position_x: float, position_y: float, landing_pad_locations: "list[location.Location]"
     ) -> location.Location:
         """
         Pick the nearest landing pad.
         """
-        nearest_landing_pad = None
-        distance_from_nearest_landing_pad_squared = 100000000
+        closest_pad = None
+        closest_pad_distance_squared = float("inf")
 
-        for i in landing_pad_locations:
-            if (i.location_x - pos_x) ** 2 + (
-                i.location_y - pos_y
-            ) ** 2 < distance_from_nearest_landing_pad_squared:
-                nearest_landing_pad = i
-                distance_from_nearest_landing_pad_squared = (i.location_x - pos_x) ** 2 + (
-                    i.location_y - pos_y
-                ) ** 2
+        for potential_pad in landing_pad_locations:
+            potential_pad_distance_squared = (potential_pad.location_x - position_x) ** 2 + (
+                potential_pad.location_y - position_y
+            ) ** 2
+            if potential_pad_distance_squared < closest_pad_distance_squared:
+                closest_pad = potential_pad
+                closest_pad_distance_squared = potential_pad_distance_squared
 
-        return nearest_landing_pad
+        return closest_pad
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -106,41 +106,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+
         if not self.heading_to_landing_pad:
-            if report.status == drone_status.DroneStatus.HALTED and self.reached_waypoint(
+            if self.reached_waypoint(
                 report.position.location_x, report.position.location_y
             ):
                 # Head to landing pad
                 self.heading_to_landing_pad = True
-            elif report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint(
-                report.position.location_x, report.position.location_y
-            ):
-                # Move to waypoint
-                dx = self.waypoint.location_x - report.position.location_x
-                dy = self.waypoint.location_y - report.position.location_y
-                command = commands.Command.create_set_relative_destination_command(dx, dy)
             else:
-                # Let the simulation keep running if the drone is moving
-                command = commands.Command.create_null_command()
-        else:
-            if report.status == drone_status.DroneStatus.HALTED and self.reached_landing_pad(
-                report.position.location_x,
-                report.position.location_y,
-                self.pick_nearest_landing_pad(
-                    report.position.location_x, report.position.location_y, landing_pad_locations
-                ),
-            ):
+                # Move to w aypoint
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+        elif self.heading_to_landing_pad:
+            self.has_reached_landing_pad = self.reached_landing_pad(
+                    report.position.location_x,
+                    report.position.location_y,
+                    self.pick_nearest_landing_pad(
+                        report.position.location_x, report.position.location_y, landing_pad_locations
+                    ))
+            
+            if self.has_reached_landing_pad:
                 # Head to landing pad
                 command = commands.Command.create_land_command()
-            elif report.status == drone_status.DroneStatus.HALTED and not self.reached_landing_pad(
-                report.position.location_x,
-                report.position.location_y,
-                self.pick_nearest_landing_pad(
-                    report.position.location_x, report.position.location_y, landing_pad_locations
-                ),
-            ):
-                # Move to waypoint
-                dx = (
+            else:
+                # Move to landing pad
+                relative_x = (
                     self.pick_nearest_landing_pad(
                         report.position.location_x,
                         report.position.location_y,
@@ -148,7 +139,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     ).location_x
                     - report.position.location_x
                 )
-                dy = (
+                relative_y = (
                     self.pick_nearest_landing_pad(
                         report.position.location_x,
                         report.position.location_y,
@@ -156,10 +147,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     ).location_y
                     - report.position.location_y
                 )
-                command = commands.Command.create_set_relative_destination_command(dx, dy)
-            else:
-                # Let the simulation keep running if the drone is moving
-                command = commands.Command.create_null_command()
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+        else:
+            pass
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
