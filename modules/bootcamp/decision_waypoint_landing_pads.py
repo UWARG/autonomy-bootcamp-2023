@@ -109,10 +109,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 self.is_halt_at_waypoint = False
 
-            elif (report.position.location_x ** 2 + report.position.location_y ** 2) / (
-                self.closest_pad.location_x ** 2 + self.closest_pad.location_y ** 2
+            elif (report.position.location_x**2 + report.position.location_y**2) / (
+                self.closest_pad.location_x**2 + self.closest_pad.location_y**2
             ) <= (
-                (1 + self.acceptance_radius)**2
+                (1 + self.acceptance_radius) ** 2
             ):  # checks if current position is in acceptable radius of landing pad by making them a ratio
 
                 command = commands.Command.create_land_command()
