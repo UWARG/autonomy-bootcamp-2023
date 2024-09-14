@@ -17,8 +17,7 @@ from .. import bounding_box
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
 # Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
+# 
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -97,7 +96,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.7, device="cpu", verbose=False)
+        predictions = self.__model.predict(image, conf=0.7, device="cpu", verbose=True)
 
         # Get the Result object
         prediction = predictions[0]
