@@ -92,8 +92,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(
                 relative_x, relative_y
             )
-        else:
-            pass
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

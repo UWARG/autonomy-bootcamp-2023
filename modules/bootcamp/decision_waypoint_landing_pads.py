@@ -39,6 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         self.heading_to_landing_pad = False
         self.has_reached_landing_pad = False
+        self.nearest_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -120,12 +121,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     relative_x, relative_y
                 )
         elif self.heading_to_landing_pad:
+            self.nearest_pad = self.pick_nearest_landing_pad(
+                report.position.location_x,
+                report.position.location_y,
+                landing_pad_locations,
+            )
             self.has_reached_landing_pad = self.reached_landing_pad(
                 report.position.location_x,
                 report.position.location_y,
-                self.pick_nearest_landing_pad(
-                    report.position.location_x, report.position.location_y, landing_pad_locations
-                ),
+                self.nearest_pad,
             )
 
             if self.has_reached_landing_pad:
@@ -133,28 +137,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
             else:
                 # Move to landing pad
-                relative_x = (
-                    self.pick_nearest_landing_pad(
-                        report.position.location_x,
-                        report.position.location_y,
-                        landing_pad_locations,
-                    ).location_x
-                    - report.position.location_x
-                )
-                relative_y = (
-                    self.pick_nearest_landing_pad(
-                        report.position.location_x,
-                        report.position.location_y,
-                        landing_pad_locations,
-                    ).location_y
-                    - report.position.location_y
-                )
+                relative_x = self.nearest_pad.location_x - report.position.location_x
+                relative_y = self.nearest_pad.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
-        else:
-            pass
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
