@@ -75,9 +75,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...  
+        # Do something based on the report and the state of this class...
 
-        self.has_reached_waypoint = self.reached_waypoint(report.position.location_x, report.position.location_y)
+        self.has_reached_waypoint = self.reached_waypoint(
+            report.position.location_x, report.position.location_y
+        )
 
         if report.status == drone_status.DroneStatus.HALTED and self.has_reached_waypoint:
 
@@ -87,7 +89,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
             relative_x = self.waypoint.location_x - report.position.location_x
             relative_y = self.waypoint.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            command = commands.Command.create_set_relative_destination_command(
+                relative_x, relative_y
+            )
         else:
             pass
         # ============

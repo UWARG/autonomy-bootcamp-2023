@@ -53,7 +53,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         ) ** 2
         return distance_squared <= self.acceptance_radius**2
 
-    def reached_landing_pad(self, position_x: float, position_y: float, landing_pad: location.Location) -> bool:
+    def reached_landing_pad(
+        self, position_x: float, position_y: float, landing_pad: location.Location
+    ) -> bool:
         """
         Calculate the distance between the drone and a landing pad.
         """
@@ -106,26 +108,26 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-
         if not self.heading_to_landing_pad:
-            if self.reached_waypoint(
-                report.position.location_x, report.position.location_y
-            ):
+            if self.reached_waypoint(report.position.location_x, report.position.location_y):
                 # Head to landing pad
                 self.heading_to_landing_pad = True
             else:
                 # Move to w aypoint
                 relative_x = self.waypoint.location_x - report.position.location_x
                 relative_y = self.waypoint.location_y - report.position.location_y
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
         elif self.heading_to_landing_pad:
             self.has_reached_landing_pad = self.reached_landing_pad(
-                    report.position.location_x,
-                    report.position.location_y,
-                    self.pick_nearest_landing_pad(
-                        report.position.location_x, report.position.location_y, landing_pad_locations
-                    ))
-            
+                report.position.location_x,
+                report.position.location_y,
+                self.pick_nearest_landing_pad(
+                    report.position.location_x, report.position.location_y, landing_pad_locations
+                ),
+            )
+
             if self.has_reached_landing_pad:
                 # Head to landing pad
                 command = commands.Command.create_land_command()
@@ -147,7 +149,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     ).location_y
                     - report.position.location_y
                 )
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
         else:
             pass
 
