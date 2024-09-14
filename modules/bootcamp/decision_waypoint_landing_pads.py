@@ -37,11 +37,37 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.heading_to_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+        
+    def reached_waypoint(self, pos_x: float, pos_y: float) -> bool:
+        """
+        Check if the drone has reached the waypoint.
+        """
+        return (self.waypoint.location_x - pos_x) ** 2 + (self.waypoint.location_y - pos_y) ** 2 <= self.acceptance_radius ** 2
+
+    def reached_landing_pad(self, pos_x: float, pos_y: float, landing_pad: location.Location) -> bool:
+        """
+        Calculate the distance between the drone and a landing pad.
+        """
+        return (landing_pad.location_x - pos_x) ** 2 + (landing_pad.location_y - pos_y) ** 2 <= self.acceptance_radius ** 2
+    
+    def pick_nearest_landing_pad(self, pos_x: float, pos_y: float, landing_pad_locations: "list[location.Location]") -> location.Location:
+        """
+        Pick the nearest landing pad.
+        """
+        nearest_landing_pad = None
+        distance_from_nearest_landing_pad_squared = 100000000
+
+        for i in landing_pad_locations:
+            if (i.location_x - pos_x) ** 2 + (i.location_y - pos_y) ** 2 < distance_from_nearest_landing_pad_squared:
+                nearest_landing_pad = i
+                distance_from_nearest_landing_pad_squared = (i.location_x - pos_x) ** 2 + (i.location_y - pos_y) ** 2
+            
+        return nearest_landing_pad
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -67,9 +93,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Do something based on the report and the state of this class...
-
+        
+        if not self.heading_to_landing_pad:
+            if report.status == drone_status.DroneStatus.HALTED and self.reached_waypoint(report.position.location_x, report.position.location_y):
+                # Head to landing pad
+                self.heading_to_landing_pad = True
+            elif report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint(report.position.location_x, report.position.location_y):
+                # Move to waypoint
+                dx = self.waypoint.location_x - report.position.location_x
+                dy = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(dx, dy)
+            else:
+                # Let the simulation keep running if the drone is moving
+                command = commands.Command.create_null_command()
+        else:
+            if report.status == drone_status.DroneStatus.HALTED and self.reached_landing_pad(report.position.location_x, report.position.location_y, self.pick_nearest_landing_pad(report.position.location_x, report.position.location_y, landing_pad_locations)):
+                # Head to landing pad
+                command = commands.Command.create_land_command()
+            elif report.status == drone_status.DroneStatus.HALTED and not self.reached_landing_pad(report.position.location_x, report.position.location_y, self.pick_nearest_landing_pad(report.position.location_x, report.position.location_y, landing_pad_locations)):
+                # Move to waypoint
+                dx = self.pick_nearest_landing_pad(report.position.location_x, report.position.location_y, landing_pad_locations).location_x - report.position.location_x
+                dy = self.pick_nearest_landing_pad(report.position.location_x, report.position.location_y, landing_pad_locations).location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(dx, dy)
+            else:
+                # Let the simulation keep running if the drone is moving
+                command = commands.Command.create_null_command()
+            
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
