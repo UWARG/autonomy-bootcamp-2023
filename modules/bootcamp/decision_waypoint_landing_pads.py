@@ -70,10 +70,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        def square(number) -> float:
+        def square(number: int) -> float:
             return number**2
 
-        def squared_distance_from_position(point, current_position) -> float:
+        def squared_distance_from_position(point: list[location.Location], current_position: list[location.Location]) -> float:
             distance = square(point.location_x - current_position.location_x) + (
                 square(point.location_y - current_position.location_y)
             )
