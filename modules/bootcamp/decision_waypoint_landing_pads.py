@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint and then land at a nearby landing pad.
 """
+
 import math
 
 from .. import commands
@@ -38,7 +39,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.at_waypoint = False
+        self.landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -71,26 +73,56 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         status = report.status
-        relative_x = self.waypoint.location_x - report.position.location_x
-        relative_y = self.waypoint.location_y - report.position.location_y
-        complete = self.flight_complete(relative_x, relative_y)
 
-        if status == drone_status.DroneStatus.HALTED:
-            if complete:
-                command = commands.Command.create_land_command()
-                print("Drone has landed")
-            else:
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
-                print("Drone is heading to the destination")
-        elif status == drone_status.DroneStatus.MOVING and complete:
-            command = commands.Command.create_halt_command()
+        if self.at_waypoint:
+            self.landing_pad = self.get_nearest_landing(report.position, landing_pad_locations)
+            complete = self.get_distance(report.position, self.landing_pad) < self.acceptance_radius
+            if status == drone_status.DroneStatus.HALTED:
+                if complete:
+                    command = commands.Command.create_land_command()
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.landing_pad.location_x - report.position.location_x,
+                        self.landing_pad.location_y - report.position.location_y,
+                    )
+            elif status == drone_status.DroneStatus.MOVING and complete:
+                command = commands.Command.create_halt_command()
+        else:
+            complete = self.get_distance(report.position, self.waypoint) < self.acceptance_radius
+            if status == drone_status.DroneStatus.HALTED:
+                if complete:
+                    self.at_waypoint = True
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x - report.position.location_x,
+                        self.waypoint.location_y - report.position.location_y,
+                    )
+                    print("Drone is heading to the destination")
+            elif status == drone_status.DroneStatus.MOVING and complete:
+                command = commands.Command.create_halt_command()
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
-    
-    def flight_complete(self, x: float, y: float):
-        "Function printing if the drone is in the acceptance radius"
-        distance = math.sqrt(pow(x, 2) + pow(y, 2))
-        return distance < self.acceptance_radius
+
+    def get_nearest_landing(
+        self, position: location.Location, landing_pads: "list[location.Location]"
+    ) -> location.Location:
+        "Function returns the nearest landing pad"
+        nearest_distance = float("inf")
+        nearest_landing_pad = None
+        for landing_pad in landing_pads:
+            current_distance = self.get_distance(landing_pad, position)
+            if current_distance < nearest_distance:
+                nearest_distance = current_distance
+                nearest_landing_pad = landing_pad
+        return nearest_landing_pad
+
+    def get_distance(self, location_1: location.Location, location_2: location.Location):
+        "Function returns the distnace of the drone to the target coordinates"
+        return math.sqrt(
+            pow(location_1.location_x - location_2.location_x, 2)
+            + pow(location_1.location_y - location_2.location_y, 2)
+        )
