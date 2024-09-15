@@ -83,8 +83,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            distance_to_pad_x = report.position.location_x - self.closest_pad.location_x
-            distance_to_pad_y = report.position.location_y - self.closest_pad.location_y
             if self.halt_at_initialization:
 
                 command = commands.Command.create_set_relative_destination_command(
@@ -114,8 +112,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.is_halt_at_waypoint = False
 
             elif (
-                distance_to_pad_x ** 2
-                + distance_to_pad_y ** 2
+                squared_distance_from_position(report.position, self.closest_pad)
             <= self.acceptance_radius**2):
 
                 command = commands.Command.create_land_command()
