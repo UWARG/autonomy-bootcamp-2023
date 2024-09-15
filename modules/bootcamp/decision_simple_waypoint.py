@@ -91,7 +91,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return command
 
-    def flight_complete(self, x: float, y: float):
+    def flight_complete(self, x: float, y: float) -> bool:
         "Function printing if the drone is in the acceptance radius"
         distance = math.sqrt(pow(x, 2) + pow(y, 2))
         return distance < self.acceptance_radius

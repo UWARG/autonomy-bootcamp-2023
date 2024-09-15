@@ -120,7 +120,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 nearest_landing_pad = landing_pad
         return nearest_landing_pad
 
-    def get_distance(self, location_1: location.Location, location_2: location.Location):
+    def get_distance(self, location_1: location.Location, location_2: location.Location) -> bool:
         "Function returns the distnace of the drone to the target coordinates"
         return math.sqrt(
             pow(location_1.location_x - location_2.location_x, 2)
