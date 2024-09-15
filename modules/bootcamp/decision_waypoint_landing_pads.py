@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint and then land at a nearby landing pad.
 """
+import math
 
 from .. import commands
 from .. import drone_report
@@ -69,9 +70,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        status = report.status
+        relative_x = self.waypoint.location_x - report.position.location_x
+        relative_y = self.waypoint.location_y - report.position.location_y
+        complete = self.flight_complete(relative_x, relative_y)
 
+        if status == drone_status.DroneStatus.HALTED:
+            if complete:
+                command = commands.Command.create_land_command()
+                print("Drone has landed")
+            else:
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                print("Drone is heading to the destination")
+        elif status == drone_status.DroneStatus.MOVING and complete:
+            command = commands.Command.create_halt_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+    
+    def flight_complete(self, x: float, y: float):
+        "Function printing if the drone is in the acceptance radius"
+        distance = math.sqrt(pow(x, 2) + pow(y, 2))
+        return distance < self.acceptance_radius
