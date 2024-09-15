@@ -4,8 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
-import math
-
 from .. import commands
 from .. import drone_report
 
@@ -75,9 +73,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         status = report.status
 
         if self.at_waypoint:
-            self.landing_pad = self.get_nearest_landing(report.position, landing_pad_locations)
-            complete = self.get_distance(report.position, self.landing_pad) < self.acceptance_radius
             if status == drone_status.DroneStatus.HALTED:
+                self.landing_pad = self.get_nearest_landing(report.position, landing_pad_locations)
+                complete = self.get_squared_distance(report.position, self.landing_pad) < pow(
+                    self.acceptance_radius, 2
+                )
                 if complete:
                     command = commands.Command.create_land_command()
                 else:
@@ -85,10 +85,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         self.landing_pad.location_x - report.position.location_x,
                         self.landing_pad.location_y - report.position.location_y,
                     )
-            elif status == drone_status.DroneStatus.MOVING and complete:
-                command = commands.Command.create_halt_command()
+            elif status == drone_status.DroneStatus.MOVING:
+                complete = self.get_squared_distance(report.position, self.landing_pad) < pow(
+                    self.acceptance_radius, 2
+                )
+                if complete:
+                    command = commands.Command.create_halt_command()
         else:
-            complete = self.get_distance(report.position, self.waypoint) < self.acceptance_radius
+            complete = self.get_squared_distance(report.position, self.waypoint) < pow(
+                self.acceptance_radius, 2
+            )
             if status == drone_status.DroneStatus.HALTED:
                 if complete:
                     self.at_waypoint = True
@@ -114,15 +120,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         nearest_distance = float("inf")
         nearest_landing_pad = None
         for landing_pad in landing_pads:
-            current_distance = self.get_distance(landing_pad, position)
+            current_distance = self.get_squared_distance(landing_pad, position)
             if current_distance < nearest_distance:
                 nearest_distance = current_distance
                 nearest_landing_pad = landing_pad
         return nearest_landing_pad
 
-    def get_distance(self, location_1: location.Location, location_2: location.Location) -> bool:
-        "Function returns the distnace of the drone to the target coordinates"
-        return math.sqrt(
-            pow(location_1.location_x - location_2.location_x, 2)
-            + pow(location_1.location_y - location_2.location_y, 2)
+    def get_squared_distance(
+        self, location_1: location.Location, location_2: location.Location
+    ) -> float:
+        "Function returns the squared distnace of the drone to the target coordinates"
+        return pow(location_1.location_x - location_2.location_x, 2) + pow(
+            location_1.location_y - location_2.location_y, 2
         )

@@ -4,8 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
-import math
-
 from .. import commands
 from .. import drone_report
 
@@ -93,5 +91,5 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
     def flight_complete(self, x: float, y: float) -> bool:
         "Function printing if the drone is in the acceptance radius"
-        distance = math.sqrt(pow(x, 2) + pow(y, 2))
-        return distance < self.acceptance_radius
+        distance_squared = pow(x, 2) + pow(y, 2)
+        return distance_squared < pow(self.acceptance_radius, 2)
