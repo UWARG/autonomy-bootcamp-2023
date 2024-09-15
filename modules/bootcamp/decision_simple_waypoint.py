@@ -68,11 +68,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        dx = self.waypoint.location_x - report.position.location_x
-        dy = self.waypoint.location_y - report.position.location_y
-        if dx**2 + dy**2 > self.acceptance_radius**2:
+        dist_to_waypoint_x = self.waypoint.location_x - report.position.location_x
+        dist_to_waypoint_y = self.waypoint.location_y - report.position.location_y
+        if dist_to_waypoint_x**2 + dist_to_waypoint_y**2 > self.acceptance_radius**2:
             if report.status != drone_status.DroneStatus.MOVING:
-                command = commands.Command.create_set_relative_destination_command(dx, dy)
+                command = commands.Command.create_set_relative_destination_command(
+                    dist_to_waypoint_x, dist_to_waypoint_y
+                )
         elif report.status == drone_status.DroneStatus.MOVING:
             command = commands.Command.create_halt_command()
         elif report.status == drone_status.DroneStatus.HALTED:
