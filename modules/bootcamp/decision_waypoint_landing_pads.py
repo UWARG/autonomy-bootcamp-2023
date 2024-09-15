@@ -39,6 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.landing_pad = None
+        self.landing_pad_relative = None
         self.has_reached_waypoint = False
 
         # ============
@@ -79,13 +80,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 ):
                     self.has_reached_waypoint = True
                     print(f"Halted at: {report.position}, reached waypoint")
-                    self.waypoint = self.determine_closest_landing_pad(
+                    self.landing_pad_relative = self.determine_closest_landing_pad(
                         self.waypoint, landing_pad_locations
                     )
                 else:
                     print(f"Halted at: {report.position}, moving to waypoint")
+                relative_destination = location.Location(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
+                    relative_destination.location_x, relative_destination.location_y
                 )
             else:
                 if (
@@ -97,7 +102,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     print(f"Halted at: {report.position}, moving to landing pad")
                     command = commands.Command.create_set_relative_destination_command(
-                        self.waypoint.location_x, self.waypoint.location_y
+                        self.landing_pad_relative.location_x, self.landing_pad_relative.location_y
                     )
         else:
             # If the drone is moving, send a null command to continue the simulation
@@ -115,11 +120,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Returns relative location to nearest landing pad
         """
-        max_distance = float("inf")
+        min_distance = float("inf")
         for landing_pad_location in landing_pad_locations:
             distance = self.calculate_distance_squared(waypoint_location, landing_pad_location)
-            if distance < max_distance:
-                max_distance = distance
+            if distance < min_distance:
+                min_distance = distance
                 self.landing_pad = landing_pad_location
 
         return location.Location(

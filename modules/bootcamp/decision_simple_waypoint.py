@@ -79,8 +79,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             else:
                 # Otherwise move to landing point
                 print(f"Halted at: {report.position}, moving to waypoint")
+                relative_destination = location.Location(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
+                    relative_destination.location_x, relative_destination.location_y
                 )
         else:
             # If the drone is moving, send a null command to continue the simulation
