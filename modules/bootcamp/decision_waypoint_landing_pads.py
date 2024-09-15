@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.waypoint_found = False
+        self.landing_pad_found = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,11 +68,43 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        if report.status == drone_status.DroneStatus.HALTED and not self.waypoint_found:
+            if self.is_within_acceptance_radius(report.position, self.waypoint):
+                self.waypoint_found = True
+                print(f"reached waypoint at {self.waypoint.location_x}, {self.waypoint.location_y}")
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y
+                )
+                print(f"Moving to waypoint at {self.waypoint.location_x}, {self.waypoint.location_y}")
 
-        # Do something based on the report and the state of this class...
+        elif report.status == drone_status.DroneStatus.HALTED and self.waypoint_found and not self.landing_pad_found:
+            closest_pad = min(landing_pad_locations, key=lambda pad: self.distance(report.position, pad))
+            if self.is_within_acceptance_radius(report.position, closest_pad):
+                self.landing_pad_found = True
+                print(f"reached landing pad at {closest_pad.location_x}, {closest_pad.location_y}")
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    closest_pad.location_x - report.position.location_x,
+                    closest_pad.location_y - report.position.location_y
+                )
+                print(f"moving to landing pad at {closest_pad.location_x}, {closest_pad.location_y}")
 
+        # If the drone has reached both the waypoint and the landing pad, land the drone
+        elif report.status == drone_status.DroneStatus.HALTED and self.landing_pad_found:
+            command = commands.Command.create_land_command()
+            print("Landing the drone.")
+
+        return command
+
+    def distance(self, l1: location.Location, l2: location.Location) -> float:
+        return (l1.location_x - l2.location_x) ** 2 + (l1.location_y - l2.location_y) ** 2
+
+    def is_within_acceptance_radius(self, pos1: location.Location, pos2: location.Location) -> bool:
+        return self.distance(pos1, pos2) <= self.acceptance_radius ** 2
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-        return command
+        # return command
