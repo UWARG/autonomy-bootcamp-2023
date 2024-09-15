@@ -38,7 +38,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         self.halt_at_initialization = True
-        self.has_sent_landing_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

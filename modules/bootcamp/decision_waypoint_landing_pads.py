@@ -37,7 +37,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         # set as closest landing to waypoint
-        self.has_sent_landing_command = False
         self.halt_at_initialization = True
         self.is_halt_at_waypoint = False
         self.closest_pad = location.Location(float("inf"), float("inf"))
@@ -99,9 +98,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     distance_from_position = squared_distance_from_position(
                         landing_pad, self.waypoint
                     )
-                    current_shortest_distance = (
-                        self.closest_pad.location_x - report.position.location_x
-                    ) ** 2 + (self.closest_pad.location_y - report.position.location_y) ** 2
+                    current_shortest_distance = squared_distance_from_position(
+                        self.closest_pad, report.position
+                    )
+                    # self.closest_pad.location_x - report.position.location_x
+                    #  ) ** 2 + (self.closest_pad.location_y - report.position.location_y) ** 2
                     if distance_from_position < current_shortest_distance:
                         self.closest_pad = landing_pad
 
