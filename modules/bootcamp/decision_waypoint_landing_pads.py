@@ -91,7 +91,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 print(f"moving to landing pad at {closest_pad.location_x}, {closest_pad.location_y}")
 
-        # If the drone has reached both the waypoint and the landing pad, land the drone
         elif report.status == drone_status.DroneStatus.HALTED and self.landing_pad_found:
             command = commands.Command.create_land_command()
             print("Landing the drone.")
