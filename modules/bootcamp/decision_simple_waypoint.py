@@ -40,15 +40,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Add your own
         print(str(waypoint.location_x) + ", " + str(waypoint.location_y))
 
-        # index to ensure only one command is sent: self.command
-        self.command_index = 0
-        self.command = commands.Command.create_set_relative_destination_command(
-            waypoint.location_x, waypoint.location_y
-        )
+        # modifed: not needed now since can't start off with relative command
+        # self.command_index = 0
+        # self.command = commands.Command.create_set_relative_destination_command(
+        #     waypoint.location_x, waypoint.location_y
+        # )
 
         self.has_sent_landing_command = False
 
-        self.counter = 0
+        # self.counter = 0
+
+        self.reached_waypoint = False
+
+    def at_waypoint(self, current_x: float, current_y: float) -> bool:
+        """
+        checks if the drone has reached the waypoint. Returns boolean
+        """
+        distance_squared = (self.waypoint.location_x - current_x) ** 2 + (
+            self.waypoint.location_y - current_y
+        ) ** 2
+        return distance_squared <= self.acceptance_radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -79,18 +90,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # command_index is used here so that the command is sent only once
-        # it is also to keep parity with the rest of the bootcamp; where self.commands is an array
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < 1:
-            command = self.command
-            self.command_index += 1
+        # if it isn't at the waypoint yet, it hasn't reached; so it moves around till it reaches the waypoint
+        self.reached_waypoint = self.at_waypoint(
+            report.position.location_x, report.position.location_y
+        )
 
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+        if report.status == drone_status.DroneStatus.HALTED and self.reached_waypoint:
             command = commands.Command.create_land_command()
-
             self.has_sent_landing_command = True
 
-        self.counter += 1
+        elif report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint:
+
+            relative_x = self.waypoint.location_x - report.position.location_x
+            relative_y = self.waypoint.location_y - report.position.location_y
+            command = commands.Command.create_set_relative_destination_command(
+                relative_x, relative_y
+            )
 
         return command
 
