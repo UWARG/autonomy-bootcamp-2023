@@ -38,6 +38,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        
+        # Set initial state
+        self.command_index = 0
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(25.0, 25.0)
+        ]
+        self.has_sent_landing_command = False
+        self.reached_destination = False
+
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -55,20 +65,38 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         This method will be called in an infinite loop, something like this:
 
         ```py
-        while True:
+        while True: 
             report, landing_pad_locations = get_input()
             command = Decision.run(report, landing_pad_locations)
             put_output(command)
         ```
         """
         # Default command
-        command = commands.Command.create_null_command()
+        
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # Update the current position from the report
+        self.current_position = report.position
+
+        # Calculate distance to the waypoint
+        distance_to_waypoint = sqrt(
+            (self.current_position[0] - self.waypoint.x) ** 2 + (self.current_position[1] - self.waypoint.y) ** 2
+        )
+
+        # Check if the drone is within the acceptance radius of the waypoint
+        if report.status == "HALTED" and not self.has_sent_landing_command:
+            if distance_to_waypoint <= self.acceptance_radius:
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+            else:
+                # Move the drone to the waypoint
+                command = self.commands[self.command_index]
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
