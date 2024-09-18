@@ -70,10 +70,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         if not self.achieved_waypoint:
-            dx, dy = self._calc_relative_dist(report.position, self.waypoint)
-            if dx**2 + dy**2 > self.acceptance_radius**2:
+            dist_to_waypoint_x, dist_to_waypoint_y = self._calc_relative_dist(
+                report.position, self.waypoint
+            )
+            if dist_to_waypoint_x**2 + dist_to_waypoint_y**2 > self.acceptance_radius**2:
                 if report.status != drone_status.DroneStatus.MOVING:
-                    command = commands.Command.create_set_relative_destination_command(dx, dy)
+                    command = commands.Command.create_set_relative_destination_command(
+                        dist_to_waypoint_x, dist_to_waypoint_y
+                    )
             else:
                 self.achieved_waypoint = True
         if self.achieved_waypoint:
@@ -131,8 +135,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def _calc_distance_squared(
         self, report: drone_report.DroneReport, destination: location.Location
     ) -> int:
-        dx, dy = self._calc_relative_dist(report.position, destination)
-        return dx**2 + dy**2
+        dist_x, dist_y = self._calc_relative_dist(report.position, destination)
+        return dist_x**2 + dist_y**2
 
     def _calc_relative_dist(
         self, loc1: location.Location, loc2: location.Location
@@ -144,6 +148,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             loc2 (location.Location): Location 2
 
         Returns:
-            tuple[int, int]: dx, dy
+            tuple[int, int]: horizontal distance, vertical distance
         """
         return loc2.location_x - loc1.location_x, loc2.location_y - loc1.location_y
