@@ -96,7 +96,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             )
             if status == drone_status.DroneStatus.HALTED:
                 if complete:
-                    self.landing_pad = self.get_nearest_landing(report.position, landing_pad_locations)
+                    self.landing_pad = self.get_nearest_landing(
+                        report.position, landing_pad_locations
+                    )
                     self.at_waypoint = True
                 else:
                     command = commands.Command.create_set_relative_destination_command(
