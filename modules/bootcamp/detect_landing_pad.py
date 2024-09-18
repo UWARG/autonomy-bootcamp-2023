@@ -99,7 +99,7 @@ class DetectLandingPad:
         # * device
         # * verbose
         predictions = self.__model.predict(
-            source=image, conf=0.25, device=self.__DEVICE, verbose=False
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
         )
 
         # Get the Result Object
@@ -107,7 +107,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result Object
         # Include the confidence value
-        image_annotated = prediction.plot(conf=0.7)
+        image_annotated = prediction.plot(boxes = True, conf = True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -119,10 +119,8 @@ class DetectLandingPad:
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        for i in range(boxes_cpu.shape[0]):
-            x1, y1, x2, y2 = boxes_cpu[i]
-            bounds = np.array([x1, y1, x2, y2])
-            success, box = bounding_box.BoundingBox.create(bounds)
+        for i in range(0, boxes_cpu.shape[0]):
+            success, box = bounding_box.BoundingBox.create(bounds=boxes_cpu[i])
             if success:
                 bounding_boxes.append(box)
 
