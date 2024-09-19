@@ -68,7 +68,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        ALLOWED_ERROR = 0.1
+
+        # Calculate relative x and y distance required to reach waypoint
+        relative_x = self.waypoint.location_x - report.position.location_x
+        relative_y = self.waypoint.location_y - report.position.location_y
+        if report.status == drone_status.DroneStatus.HALTED:
+            # Check if the waypoint has already been reached
+            if abs(relative_x) < ALLOWED_ERROR and abs(relative_y) < ALLOWED_ERROR:
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
