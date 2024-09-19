@@ -13,6 +13,7 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
+import math
 
 # Disable for bootcamp use
 # No enable
@@ -37,7 +38,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.started_moving_to_waypoint = False
+        self.started_moving_to_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,10 +70,34 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        # Calculate relative x and y distance required to reach waypoint
+        if report.status == drone_status.DroneStatus.HALTED:
+            # Check if the waypoint has already been reached
+            if self.started_moving_to_landing_pad:
+                command = commands.Command.create_land_command()
+            elif self.started_moving_to_waypoint:
+                closest_landing_pad = min(landing_pad_locations, key=lambda pad: self.__distance_between_locations(report.position, pad))
+                relative_x = closest_landing_pad.location_x - report.position.location_x
+                relative_y = closest_landing_pad.location_y - report.position.location_y
+                
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                self.started_moving_to_landing_pad = True
+            else:
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                
+                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                self.started_moving_to_waypoint = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def __distance_between_locations(self, location1: location.Location, location2: location.Location):
+        """
+        Calculate the distance between two Location objects.
+        """
+
+        return math.sqrt(((location2.location_x - location1.location_x) ** 2) + ((location2.location_y - location2.location_x) ** 2))
