@@ -69,7 +69,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Check the report to see what the status of the drone is 
+        # Check the report to see what the status of the drone is
         if report.status == drone_status.DroneStatus.HALTED:
 
             # First check whether it has gotten to the waypoint
@@ -85,7 +85,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             else:
                 command = commands.Command.create_land_command()
 
-        #raise NotImplementedError
+        # raise NotImplementedError
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
