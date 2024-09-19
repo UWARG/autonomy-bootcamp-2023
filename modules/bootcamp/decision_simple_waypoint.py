@@ -79,7 +79,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             else:
                 relative_x = self.waypoint.location_x - report.position.location_x
                 relative_y = self.waypoint.location_y - report.position.location_y
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
