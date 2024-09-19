@@ -68,8 +68,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         allowed_error = 0.1
 
-        # Calculate relative x and y distance required to reach waypoint
         if report.status == drone_status.DroneStatus.HALTED:
+            # Calculate relative x and y distance required to reach waypoint
             relative_x = self.waypoint.location_x - report.position.location_x
             relative_y = self.waypoint.location_y - report.position.location_y
 

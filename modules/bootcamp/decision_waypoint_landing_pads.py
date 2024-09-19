@@ -70,7 +70,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Calculate relative x and y distance required to reach waypoint
         if report.status == drone_status.DroneStatus.HALTED:
             # Check if the waypoint has already been reached
             if self.started_moving_to_landing_pad:
@@ -80,6 +79,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     landing_pad_locations,
                     key=lambda pad: self.__distance_between_locations(report.position, pad),
                 )
+
+                # Calculate relative x and y distance required to reach landing pad
                 relative_x = closest_landing_pad.location_x - report.position.location_x
                 relative_y = closest_landing_pad.location_y - report.position.location_y
 
@@ -88,6 +89,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 self.started_moving_to_landing_pad = True
             else:
+                # Calculate relative x and y distance required to reach waypoint
                 relative_x = self.waypoint.location_x - report.position.location_x
                 relative_y = self.waypoint.location_y - report.position.location_y
 
