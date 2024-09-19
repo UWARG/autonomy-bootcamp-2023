@@ -81,4 +81,7 @@ class DecisionExample(base_decision.BaseDecision):
 
         self.counter += 1
 
+        print(command)
+
+
         return command

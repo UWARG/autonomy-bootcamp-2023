@@ -36,8 +36,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Add your own
+
+        self.command_index = 0
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
+        ]
+
+        self.has_sent_landing_command = False
+
+        self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,8 +75,28 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        
         # Do something based on the report and the state of this class...
+
+         # Default command
+        command = commands.Command.create_null_command()
+
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
+            self.commands
+        ):
+
+            print(f"Halted at: {report.position}")
+
+            command = self.commands[self.command_index]
+            self.command_index += 1
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            command = commands.Command.create_land_command()
+
+            self.has_sent_landing_command = True
+
+        self.counter += 1
+
+        print(command)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

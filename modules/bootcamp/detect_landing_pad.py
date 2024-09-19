@@ -103,7 +103,7 @@ class DetectLandingPad:
         # Get the Result object
         prediction = self.__model.predict(source=image)
 
-        print('\n\nHEYYYYYYYYYYY\n\n')
+        # print('\n\nHEYYYYYYYYYYY\n\n')
         # print(prediction[0])
 
         # Plot the annotated image from the Result object
@@ -127,7 +127,7 @@ class DetectLandingPad:
             # Create BoundingBox object and append to list
             temp_box = bounding_box.BoundingBox.create(np.array(boxes_cpu[i]))[1]
             bounding_boxes.append(temp_box)
-        print(bounding_boxes)
+        # print(bounding_boxes)
         return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
