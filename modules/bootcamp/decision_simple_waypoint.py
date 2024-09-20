@@ -66,15 +66,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        allowed_error = 0.1
+        allowed_error = 0.01
 
         if report.status == drone_status.DroneStatus.HALTED:
-            # Calculate relative x and y distance required to reach waypoint
-            relative_x = self.waypoint.location_x - report.position.location_x
-            relative_y = self.waypoint.location_y - report.position.location_y
-
             # Check if the waypoint has already been reached
-            if abs(relative_x) < allowed_error and abs(relative_y) < allowed_error:
+            if self.__squared_distance(self.waypoint, report.position) < allowed_error:
                 command = commands.Command.create_land_command()
             else:
                 relative_x = self.waypoint.location_x - report.position.location_x
@@ -88,3 +84,14 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         return command
+
+    def __squared_distance(
+        self, location1: location.Location, location2: location.Location
+    ) -> float:
+        """
+        Calculate the distance between two Location objects.
+        """
+
+        return ((location2.location_x - location1.location_x) ** 2) + (
+            (location2.location_y - location2.location_x) ** 2
+        )
