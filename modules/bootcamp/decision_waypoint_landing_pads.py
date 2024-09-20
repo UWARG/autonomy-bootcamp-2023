@@ -36,8 +36,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.started_moving_to_waypoint = False
-        self.started_moving_to_landing_pad = False
+        self.has_reached_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,16 +67,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if report.status == drone_status.DroneStatus.HALTED:
-            # Check if the waypoint has already been reached
-            if self.started_moving_to_landing_pad:
-                command = commands.Command.create_land_command()
-            elif self.started_moving_to_waypoint:
-                closest_landing_pad = min(
-                    landing_pad_locations,
-                    key=lambda pad: self.__squared_distance(report.position, pad),
-                )
+        allowed_error = 0.01
 
+        if report.status == drone_status.DroneStatus.HALTED:
+            closest_landing_pad = min(
+                landing_pad_locations,
+                key=lambda pad: self.__squared_distance(report.position, pad),
+            )
+
+            # Check if the landing pad or waypoint has already been reached
+            if (
+                self.__squared_distance(report.position, closest_landing_pad) < allowed_error
+                and self.has_reached_waypoint
+            ):
+                command = commands.Command.create_land_command()
+            elif self.__squared_distance(report.position, self.waypoint) < allowed_error:
                 # Calculate relative x and y distance required to reach landing pad
                 relative_x = closest_landing_pad.location_x - report.position.location_x
                 relative_y = closest_landing_pad.location_y - report.position.location_y
@@ -85,7 +89,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
-                self.started_moving_to_landing_pad = True
+
+                self.has_reached_waypoint = True
             else:
                 # Calculate relative x and y distance required to reach waypoint
                 relative_x = self.waypoint.location_x - report.position.location_x
@@ -94,7 +99,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
-                self.started_moving_to_waypoint = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -110,5 +114,5 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
 
         return ((location2.location_x - location1.location_x) ** 2) + (
-            (location2.location_y - location2.location_x) ** 2
+            (location2.location_y - location1.location_y) ** 2
         )

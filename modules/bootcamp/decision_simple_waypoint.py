@@ -93,5 +93,5 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
 
         return ((location2.location_x - location1.location_x) ** 2) + (
-            (location2.location_y - location2.location_x) ** 2
+            (location2.location_y - location1.location_y) ** 2
         )
