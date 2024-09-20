@@ -13,6 +13,9 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
+import numpy as np
+import math
+
 
 # Disable for bootcamp use
 # No enable
@@ -39,9 +42,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
+        self.waypoint_reached = False
+
+        self.command_index = 0
+        self.commands = [
+            commands.Command.create_set_relative_destination_command(waypoint.location_x, waypoint.location_y),
+        ]
+
+        def create_command(x: float, y: float):
+            self.commands.append(commands.Command.create_set_relative_destination_command(x, y))
+
+        self.has_sent_landing_command = False
+
+        self.counter = 0
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def distance_to_point(position: location.Location, target: location.Location):
+        
+        return 3
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -68,7 +89,57 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        # Do something based on the report and the state of this class..
+
+        # dist = float('inf')
+        # index = -1
+        # for i, location in enumerate(landing_pad_locations):
+        #     ## put this in a helper method
+        #     temp = math.sqrt(pow((location.location_x - report.position.location_x), 2) + pow((location.location_y - report.position.location_y), 2))
+        #     if temp < dist: 
+        #         dist = temp
+        #         index = i
+        #     pass
+        # print(index)
+        # print(landing_pad_locations)
+
+        if report.status == drone_status.DroneStatus.HALTED and not self.waypoint_reached and self.command_index < len(
+            self.commands
+        ):
+
+            print(f"Halted at: {report.position}")
+
+            command = self.commands[self.command_index]
+            self.command_index += 1
+        
+        elif report.status == drone_status.DroneStatus.HALTED and not self.waypoint_reached:
+            self.waypoint_reached = True
+
+            # I think this works
+            dist = float('inf')
+            index = -1
+            for i, location in enumerate(landing_pad_locations):
+                ## put this in a helper method
+                temp = math.sqrt(pow((location.location_x - report.position.location_x), 2) + pow((location.location_y - report.position.location_y), 2))
+                if temp < dist: 
+                    dist = temp
+                    index = i
+                pass
+            
+            print(landing_pad_locations)
+            print("TARGET INDEX:", index)
+
+            self.commands.append(commands.Command.create_set_relative_destination_command(landing_pad_locations[index].location_x - report.position.location_x, landing_pad_locations[index].location_y - report.position.location_y))
+            command = self.commands[self.command_index]
+
+        elif report.status == drone_status.DroneStatus.HALTED and self.waypoint_reached and not self.has_sent_landing_command:
+            command = commands.Command.create_land_command()
+
+            self.has_sent_landing_command = True
+
+        self.counter += 1
+
+        print(command)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
