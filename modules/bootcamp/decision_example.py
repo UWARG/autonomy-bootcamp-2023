@@ -83,5 +83,4 @@ class DecisionExample(base_decision.BaseDecision):
 
         print(command)
 
-
         return command

@@ -39,8 +39,6 @@ class DetectLandingPad:
     # run on the CPU instead, replace the right side with "cpu"
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
-
-
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
     # ============
