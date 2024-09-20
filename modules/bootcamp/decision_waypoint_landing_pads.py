@@ -4,8 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
-import math
-
 from .. import commands
 from .. import drone_report
 
@@ -77,7 +75,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif self.started_moving_to_waypoint:
                 closest_landing_pad = min(
                     landing_pad_locations,
-                    key=lambda pad: self.__distance_between_locations(report.position, pad),
+                    key=lambda pad: self.__squared_distance(report.position, pad),
                 )
 
                 # Calculate relative x and y distance required to reach landing pad
@@ -104,14 +102,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
-    def __distance_between_locations(
+    def __squared_distance(
         self, location1: location.Location, location2: location.Location
     ) -> float:
         """
         Calculate the distance between two Location objects.
         """
 
-        return math.sqrt(
-            ((location2.location_x - location1.location_x) ** 2)
-            + ((location2.location_y - location2.location_x) ** 2)
+        return ((location2.location_x - location1.location_x) ** 2) + (
+            (location2.location_y - location2.location_x) ** 2
         )
