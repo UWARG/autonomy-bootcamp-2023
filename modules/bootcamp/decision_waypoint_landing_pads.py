@@ -98,8 +98,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             index = -1
             for i, location in enumerate(landing_pad_locations):
                 ## put this in a helper method
-                temp = pow((location.location_x - report.position.location_x), 2) + pow((location.location_y - report.position.location_y), 2)
-                
+                temp = pow((location.location_x - report.position.location_x), 2) + pow(
+                    (location.location_y - report.position.location_y), 2
+                )
+
                 if temp < dist:
                     dist = temp
                     index = i
