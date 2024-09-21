@@ -69,12 +69,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         if report.status == drone_status.DroneStatus.HALTED:
-            allowed_error = self.acceptance_radius ** 2
+            allowed_error = self.acceptance_radius**2
 
             # Check if the landing pad or waypoint has already been reached
             if self.has_reached_waypoint:
                 # Make sure the landing pad has actually been reached; otherwise send another set relative destination command
-                if self.__squared_distance(report.position, self.closest_landing_pad) < allowed_error:
+                if (
+                    self.__squared_distance(report.position, self.closest_landing_pad)
+                    < allowed_error
+                ):
                     command = commands.Command.create_land_command()
                 else:
                     relative_x = self.closest_landing_pad.location_x - report.position.location_x

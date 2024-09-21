@@ -67,7 +67,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         if report.status == drone_status.DroneStatus.HALTED:
-            allowed_error = self.acceptance_radius ** 2
+            allowed_error = self.acceptance_radius**2
 
             # Check if the waypoint has already been reached
             if self.__squared_distance(self.waypoint, report.position) < allowed_error:
