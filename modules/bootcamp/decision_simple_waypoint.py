@@ -72,9 +72,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         current_position = report.position
         waypoint = self.waypoint
 
-        rel_dest_x = waypoint.location_x - current_position.location_x
-        rel_dest_y = waypoint.location_y - current_position.location_y
-        distance_squared_to_waypoint = rel_dest_x**2 + rel_dest_y**2
+        relative_dest_x = waypoint.location_x - current_position.location_x
+        relative_dest_y = waypoint.location_y - current_position.location_y
+        distance_squared_to_waypoint = relative_dest_x**2 + relative_dest_y**2
 
         if status == drone_status.DroneStatus.HALTED:
             if distance_squared_to_waypoint < self.acceptance_radius**2:
@@ -82,7 +82,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 print("Drone is within range. Landing.")
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    rel_dest_x, rel_dest_y
+                    relative_dest_x, relative_dest_y
                 )
                 print(f"Moving to waypoint: {waypoint.location_x}, {waypoint.location_y}")
 

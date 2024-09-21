@@ -87,7 +87,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if not self.landing_pad_found:
             if not hasattr(self, "closest_pad"):
                 closest_pad = min(
-                    landing_pad_locations, key=lambda pad: self.distance(report.position, pad)
+                    landing_pad_locations,
+                    key=lambda pad: self.distance_squared(report.position, pad),
                 )
             if self.is_within_acceptance_radius(report.position, closest_pad):
                 self.landing_pad_found = True
@@ -109,11 +110,38 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
-    def distance(self, l1: location.Location, l2: location.Location) -> float:
+    def distance_squared(self, l1: location.Location, l2: location.Location) -> float:
+        """
+        Calculate the squared distance between two locations.
+
+        Finds the differences between the corresponding x and y coordinates of two locations, then computes the squared distance.
+        The squared distance is the sum of the squared differences between the x and y coordinates of the two locations.
+
+        Args:
+        l1 (location.Location): The first location with attributes `location_x` and `location_y`.
+        l2 (location.Location): The second location with attributes `location_x` and `location_y`.
+
+        Returns:
+        float: The squared distance between the two locations.
+        """
         return (l1.location_x - l2.location_x) ** 2 + (l1.location_y - l2.location_y) ** 2
 
     def is_within_acceptance_radius(self, pos1: location.Location, pos2: location.Location) -> bool:
-        return self.distance(pos1, pos2) <= self.acceptance_radius**2
+        """
+        Determine if two locations are within the acceptance radius.
+
+        This function checks whether the distance between two locations
+        (pos1 and pos2) is less than or equal to the squared acceptance radius.
+
+        Args:
+            pos1 (location.Location): The first location with attributes `location_x` and `location_y`.
+            pos2 (location.Location): The second location with attributes `location_x` and `location_y`.
+
+        Returns:
+            bool: True if the distance between the two locations is within the
+            acceptance radius, otherwise False.
+        """
+        return self.distance_squared(pos1, pos2) <= self.acceptance_radius**2
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
