@@ -96,7 +96,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        # predictions = ...
 
         # Get the Result object
         prediction = self.__model.predict(source=image)

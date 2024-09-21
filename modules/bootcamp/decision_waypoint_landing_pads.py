@@ -96,10 +96,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.waypoint_reached = True
             dist = float("inf")
             index = -1
-            for i, location in enumerate(landing_pad_locations):
+            for i, landing_pad in enumerate(landing_pad_locations):
                 ## put this in a helper method
-                temp = pow((location.location_x - report.position.location_x), 2) + pow(
-                    (location.location_y - report.position.location_y), 2
+                temp = pow((landing_pad.location_x - report.position.location_x), 2) + pow(
+                    (landing_pad.location_y - report.position.location_y), 2
                 )
 
                 if temp < dist:
