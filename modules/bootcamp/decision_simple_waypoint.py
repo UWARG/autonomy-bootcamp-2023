@@ -66,9 +66,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        allowed_error = 0.01
-
         if report.status == drone_status.DroneStatus.HALTED:
+            allowed_error = self.acceptance_radius ** 2
+
             # Check if the waypoint has already been reached
             if self.__squared_distance(self.waypoint, report.position) < allowed_error:
                 command = commands.Command.create_land_command()

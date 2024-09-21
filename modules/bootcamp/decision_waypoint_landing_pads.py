@@ -67,9 +67,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        allowed_error = 0.01
-
         if report.status == drone_status.DroneStatus.HALTED:
+            allowed_error = self.acceptance_radius ** 2
+
             closest_landing_pad = min(
                 landing_pad_locations,
                 key=lambda pad: self.__squared_distance(report.position, pad),
