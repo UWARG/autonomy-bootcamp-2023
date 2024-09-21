@@ -102,6 +102,9 @@ class DetectLandingPad:
             source=image, conf=0.7, device=self.__DEVICE, verbose=False
         )
 
+        if not predictions:
+            return [], image
+
         # Get the Result Object
         prediction = predictions[0]
 
