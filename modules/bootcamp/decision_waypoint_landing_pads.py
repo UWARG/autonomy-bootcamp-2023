@@ -103,7 +103,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
             return command
 
-        # If the drone has reached both the waypoint and the landing pad, land the drone
         if self.landing_pad_found:
             command = commands.Command.create_land_command()
             print("Landing the drone.")
