@@ -68,59 +68,32 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        status = report.status
+        current_position = report.position
+        waypoint = self.waypoint
 
-        try:
-            if report.status == drone_status.DroneStatus.HALTED:
-                if not self.waypoint_found:
-                    # Debugging information
-                    #print(f"Drone position: {report.position.location_x}, {
-                    #    report.position.location_y}")
-                    #print(f"Waypoint location: {self.waypoint.location_x}, {
-                    #    self.waypoint.location_y}")
+        rel_dest_x = waypoint.location_x - current_position.location_x
+        rel_dest_y = waypoint.location_y - current_position.location_y
+        distance_squared_to_waypoint = rel_dest_x**2 + rel_dest_y**2
 
-                    # Command to move to the waypoint
-                    command = commands.Command.create_set_relative_destination_command(
-                        self.waypoint.location_x - report.position.location_x,
-                        self.waypoint.location_y - report.position.location_y
-                    )
-                    self.waypoint_found = True
+        if status == drone_status.DroneStatus.HALTED:
+            if distance_squared_to_waypoint < self.acceptance_radius**2:
+                command = commands.Command.create_land_command()
+                print("Drone is within range. Landing.")
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    rel_dest_x, rel_dest_y
+                )
+                print(f"Moving to waypoint: {waypoint.location_x}, {waypoint.location_y}")
 
-                elif not self.landing_pad_found:
-                    # Debugging information
-                    #print(f"Landing pads: {landing_pad_locations}")
-
-                    # Find and move to the closest landing pad
-                    closest_pad = min(
-                        landing_pad_locations, key=lambda pad: self.distance(report.position, pad))
-                    print(f"Closest landing pad location: {
-                        closest_pad.location_x}, {closest_pad.location_y}")
-
-                    command = commands.Command.create_set_relative_destination_command(
-                        closest_pad.location_x - report.position.location_x,
-                        closest_pad.location_y - report.position.location_y
-                    )
-                    self.landing_pad_found = True
-
-                else:
-                    # Command to land the drone
-                    print("Landing drone.")
-                    command = commands.Command.create_land_command()
-
-        except Exception as e:
-            print(f"Error in run method: {e}")
-            # Optionally, return a null command or handle the error in a way that prevents crashing
+        else:
             command = commands.Command.create_null_command()
 
         return command
 
-    def distance(self, l1: location.Location, l2: location.Location):
-        return (l1.location_x - l2.location_x)**2 + (l1.location_y - l2.location_y)**2
-
     # Remove this when done
     # raise NotImplementedError
 
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
-
-        #return command
+    # ============
+    # BOOTCAMPERS MODIFY ABOVE THIS COMMENT
+    # ============
