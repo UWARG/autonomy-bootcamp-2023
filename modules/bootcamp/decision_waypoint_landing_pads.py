@@ -37,6 +37,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.has_reached_waypoint = False
+        self.closest_landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,21 +71,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:
             allowed_error = self.acceptance_radius ** 2
 
-            closest_landing_pad = min(
-                landing_pad_locations,
-                key=lambda pad: self.__squared_distance(report.position, pad),
-            )
-
             # Check if the landing pad or waypoint has already been reached
-            if (
-                self.__squared_distance(report.position, closest_landing_pad) < allowed_error
-                and self.has_reached_waypoint
-            ):
-                command = commands.Command.create_land_command()
+            if self.has_reached_waypoint:
+                # Make sure the landing pad has actually been reached; otherwise send another set relative destination command
+                if self.__squared_distance(report.position, self.closest_landing_pad) < allowed_error:
+                    command = commands.Command.create_land_command()
+                else:
+                    relative_x = self.closest_landing_pad.location_x - report.position.location_x
+                    relative_y = self.closest_landing_pad.location_y - report.position.location_y
+
+                    command = commands.Command.create_set_relative_destination_command(
+                        relative_x, relative_y
+                    )
             elif self.__squared_distance(report.position, self.waypoint) < allowed_error:
+                self.closest_landing_pad = min(
+                    landing_pad_locations,
+                    key=lambda pad: self.__squared_distance(report.position, pad),
+                )
+
                 # Calculate relative x and y distance required to reach landing pad
-                relative_x = closest_landing_pad.location_x - report.position.location_x
-                relative_y = closest_landing_pad.location_y - report.position.location_y
+                relative_x = self.closest_landing_pad.location_x - report.position.location_x
+                relative_y = self.closest_landing_pad.location_y - report.position.location_y
 
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
