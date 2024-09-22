@@ -130,10 +130,26 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_location = pad_location
 
             if closest_location is not None:
-                command = commands.Command.create_set_relative_destination_command(
-                    closest_location.location_x - report.position.location_x,
-                    closest_location.location_y - report.position.location_y,
+                at_landing_pad_x = (
+                    closest_location.location_x - report.position.location_x
+                    <= self.acceptance_radius
                 )
+                at_landing_pad_y = (
+                    closest_location.location_y - report.position.location_y
+                    <= self.acceptance_radius
+                )
+
+                at_landing_pad = at_landing_pad_x and at_landing_pad_y
+
+                if at_landing_pad:
+                    self.has_sent_landing_command = True
+                    command = commands.Command.create_land_command()
+
+                elif not at_landing_pad:
+                    command = commands.Command.create_set_relative_destination_command(
+                        closest_location.location_x - report.position.location_x,
+                        closest_location.location_y - report.position.location_y,
+                    )
 
             self.has_sent_landing_command = True
 

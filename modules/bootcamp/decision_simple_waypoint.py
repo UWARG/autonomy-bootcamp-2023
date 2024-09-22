@@ -91,6 +91,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # if it isn't at the waypoint yet, it hasn't reached; so it moves around till it reaches the waypoint
+
         self.reached_waypoint = self.at_waypoint(
             report.position.location_x, report.position.location_y
         )
