@@ -98,31 +98,37 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        # BC NOTE: May need to create instantiate model object with create()
+        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE,verbose=False)
+        # BC NOTE: See https://docs.ultralytics.com/modes/predict/#working-with-results
 
         # Get the Result object
-        prediction = ...
+        # BOOTCAMPER NOTE: may raise ValueError
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot()
+        # BC NOTE: conf & boxes True by default
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
+        # BC NOTE: Result.boxes may be None, could cause error trying to access Boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
-        bounding_boxes = []
+        # BC NOTE: Need for error checking from returned tuple from BoundingBox.create()
+        bounding_boxes = [bounding_box.BoundingBox.create(rectangle)[1] for rectangle in boxes_cpu]
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
         #     result, box = ...
 
-        return [], image_annotated
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
