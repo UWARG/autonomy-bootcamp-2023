@@ -115,9 +115,9 @@ class DetectLandingPad:
         ]  # .shape => (0: num of arrays, 1: num of el in arrays)
         for i in range(0, num_of_bounding_boxes):
             # Create BoundingBox object and append to list
-            box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             bounding_boxes.append(box)
-        return [], image_annotated
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

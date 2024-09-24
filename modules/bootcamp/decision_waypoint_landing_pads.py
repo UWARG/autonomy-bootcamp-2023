@@ -75,42 +75,41 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if status == halted:
             if not self.reached_at_waypoint:
-                relative_x = self.waypoint.location_x - report.position.location_x
-                relative_y = self.waypoint.location_y - report.position.location_y
+                waypoint_relative_x = self.waypoint.location_x - report.position.location_x
+                waypoint_relative_y = self.waypoint.location_y - report.position.location_y
 
-                if (
-                    abs(relative_x) < self.acceptance_radius
-                    and abs(relative_y) < self.acceptance_radius
-                ):
+                if self.within_acceptance_radius(waypoint_relative_x, waypoint_relative_y):
                     self.reached_at_waypoint = True
                     self.the_closest_landing_pad = self.find_closest_landing_pad(
                         report.position, landing_pad_locations
                     )
-                    relative_x = (
-                        self.the_closest_landing_pad.location_x - report.position.location_x
-                    )
-                    relative_y = (
-                        self.the_closest_landing_pad.location_y - report.position.location_y
-                    )
-                    command = commands.Command.create_set_relative_destination_command(
-                        relative_x, relative_y
-                    )
                 else:
                     command = commands.Command.create_set_relative_destination_command(
-                        relative_x, relative_y
+                        waypoint_relative_x, waypoint_relative_y
                     )
-            else:
-                relative_x = self.the_closest_landing_pad.location_x - report.position.location_x
-                relative_y = self.the_closest_landing_pad.location_y - report.position.location_y
+            elif not self.reached_at_landing_pad:
+                landing_pad_relative_x = (
+                    self.the_closest_landing_pad.location_x - report.position.location_x
+                )
+                landing_pad_relative_y = (
+                    self.the_closest_landing_pad.location_y - report.position.location_y
+                )
 
-                if abs(relative_x) < 0.1 and abs(relative_y) < 0.1:
+                if self.within_acceptance_radius(landing_pad_relative_x, landing_pad_relative_y):
+                    self.reached_at_landing_pad = True
                     command = commands.Command.create_land_command()
                 else:
                     command = commands.Command.create_set_relative_destination_command(
-                        relative_x, relative_y
+                        landing_pad_relative_x, landing_pad_relative_y
                     )
 
         return command
+
+    def within_acceptance_radius(self, dx: float, dy: float) -> bool:
+        """
+        Checks if its within the acceptance radius using Euclidean distance
+        """
+        return ((dx**2 + dy**2) ** 0.5) < self.acceptance_radius
 
     def find_closest_landing_pad(
         self, current_position: location.Location, landing_pads: "list[location.Location]"
