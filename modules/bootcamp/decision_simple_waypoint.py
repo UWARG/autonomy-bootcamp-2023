@@ -38,7 +38,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.goal = commands.Command.create_set_relative_destination_command(10, 10) # top right?
+        self.goal = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y) # top right?
         self.should_land = False
 
         # ============
