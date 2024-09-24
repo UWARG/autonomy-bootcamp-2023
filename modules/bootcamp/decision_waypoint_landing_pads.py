@@ -84,6 +84,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def get_relative_position(
         location_1: location.Location, location_2: location.Location
     ) -> tuple[float, float]:
+        """
+        Calculates the relative position of one position to another
+        """
         return (
             location_2.location_x - location_1.location_x,
             location_2.location_y - location_1.location_y,
