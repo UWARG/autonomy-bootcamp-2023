@@ -99,7 +99,9 @@ class DetectLandingPad:
         # * device
         # * verbose
         # BC NOTE: May need to create instantiate model object with create()
-        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE,verbose=False)
+        predictions = self.__model.predict(
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
+        )
         # BC NOTE: See https://docs.ultralytics.com/modes/predict/#working-with-results
 
         # Get the Result object

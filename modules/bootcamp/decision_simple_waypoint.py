@@ -38,7 +38,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.goal = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y) # top right?
+        self.goal = commands.Command.create_set_relative_destination_command(
+            self.waypoint.location_x, self.waypoint.location_y
+        )  # top right?
         self.should_land = False
 
         # ============
@@ -75,7 +77,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.should_land:
                 command = self.goal
-                self.should_land = True # should land on the next instruction
+                self.should_land = True  # should land on the next instruction
             else:
                 command = commands.Command.create_land_command()
         # ============
