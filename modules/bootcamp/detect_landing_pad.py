@@ -124,7 +124,13 @@ class DetectLandingPad:
 
         # Loop over the boxes list and create a list of bounding boxes
         # BC NOTE: Need for error checking from returned tuple from BoundingBox.create()
-        bounding_boxes = [bounding_box.BoundingBox.create(rectangle)[1] for rectangle in boxes_cpu]
+        bounding_boxes = []
+        for rectangle in boxes_cpu:
+            optional_bounding_box = bounding_box.BoundingBox.create(rectangle)
+            # why is it that this one returns False while other functions might return None for a failure?
+            # still unsure why .shape() is required
+            if optional_bounding_box[0]:
+                bounding_boxes.append(optional_bounding_box[1])
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
