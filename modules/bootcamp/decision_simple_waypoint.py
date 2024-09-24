@@ -38,21 +38,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.acceptance_radius_squared = self.acceptance_radius ** 2 # used for distance calculation
-        
-        self.goals = [commands.Command.create_set_relative_destination_command(
-            self.waypoint.location_x, self.waypoint.location_y
-        )]
+        self.acceptance_radius_squared = self.acceptance_radius**2  # used for distance calculation
+
+        self.goals = [
+            commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+        ]
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
     @staticmethod
-    def calculate_distance_squared(location_1 : location.Location, location_2 : location.Location) -> float:
-        '''
+    def calculate_distance_squared(
+        location_1: location.Location, location_2: location.Location
+    ) -> float:
+        """
         Calculate the non-square rooted distance between two locations
-        '''
-        return (location_2.location_x - location_1.location_x) ** 2 + (location_2.location_y - location_1.location_y) ** 2
+        """
+        return (location_2.location_x - location_1.location_x) ** 2 + (
+            location_2.location_y - location_1.location_y
+        ) ** 2
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -91,7 +97,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     command = commands.Command.create_land_command()
             case drone_status.DroneStatus.MOVING:
                 # if the current position is close enough to the destination.
-                if DecisionSimpleWaypoint.calculate_distance_squared(report.position, report.destination) <= self.acceptance_radius_squared:
+                if (
+                    DecisionSimpleWaypoint.calculate_distance_squared(
+                        report.position, report.destination
+                    )
+                    <= self.acceptance_radius_squared
+                ):
                     command = commands.Command.create_halt_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
