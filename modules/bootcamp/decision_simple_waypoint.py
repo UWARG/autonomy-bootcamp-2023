@@ -69,6 +69,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.position.location_x == 0 and report.position.location_y == 0:
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+        if (
+            report.position.location_x == self.waypoint.location_x
+            and report.position.location_y == self.waypoint.location_y
+        ):
+            command = commands.Command.create_halt_command()
+            if report.status == drone_status.DroneStatus.HALTED:
+                command = commands.Command.create_land_command()
+
+        print("report", report)
+        print("Locations", landing_pad_locations)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
