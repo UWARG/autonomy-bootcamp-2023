@@ -75,17 +75,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 self.waypoint.location_x, self.waypoint.location_y
             )
 
-
         def within(loc1: location.Location, loc2: location.Location) -> bool:
             radius_squared = self.acceptance_radius**2
             return (loc1.location_x - loc2.location_x) ** 2 + (
                 loc1.location_y - loc2.location_y
             ) ** 2 <= radius_squared
 
-        if (
-            drone_status.DroneStatus.MOVING
-            and within(report.position, self.waypoint)
-        ):
+        if drone_status.DroneStatus.MOVING and within(report.position, self.waypoint):
             command = commands.Command.create_halt_command()
             if report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
