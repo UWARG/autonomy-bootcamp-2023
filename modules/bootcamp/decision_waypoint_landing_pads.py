@@ -109,7 +109,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Checks if its within the acceptance radius using Euclidean distance
         """
-        return ((dx**2 + dy**2) ** 0.5) < self.acceptance_radius
+        return (dx**2 + dy**2) < (self.acceptance_radius**2)
 
     def find_closest_landing_pad(
         self, current_position: location.Location, landing_pads: "list[location.Location]"

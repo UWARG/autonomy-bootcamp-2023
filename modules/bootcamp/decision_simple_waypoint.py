@@ -74,16 +74,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if status == halted:
                 relative_x = self.waypoint.location_x - report.position.location_x
                 relative_y = self.waypoint.location_y - report.position.location_y
+                distance = (relative_x**2 + relative_y**2)
 
-                if (
-                    abs(relative_x) < self.acceptance_radius
-                    and abs(relative_y) < self.acceptance_radius
-                ):
+                if distance < (self.acceptance_radius**2):
                     self.reached_at_waypoint = True
                     command = commands.Command.create_land_command()
-                command = commands.Command.create_set_relative_destination_command(
-                    relative_x, relative_y
-                )
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        relative_x, relative_y
+                    )
         else:
             command = commands.Command.create_land_command()
 
