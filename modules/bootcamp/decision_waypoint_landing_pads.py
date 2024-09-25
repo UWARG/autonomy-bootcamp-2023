@@ -77,15 +77,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 loc.location_y - self.waypoint.location_y
             )
 
+        def within(loc1: location.Location, loc2: location.Location) -> bool:
+            radius_squared = self.acceptance_radius**2
+            return (loc1.location_x - loc2.location_x) ** 2 + (
+                loc1.location_y - loc2.location_y
+            ) ** 2 <= radius_squared
+
         if report.position.location_x == 0 and report.position.location_y == 0:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
-        if (
-            report.position.location_x == self.waypoint.location_x
-            and report.position.location_y == self.waypoint.location_y
-            and self.closest_point is None
-        ):
+
+        if self.closest_point is None and within(report.position, self.waypoint):
             dist = manhattan_dist(landing_pad_locations[0])
             loc = landing_pad_locations[0]
             for i in range(1, len(landing_pad_locations)):
@@ -97,14 +100,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 loc.location_x - self.waypoint.location_x, loc.location_y - self.waypoint.location_y
             )
             self.closest_point = loc
-        if (
-            self.closest_point
-            and report.position.location_x == self.closest_point.location_x
-            and report.position.location_y == self.closest_point.location_y
-        ):
+
+        if self.closest_point and within(report.position, self.closest_point):
             command = commands.Command.create_land_command()
-        print("report", report)
-        print("Locations", landing_pad_locations)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
