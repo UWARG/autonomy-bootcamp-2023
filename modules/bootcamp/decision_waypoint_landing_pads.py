@@ -27,6 +27,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Initialize all persistent variables here with self.
+
+        Args:
+            waypoint (location.Location): The waypoint location to travel to.
+            acceptance_radius (float): The radius within which the waypoint is considered reached.
         """
         self.waypoint = waypoint
         print(f"Waypoint: {waypoint}")
@@ -37,11 +41,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        print(str(waypoint.location_x) + str(waypoint.location_y))
 
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+        self.has_sent_landing_command = False
+        self.find_nearest_landing_pad = False
+        self.reached_waypoint = False
+        self.moving_to_landing_pad = False
+        self.counter = 0
+
+    def at_point(self, current_x: float, current_y: float) -> bool:
+        """
+        Check if the current position is within the acceptance radius of the waypoint.
+
+        Args:
+            current_x (float): The current x-coordinate of the drone.
+            current_y (float): The current y-coordinate of the drone.
+
+        Returns:
+            bool: True if the drone is within the acceptance radius, False otherwise.
+        """
+        distance_squared = (self.waypoint.location_x - current_x) ** 2 + (
+            self.waypoint.location_y - current_y
+        ) ** 2
+        return distance_squared <= self.acceptance_radius**2
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -49,17 +71,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Make the drone fly to the waypoint and then land at the nearest landing pad.
 
-        You are allowed to create as many helper methods as you want,
-        as long as you do not change the __init__() and run() signatures.
+        Args:
+            report (drone_report.DroneReport): Current status report of the drone.
+            landing_pad_locations (list[location.Location]): List of available landing pad locations.
 
-        This method will be called in an infinite loop, something like this:
-
-        ```py
-        while True:
-            report, landing_pad_locations = get_input()
-            command = Decision.run(report, landing_pad_locations)
-            put_output(command)
-        ```
+        Returns:
+            commands.Command: The command for the drone to execute.
         """
         # Default command
         command = commands.Command.create_null_command()
