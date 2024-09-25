@@ -103,15 +103,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             and report.position.location_y == self.closest_point.location_y
         ):
             command = commands.Command.create_land_command()
-        if self.closest_point:
-            print(
-                "Closest point set to: ",
-                self.closest_point,
-                "Equals",
-                report.position.location_x == self.closest_point.location_x,
-                "Equals y",
-                report.position.location_y == self.closest_point.location_y,
-            )
         print("report", report)
         print("Locations", landing_pad_locations)
 
