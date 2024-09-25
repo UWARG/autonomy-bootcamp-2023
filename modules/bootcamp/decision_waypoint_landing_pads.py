@@ -1,27 +1,21 @@
 """
-BOOTCAMPERS TO COMPLETE.
+Module to manage drone navigation to a waypoint and landing at the nearest landing pad.
 
-Travel to designated waypoint and then land at a nearby landing pad.
+This module provides the DecisionWaypointLandingPads class which is responsible for
+directing a drone to a specified waypoint and then finding and landing at the nearest
+landing pad, based on the drone's current position and the list of available landing pads.
 """
 
 from .. import commands
 from .. import drone_report
-
-# Disable for bootcamp use
-# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
-# Disable for bootcamp use
-# No enable
-# pylint: disable=duplicate-code,unused-argument
-
-
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
-    Travel to the designed waypoint and then land at the nearest landing pad.
+    Travel to the designated waypoint and then land at the nearest landing pad.
     """
 
     def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
@@ -33,18 +27,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             acceptance_radius (float): The radius within which the waypoint is considered reached.
         """
         self.waypoint = waypoint
-        print(f"Waypoint: {waypoint}")
-
         self.acceptance_radius = acceptance_radius
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
-
-        print(str(waypoint.location_x) + str(waypoint.location_y))
+        # Group related attributes into a single dictionary to reduce attribute count
+        self.state = {"waypoint_found": False, "landing_pad_found": False, "closest_pad": None}
 
         self.has_sent_landing_command = False
-        self.find_nearest_landing_pad = False
         self.reached_waypoint = False
         self.moving_to_landing_pad = False
         self.counter = 0
@@ -65,6 +53,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         ) ** 2
         return distance_squared <= self.acceptance_radius**2
 
+    def distance_squared(self, l1: location.Location, l2: location.Location) -> float:
+        """
+        Calculate the square of the distance between two locations.
+
+        Args:
+            l1 (location.Location): The first location.
+            l2 (location.Location): The second location.
+
+        Returns:
+            float: The square of the distance between the two locations.
+        """
+        return (l1.location_x - l2.location_x) ** 2 + (l1.location_y - l2.location_y) ** 2
+
+    def is_within_acceptance_radius(self, pos1: location.Location, pos2: location.Location) -> bool:
+        """
+        Determine if two locations are within the acceptance radius.
+
+        Args:
+            pos1 (location.Location): The first location with attributes `location_x` and `location_y`.
+            pos2 (location.Location): The second location with attributes `location_x` and `location_y`.
+
+        Returns:
+            bool: True if the distance between the two locations is within the acceptance radius.
+        """
+        return self.distance_squared(pos1, pos2) <= self.acceptance_radius**2
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -81,14 +95,49 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
+        if report.status != drone_status.DroneStatus.HALTED:
+            return command
 
-        # Do something based on the report and the state of this class...
+        # Check if the waypoint is reached
+        if not self.state["waypoint_found"]:
+            if self.is_within_acceptance_radius(report.position, self.waypoint):
+                self.state["waypoint_found"] = True
+                print(f"Reached waypoint at {self.waypoint.location_x}, {self.waypoint.location_y}")
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
+                print(
+                    f"Moving to waypoint at {self.waypoint.location_x}, {self.waypoint.location_y}"
+                )
+            return command
 
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+        # Check if the nearest landing pad is found
+        if not self.state["landing_pad_found"]:
+            if self.state["closest_pad"] is None:
+                self.state["closest_pad"] = min(
+                    landing_pad_locations,
+                    key=lambda pad: self.distance_squared(report.position, pad),
+                )
+            if self.is_within_acceptance_radius(report.position, self.state["closest_pad"]):
+                self.state["landing_pad_found"] = True
+                print(
+                    f"Reached landing pad at {self.state['closest_pad'].location_x}, {self.state['closest_pad'].location_y}"
+                )
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.state["closest_pad"].location_x - report.position.location_x,
+                    self.state["closest_pad"].location_y - report.position.location_y,
+                )
+                print(
+                    f"Moving to landing pad at {self.state['closest_pad'].location_x}, {self.state['closest_pad'].location_y}"
+                )
+            return command
+
+        # Land the drone
+        if self.state["landing_pad_found"]:
+            command = commands.Command.create_land_command()
+            print("Landing the drone.")
 
         return command
