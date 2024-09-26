@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.journey_complete = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,10 +68,30 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            x_dist = self.waypoint.location_x - report.position.location_x
+            y_dist = self.waypoint.location_y - report.position.location_y
+            if not self.within_range(report, self.waypoint):
+                command = commands.Command.create_set_relative_destination_command(x_dist, y_dist)
+            elif not self.journey_complete:
+                self.journey_complete = True
+                command = commands.Command.create_halt_command()
+            else:
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def within_range(self, report: drone_report.DroneReport, waypoint: location.Location) -> bool:
+        """
+        Calculates how far the drone is from the waypoint in the x and y direction
+        """
+        x_dist = waypoint.location_x - report.position.location_x
+        y_dist = waypoint.location_y - report.position.location_y
+
+        if x_dist**2 + y_dist**2 <= self.acceptance_radius:
+            return True
+        return False

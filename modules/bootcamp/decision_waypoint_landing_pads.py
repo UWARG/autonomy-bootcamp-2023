@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.reached_waypoint = False
+        self.reached_landpad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -63,15 +64,60 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-
+        nearest_pad = self.nearest_land_pad(self.waypoint, landing_pad_locations)
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            x_dist = self.waypoint.location_x - report.position.location_x
+            y_dist = self.waypoint.location_y - report.position.location_y
+            if not self.within_range(report, self.waypoint) and not self.reached_waypoint:
+                command = commands.Command.create_set_relative_destination_command(x_dist, y_dist)
+            elif not self.reached_waypoint:
+                self.reached_waypoint = True
+                command = commands.Command.create_halt_command()
+            elif not self.reached_landpad:
+                if not self.within_range(report, nearest_pad):
+                    x_pad = nearest_pad.location_x - report.position.location_x
+                    y_pad = nearest_pad.location_y - report.position.location_y
+                    command = commands.Command.create_set_relative_destination_command(x_pad, y_pad)
+                else:
+                    self.reached_landpad = True
+                    command = commands.Command.create_halt_command()
+            else:
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def within_range(self, report: drone_report.DroneReport, waypoint: location.Location) -> bool:
+        """
+        Calculates how far the drone is from the waypoint in the x and y direction
+        """
+        x_dist = waypoint.location_x - report.position.location_x
+        y_dist = waypoint.location_y - report.position.location_y
+
+        if x_dist**2 + y_dist**2 <= self.acceptance_radius:
+            return True
+        return False
+
+    def nearest_land_pad(
+        self, waypoint: location.Location, landing_pad_locations: "list[location.Location]"
+    ) -> location.Location:
+        """
+        Calculates the closest landing pad from the drone's location
+        """
+        min_dist = 100000000000000000
+        min_pad = location.Location
+        for pad in landing_pad_locations:
+            x_dist = waypoint.location_x - pad.location_x
+            y_dist = waypoint.location_y - pad.location_y
+            total_dist = (x_dist**2 + y_dist**2) ** 0.5
+            if total_dist < min_dist:
+                min_dist = total_dist
+                min_pad = pad
+        return min_pad
