@@ -17,9 +17,6 @@ from .. import bounding_box
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
 # Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -98,31 +95,43 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        CONF_VALUE = 0.7
+
+        predictions = self.__model.predict(
+            source=image,
+            conf=CONF_VALUE,
+            device=self.__DEVICE,
+            verbose=True,
+        )
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy if prediction.boxes else []
+        print("boxes_xyxy:", boxes_xyxy)
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = [box.cpu().numpy() for box in boxes_xyxy]
+        print("boxes_cpu:", boxes_cpu)
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
+        for i in range(0, len(boxes_cpu)):
+            # Create BoundingBox object and append to list
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
 
-        return [], image_annotated
+            if result == True and box:
+                bounding_boxes.append(box)
+
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
