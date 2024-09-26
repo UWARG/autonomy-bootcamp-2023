@@ -126,11 +126,14 @@ class DetectLandingPad:
         # BC NOTE: Need for error checking from returned tuple from BoundingBox.create()
         bounding_boxes = []
         for rectangle in boxes_cpu:
-            optional_bounding_box = bounding_box.BoundingBox.create(rectangle)
-            # why is it that this one returns False while other functions might return None for a failure?
-            # still unsure why .shape() is required
-            if optional_bounding_box[0]:
-                bounding_boxes.append(optional_bounding_box[1])
+            # unwrap returned tuple
+            result, box = bounding_box.BoundingBox.create(rectangle)
+            if result:
+                bounding_boxes.append(box)
+            else:
+                # return an empty list if any of them fail???
+                bounding_boxes.clear()  # clear the boxes if any were made before the failed one
+                break
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list

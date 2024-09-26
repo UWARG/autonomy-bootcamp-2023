@@ -87,23 +87,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        match (report.status):
-            # this case should mean the drone is ready for the next instruction
-            case drone_status.DroneStatus.HALTED:
-                # if list queue is not empty
-                if self.goals:
-                    command = self.goals.pop(0)
-                else:
-                    command = commands.Command.create_land_command()
-            case drone_status.DroneStatus.MOVING:
-                # if the current position is close enough to the destination.
-                if (
-                    DecisionSimpleWaypoint.calculate_distance_squared(
-                        report.position, report.destination
-                    )
-                    <= self.acceptance_radius_squared
-                ):
-                    command = commands.Command.create_halt_command()
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.goals:
+                command = self.goals.pop(0)
+            elif (
+                DecisionSimpleWaypoint.calculate_distance_squared(
+                    report.position, report.destination
+                )
+                <= self.acceptance_radius_squared
+            ):
+                command = commands.Command.create_land_command()
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

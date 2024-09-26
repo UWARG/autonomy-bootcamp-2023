@@ -120,36 +120,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         # only execute when "drone" is ready for another instruction
-        match (report.status):
-            # this case should mean the drone is ready for the next instruction
-            case drone_status.DroneStatus.HALTED:
-                # if list queue is not empty
-                if self.goals:
-                    command = self.goals.pop(0)
-                elif not self.landing:
-                    # try to find a landing pad
-                    self.landing = True
-                    nearest_landing_pad_location = DecisionWaypointLandingPads.find_nearest_pad(
-                        report.position, landing_pad_locations
-                    )
-                    # tuple unwrapping
-                    relative_x, relative_y = DecisionWaypointLandingPads.get_relative_position(
-                        report.position, nearest_landing_pad_location
-                    )
-                    command = commands.Command.create_set_relative_destination_command(
-                        relative_x, relative_y
-                    )
-                else:
-                    command = commands.Command.create_land_command()
-            case drone_status.DroneStatus.MOVING:
-                # if the current position is close enough to the destination.
-                if (
-                    DecisionWaypointLandingPads.calculate_distance_squared(
-                        report.position, report.destination
-                    )
-                    <= self.acceptance_radius_squared
-                ):
-                    command = commands.Command.create_halt_command()
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.goals:
+                command = self.goals.pop(0)
+            elif not self.landing:
+                # try to find a landing pad
+                self.landing = True
+                nearest_landing_pad_location = DecisionWaypointLandingPads.find_nearest_pad(
+                    report.position, landing_pad_locations
+                )
+                # tuple unwrapping
+                relative_x, relative_y = DecisionWaypointLandingPads.get_relative_position(
+                    report.position, nearest_landing_pad_location
+                )
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
+            elif (
+                DecisionWaypointLandingPads.calculate_distance_squared(
+                    report.position, report.destination
+                )
+                <= self.acceptance_radius_squared
+            ):
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
