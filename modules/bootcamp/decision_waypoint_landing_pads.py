@@ -71,7 +71,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 _min = x_distance**2 + y_distance**2
             index += 1
 
-        if _min <= self.acceptance_radius:
+        if _min <= self.acceptance_radius**2:
             return -1
 
         return closest_index
