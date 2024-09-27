@@ -85,8 +85,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.landing:
                 command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            )
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
                 self.landing = True
             elif (
                 DecisionSimpleWaypoint.calculate_distance_squared(

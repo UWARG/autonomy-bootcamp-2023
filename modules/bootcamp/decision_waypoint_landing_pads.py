@@ -126,7 +126,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 <= self.acceptance_radius_squared
             ):
-                command = commands.Command.create_land_command()            
+                command = commands.Command.create_land_command()
             else:
                 # try to find a landing pad
                 nearest_landing_pad_location = DecisionWaypointLandingPads.find_nearest_pad(
