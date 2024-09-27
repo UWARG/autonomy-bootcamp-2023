@@ -37,8 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.journey_complete = False
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -73,9 +71,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             y_dist = self.waypoint.location_y - report.position.location_y
             if not self.within_range(report, self.waypoint):
                 command = commands.Command.create_set_relative_destination_command(x_dist, y_dist)
-            elif not self.journey_complete:
-                self.journey_complete = True
-                command = commands.Command.create_halt_command()
             else:
                 command = commands.Command.create_land_command()
 
@@ -92,6 +87,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         x_dist = waypoint.location_x - report.position.location_x
         y_dist = waypoint.location_y - report.position.location_y
 
-        if x_dist**2 + y_dist**2 <= self.acceptance_radius:
+        if x_dist**2 + y_dist**2 <= self.acceptance_radius**2:
             return True
         return False

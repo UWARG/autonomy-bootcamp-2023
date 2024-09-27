@@ -64,7 +64,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-        nearest_pad = self.nearest_land_pad(self.waypoint, landing_pad_locations)
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -74,17 +73,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             y_dist = self.waypoint.location_y - report.position.location_y
             if not self.within_range(report, self.waypoint) and not self.reached_waypoint:
                 command = commands.Command.create_set_relative_destination_command(x_dist, y_dist)
-            elif not self.reached_waypoint:
-                self.reached_waypoint = True
-                command = commands.Command.create_halt_command()
             elif not self.reached_landpad:
+                self.reached_waypoint = True
+                nearest_pad = self.nearest_land_pad(self.waypoint, landing_pad_locations)
                 if not self.within_range(report, nearest_pad):
                     x_pad = nearest_pad.location_x - report.position.location_x
                     y_pad = nearest_pad.location_y - report.position.location_y
                     command = commands.Command.create_set_relative_destination_command(x_pad, y_pad)
                 else:
                     self.reached_landpad = True
-                    command = commands.Command.create_halt_command()
             else:
                 command = commands.Command.create_land_command()
 
@@ -101,7 +98,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         x_dist = waypoint.location_x - report.position.location_x
         y_dist = waypoint.location_y - report.position.location_y
 
-        if x_dist**2 + y_dist**2 <= self.acceptance_radius:
+        if x_dist**2 + y_dist**2 <= self.acceptance_radius**2:
             return True
         return False
 
@@ -111,13 +108,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Calculates the closest landing pad from the drone's location
         """
-        min_dist = 100000000000000000
+        min_dist = float("inf")
         min_pad = location.Location
         for pad in landing_pad_locations:
             x_dist = waypoint.location_x - pad.location_x
             y_dist = waypoint.location_y - pad.location_y
-            total_dist = (x_dist**2 + y_dist**2) ** 0.5
-            if total_dist < min_dist:
-                min_dist = total_dist
+            curr_dist = x_dist**2 + y_dist**2
+            if curr_dist < min_dist:
+                min_dist = curr_dist
                 min_pad = pad
         return min_pad
