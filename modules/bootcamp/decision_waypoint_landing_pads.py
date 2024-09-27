@@ -39,13 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.acceptance_radius_squared = self.acceptance_radius**2  # used for distance calculation
-
-        self.goals = [
-            commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            )
-        ]
-
+        self.finding_landing_pad = False
         self.landing = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -121,11 +115,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # only execute when "drone" is ready for another instruction
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.goals:
-                command = self.goals.pop(0)
-            elif not self.landing:
+            if not self.finding_landing_pad:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
+                self.finding_landing_pad = True
+            elif self.landing and (
+                DecisionWaypointLandingPads.calculate_distance_squared(
+                    report.position, report.destination
+                )
+                <= self.acceptance_radius_squared
+            ):
+                command = commands.Command.create_land_command()            
+            else:
                 # try to find a landing pad
-                self.landing = True
                 nearest_landing_pad_location = DecisionWaypointLandingPads.find_nearest_pad(
                     report.position, landing_pad_locations
                 )
@@ -136,13 +139,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
-            elif (
-                DecisionWaypointLandingPads.calculate_distance_squared(
-                    report.position, report.destination
-                )
-                <= self.acceptance_radius_squared
-            ):
-                command = commands.Command.create_land_command()
+                self.landing = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

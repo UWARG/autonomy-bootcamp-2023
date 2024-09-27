@@ -131,9 +131,7 @@ class DetectLandingPad:
             if result:
                 bounding_boxes.append(box)
             else:
-                # return an empty list if any of them fail???
-                bounding_boxes.clear()  # clear the boxes if any were made before the failed one
-                break
+                return [], image_annotated
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list

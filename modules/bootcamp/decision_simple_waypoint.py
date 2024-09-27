@@ -39,12 +39,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
         self.acceptance_radius_squared = self.acceptance_radius**2  # used for distance calculation
-
-        self.goals = [
-            commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            )
-        ]
+        self.landing = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -88,8 +83,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.goals:
-                command = self.goals.pop(0)
+            if not self.landing:
+                command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+                self.landing = True
             elif (
                 DecisionSimpleWaypoint.calculate_distance_squared(
                     report.position, report.destination
