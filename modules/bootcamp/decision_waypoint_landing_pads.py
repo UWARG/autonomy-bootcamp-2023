@@ -32,27 +32,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Group related attributes into a single dictionary to reduce attribute count
         self.state = {"waypoint_found": False, "landing_pad_found": False, "closest_pad": None}
 
-        self.has_sent_landing_command = False
-        self.reached_waypoint = False
-        self.moving_to_landing_pad = False
-        self.counter = 0
-
-    def at_point(self, current_x: float, current_y: float) -> bool:
-        """
-        Check if the current position is within the acceptance radius of the waypoint.
-
-        Args:
-            current_x (float): The current x-coordinate of the drone.
-            current_y (float): The current y-coordinate of the drone.
-
-        Returns:
-            bool: True if the drone is within the acceptance radius, False otherwise.
-        """
-        distance_squared = (self.waypoint.location_x - current_x) ** 2 + (
-            self.waypoint.location_y - current_y
-        ) ** 2
-        return distance_squared <= self.acceptance_radius**2
-
     def distance_squared(self, l1: location.Location, l2: location.Location) -> float:
         """
         Calculate the square of the distance between two locations.
