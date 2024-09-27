@@ -39,6 +39,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
 
+        self.has_set_destination = False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,22 +71,23 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        def within(location1: location.Location, location2: location.Location) -> bool:
+            radius_squared = self.acceptance_radius**2
+            return (location1.location_x - location2.location_x) ** 2 + (
+                location1.location_y - location2.location_y
+            ) ** 2 <= radius_squared
 
-        if report.position.location_x == 0 and report.position.location_y == 0:
+        if not self.has_set_destination:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
-
-        def within(loc1: location.Location, loc2: location.Location) -> bool:
-            radius_squared = self.acceptance_radius**2
-            return (loc1.location_x - loc2.location_x) ** 2 + (
-                loc1.location_y - loc2.location_y
-            ) ** 2 <= radius_squared
-
-        if drone_status.DroneStatus.MOVING and within(report.position, self.waypoint):
+            self.has_set_destination = True
+        elif report.status == drone_status.DroneStatus.MOVING and within(
+            report.position, report.destination
+        ):
             command = commands.Command.create_halt_command()
-            if report.status == drone_status.DroneStatus.HALTED:
-                command = commands.Command.create_land_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

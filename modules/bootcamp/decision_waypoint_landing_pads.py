@@ -39,7 +39,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
-        self.closest_point = None
+        self.found_closest_landing_pad = False
+
+        self.has_set_destination = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -72,36 +74,46 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        def manhattan_dist(loc: location.Location) -> int:
-            return abs(loc.location_x - self.waypoint.location_x) + abs(
-                loc.location_y - self.waypoint.location_y
-            )
-
-        def within(loc1: location.Location, loc2: location.Location) -> bool:
+        def within(location1: location.Location, location2: location.Location) -> bool:
             radius_squared = self.acceptance_radius**2
-            return (loc1.location_x - loc2.location_x) ** 2 + (
-                loc1.location_y - loc2.location_y
+            return (location1.location_x - location2.location_x) ** 2 + (
+                location1.location_y - location2.location_y
             ) ** 2 <= radius_squared
 
-        if report.position.location_x == 0 and report.position.location_y == 0:
+        def euclidean_distance_squared(
+            location1: location.Location, location2: location.Location
+        ) -> int:
+            return (location1.location_x - location2.location_x) ** 2 + (
+                location1.location_y - location2.location_y
+            ) ** 2
+
+        if not self.has_set_destination:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
-
-        if self.closest_point is None and within(report.position, self.waypoint):
-            dist = manhattan_dist(landing_pad_locations[0])
-            loc = landing_pad_locations[0]
+            self.has_set_destination = True
+        elif report.status == drone_status.DroneStatus.MOVING and within(
+            report.position, report.destination
+        ):
+            command = commands.Command.create_halt_command()
+        elif not self.found_closest_landing_pad and within(report.position, report.destination):
+            distance = euclidean_distance_squared(report.position, landing_pad_locations[0])
+            found_location = landing_pad_locations[0]
             for i in range(1, len(landing_pad_locations)):
-                new_dist = manhattan_dist(landing_pad_locations[i])
-                if new_dist < dist:
-                    dist = new_dist
-                    loc = landing_pad_locations[i]
+                new_distance = euclidean_distance_squared(report.position, landing_pad_locations[i])
+                if new_distance < distance:
+                    distance = new_distance
+                    found_location = landing_pad_locations[i]
             command = commands.Command.create_set_relative_destination_command(
-                loc.location_x - self.waypoint.location_x, loc.location_y - self.waypoint.location_y
+                found_location.location_x - report.position.location_x,
+                found_location.location_y - report.position.location_y,
             )
-            self.closest_point = loc
-
-        if self.closest_point and within(report.position, self.closest_point):
+            self.found_closest_landing_pad = True
+        elif (
+            self.found_closest_landing_pad
+            and report.status == drone_status.DroneStatus.HALTED
+            and within(report.position, report.destination)
+        ):
             command = commands.Command.create_land_command()
 
         # ============
