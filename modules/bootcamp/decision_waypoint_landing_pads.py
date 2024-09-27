@@ -109,7 +109,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Calculates the closest landing pad from the drone's location
         """
         min_dist = float("inf")
-        min_pad = location.Location
+        min_pad = None
         for pad in landing_pad_locations:
             x_dist = waypoint.location_x - pad.location_x
             y_dist = waypoint.location_y - pad.location_y
