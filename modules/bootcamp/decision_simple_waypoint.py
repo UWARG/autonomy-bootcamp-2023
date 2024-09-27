@@ -45,15 +45,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def calculate_distance_squared(
-        location_1: location.Location, location_2: location.Location
-    ) -> float:
+    def calculate_distance_squared(location_1: location.Location, to_x: float, to_y) -> float:
         """
         Calculate the non-square rooted distance between two locations
         """
-        return (location_2.location_x - location_1.location_x) ** 2 + (
-            location_2.location_y - location_1.location_y
-        ) ** 2
+        return (to_x - location_1.location_x) ** 2 + (to_y - location_1.location_y) ** 2
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -83,18 +79,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         if report.status == drone_status.DroneStatus.HALTED:
-            if not self.landing:
-                command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
-                )
-                self.landing = True
-            elif (
+            if (
                 DecisionSimpleWaypoint.calculate_distance_squared(
-                    report.position, report.destination
+                    report.position, self.waypoint.location_x, self.waypoint.location_y
                 )
                 <= self.acceptance_radius_squared
             ):
                 command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

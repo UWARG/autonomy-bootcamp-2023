@@ -39,8 +39,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.acceptance_radius_squared = self.acceptance_radius**2  # used for distance calculation
-        self.finding_landing_pad = False
-        self.landing = False
+        self.finding_waypoint = True
+        self.nearest_landing_pad_location = location.Location(0, 0)
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -65,14 +66,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     @staticmethod
     def calculate_distance_squared(
-        location_1: location.Location, location_2: location.Location
+        location_1: location.Location, to_x: float, to_y: float
     ) -> float:
         """
         Calculate the non-square rooted distance between two locations
         """
-        return (location_2.location_x - location_1.location_x) ** 2 + (
-            location_2.location_y - location_1.location_y
-        ) ** 2
+        return (to_x - location_1.location_x) ** 2 + (to_y - location_1.location_y) ** 2
 
     @staticmethod
     def get_relative_position(
@@ -115,31 +114,40 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # only execute when "drone" is ready for another instruction
         if report.status == drone_status.DroneStatus.HALTED:
-            if not self.finding_landing_pad:
-                command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
-                )
-                self.finding_landing_pad = True
-            elif self.landing and (
-                DecisionWaypointLandingPads.calculate_distance_squared(
-                    report.position, report.destination
-                )
-                <= self.acceptance_radius_squared
-            ):
-                command = commands.Command.create_land_command()
+            if self.finding_waypoint:
+                if (
+                    DecisionWaypointLandingPads.calculate_distance_squared(
+                        report.position, self.waypoint.location_x, self.waypoint.location_y
+                    )
+                    <= self.acceptance_radius_squared
+                ):
+                    self.finding_waypoint = False
+                    self.nearest_landing_pad_location = (
+                        DecisionWaypointLandingPads.find_nearest_pad(
+                            report.position, landing_pad_locations
+                        )
+                    )
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x, self.waypoint.location_y
+                    )
             else:
-                # try to find a landing pad
-                nearest_landing_pad_location = DecisionWaypointLandingPads.find_nearest_pad(
-                    report.position, landing_pad_locations
-                )
-                # tuple unwrapping
-                relative_x, relative_y = DecisionWaypointLandingPads.get_relative_position(
-                    report.position, nearest_landing_pad_location
-                )
-                command = commands.Command.create_set_relative_destination_command(
-                    relative_x, relative_y
-                )
-                self.landing = True
+                if (
+                    DecisionWaypointLandingPads.calculate_distance_squared(
+                        report.position,
+                        self.nearest_landing_pad_location.location_x,
+                        self.nearest_landing_pad_location.location_y,
+                    )
+                    <= self.acceptance_radius_squared
+                ):
+                    command = commands.Command.create_land_command()
+                else:
+                    relative_x, relative_y = DecisionWaypointLandingPads.get_relative_position(
+                        report.position, self.nearest_landing_pad_location
+                    )
+                    command = commands.Command.create_set_relative_destination_command(
+                        relative_x, relative_y
+                    )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
