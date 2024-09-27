@@ -71,7 +71,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Calculate the non-square rooted distance between two locations
         """
-        return (to_location_x - from_location.location_x) ** 2 + (to_location_y - from_location.location_y) ** 2
+        return (to_location_x - from_location.location_x) ** 2 + (
+            to_location_y - from_location.location_y
+        ) ** 2
 
     @staticmethod
     def get_relative_position(
