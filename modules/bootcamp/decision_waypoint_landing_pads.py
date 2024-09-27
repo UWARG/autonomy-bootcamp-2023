@@ -66,23 +66,23 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     @staticmethod
     def calculate_distance_squared(
-        location_1: location.Location, to_x: float, to_y: float
+        from_location: location.Location, to_location_x: float, to_location_y: float
     ) -> float:
         """
         Calculate the non-square rooted distance between two locations
         """
-        return (to_x - location_1.location_x) ** 2 + (to_y - location_1.location_y) ** 2
+        return (to_location_x - from_location.location_x) ** 2 + (to_location_y - from_location.location_y) ** 2
 
     @staticmethod
     def get_relative_position(
-        location_1: location.Location, location_2: location.Location
+        from_location: location.Location, to_location: location.Location
     ) -> tuple[float, float]:
         """
         Calculates the relative position of one position to another
         """
         return (
-            location_2.location_x - location_1.location_x,
-            location_2.location_y - location_1.location_y,
+            to_location.location_x - from_location.location_x,
+            to_location.location_y - from_location.location_y,
         )
 
     def run(

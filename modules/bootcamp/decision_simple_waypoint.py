@@ -45,11 +45,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def calculate_distance_squared(location_1: location.Location, to_x: float, to_y) -> float:
+    def calculate_distance_squared(from_location: location.Location, to_location_x: float, to_location_y) -> float:
         """
         Calculate the non-square rooted distance between two locations
         """
-        return (to_x - location_1.location_x) ** 2 + (to_y - location_1.location_y) ** 2
+        return (to_location_x - from_location.location_x) ** 2 + (to_location_y - from_location.location_y) ** 2
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
