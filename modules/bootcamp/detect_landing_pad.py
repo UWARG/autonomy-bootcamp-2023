@@ -71,7 +71,7 @@ class DetectLandingPad:
         """
         assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
 
-        self._model = model
+        self.__model = model
 
     def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
@@ -95,7 +95,7 @@ class DetectLandingPad:
         # * device
         # * verbose
 
-        predictions = self._model.predict(image, conf=0.75, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(image, conf=0.75, device=self.__DEVICE, verbose=False)
         # Get the Result object
         prediction = predictions[0]
 
@@ -118,7 +118,7 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             # Hint: .shape gets the dimensions of the numpy array
             # for i in range(0, ...):
-            #     # Create BoundingBox object and append to l   xist
+            #     # Create BoundingBox object and append to list
             box_coordinates = np.array(
                 [boxes_cpu[i][0], boxes_cpu[i][1], boxes_cpu[i][2], boxes_cpu[i][3]]
             )
