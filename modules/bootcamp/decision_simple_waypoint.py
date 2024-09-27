@@ -79,14 +79,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         if not self.has_set_destination:
             command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
             )
             self.has_set_destination = True
         elif report.status == drone_status.DroneStatus.MOVING and within(
-            report.position, report.destination
+            report.position, self.waypoint
         ):
             command = commands.Command.create_halt_command()
-        elif report.status == drone_status.DroneStatus.HALTED:
+        elif report.status == drone_status.DroneStatus.HALTED and within(
+            report.position, self.waypoint
+        ):
             command = commands.Command.create_land_command()
 
         # ============

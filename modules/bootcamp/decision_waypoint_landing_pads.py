@@ -39,7 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
-        self.found_closest_landing_pad = False
+        self.closest_landing_pad = None
 
         self.has_set_destination = False
 
@@ -89,14 +89,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if not self.has_set_destination:
             command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
             )
             self.has_set_destination = True
         elif report.status == drone_status.DroneStatus.MOVING and within(
-            report.position, report.destination
+            report.position, self.waypoint
         ):
             command = commands.Command.create_halt_command()
-        elif not self.found_closest_landing_pad and within(report.position, report.destination):
+        elif self.closest_landing_pad is None and within(report.position, self.waypoint):
             distance = euclidean_distance_squared(report.position, landing_pad_locations[0])
             found_location = landing_pad_locations[0]
             for i in range(1, len(landing_pad_locations)):
@@ -108,11 +109,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 found_location.location_x - report.position.location_x,
                 found_location.location_y - report.position.location_y,
             )
-            self.found_closest_landing_pad = True
+            self.closest_landing_pad = found_location
         elif (
-            self.found_closest_landing_pad
+            not self.closest_landing_pad is None
             and report.status == drone_status.DroneStatus.HALTED
-            and within(report.position, report.destination)
+            and within(report.position, self.closest_landing_pad)
         ):
             command = commands.Command.create_land_command()
 
