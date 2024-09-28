@@ -54,30 +54,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         x_direction = self.waypoint.location_x - report.position.location_x
         y_direction = self.waypoint.location_y - report.position.location_y
 
-        overbound = True
-        while overbound:
-            x_temp = x_direction
-            y_temp = y_direction
-            overbound = False
-            if abs(x_direction) > 60:
-                overbound = True
-                if x_direction < 0:
-                    x_temp = -60.0
-                    x_direction += -60.0
-                else:
-                    x_temp = 60.0
-                    x_direction += 60.0
-            if abs(y_direction) > 60:
-                overbound = True
-                if y_direction < 0:
-                    y_temp = -60.0
-                    y_direction += -60.0
-                else:
-                    y_temp = 60.0
-                    y_direction += 60.0
-
         self.commands.append(
-            commands.Command.create_set_relative_destination_command(x_temp, y_temp)
+            commands.Command.create_set_relative_destination_command(x_direction, y_direction)
         )
 
     def run(
