@@ -37,14 +37,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.has_sent_landing_command = False
+
+        self.has_sent_flying_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
     def run(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+        self,
+        report: drone_report.DroneReport,
+        landing_pad_locations: "list[location.Location]",
     ) -> commands.Command:
         """
         Make the drone fly to the waypoint.
@@ -68,7 +72,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_sent_flying_command
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+            self.has_sent_flying_command = True
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_sent_landing_command
+        ):
+            command = commands.Command.create_land_command()
+            self.has_sent_landing_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
