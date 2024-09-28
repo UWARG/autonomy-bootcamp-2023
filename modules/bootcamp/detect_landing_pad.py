@@ -89,7 +89,7 @@ class DetectLandingPad:
 
         # Ultralytics has documentation and examples
         # https://docs.ultralytics.com/modes/predict/
-        model = self.__model # use pre-trained model
+        model = self.__model  # use pre-trained model
 
         # Use the model's predict() method to run inference
         # Parameters of interest:
@@ -97,9 +97,7 @@ class DetectLandingPad:
         # * conf - float: Sets the minimum confidence threshold for detections. Objects detected with confidence below this threshold will be disregarded. Adjusting this value can help reduce false positives.
         # * device - str: Specifies the device for inference (e.g., cpu, cuda:0 or 0). Allows users to select between CPU, a specific GPU, or other compute devices for model execution.
         # * verbose - bool: Return log string for each task.
-        predictions = model.predict(
-            source=image, conf=0.7, device=self.__DEVICE, verbose=False
-        )
+        predictions = model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
 
         # Get the Result object
         prediction = predictions[0]
@@ -122,9 +120,10 @@ class DetectLandingPad:
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
         #     result, box = ...
-        for i in range(len(boxes_cpu)):
-            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            if not result: return [], image_annotated # data is invalid
+        for box_cpu in boxes_cpu:
+            result, box = bounding_box.BoundingBox.create(box_cpu)
+            if not result:
+                return [], image_annotated  # data is invalid
             bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
