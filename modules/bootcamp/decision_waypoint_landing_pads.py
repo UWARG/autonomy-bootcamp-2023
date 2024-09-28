@@ -41,7 +41,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.commands = []
         self.has_sent_landing_command = False
         self.has_reached_waypoint = False
-        self.closest_index = -2
+        self.closest_index = -1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -55,6 +55,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """ "
         set_directions and append it to the list
         """
+        self.commands = []
         x_direction = destination.location_x - report.position.location_x
         y_direction = destination.location_y - report.position.location_y
 
@@ -64,7 +65,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     def closest_pad(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
-    ) -> int:
+    ) -> int | None:
         """ "
         Finds the index of the closest pad
         """
@@ -81,8 +82,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             index += 1
 
         if _min <= self.acceptance_radius**2:
-            return -1
-
+            return None
         return closest_index
 
     def run(
@@ -110,7 +110,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if len(self.commands) == 0 and not self.has_reached_waypoint:
+        if len(self.commands) == 0 and not self.has_reached_waypoint:  # set directions
             self.set_directions(report, self.waypoint)
 
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
@@ -123,30 +123,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             command = self.commands[self.command_index]
             self.command_index += 1
 
+        elif (
+            report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint
+        ):  # if halted somewhere on the way to the waypoint
             if (
                 abs(report.position.location_x - self.waypoint.location_x) <= self.acceptance_radius
                 and abs(report.position.location_y - self.waypoint.location_y)
                 <= self.acceptance_radius
             ):  # if arrive to the waypoint
                 self.has_reached_waypoint = True
+            else:
+                self.set_directions(report, self.waypoint)
+                self.command_index = 0
+                command = self.commands[0]
 
-        elif (
-            report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint
-        ):  # if halted somewhere on the way to the waypoint
-            self.set_directions(report, self.waypoint)
-            self.command_index = 0
-            command = self.commands[0]
-
-        elif (
+        if (
             report.status == drone_status.DroneStatus.HALTED
             and self.has_reached_waypoint
             and not self.has_sent_landing_command
         ):  # if halted somewhere on the way to the pad
-
-            if self.closest_index == -2:
+            if self.closest_index == -1:
                 self.closest_index = self.closest_pad(report, landing_pad_locations)
-
-            if self.closest_index != -1 or self.closest_index != -2:
+                if self.closest_index is None:  # if waypoint is directly on the pad simply land
+                    command = commands.Command.create_land_command()
+                    self.has_sent_landing_command = True
+            else:
                 if (
                     abs(
                         report.position.location_x
@@ -163,7 +164,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.command_index = 0
                     command = self.commands[0]
                 else:  # if arrive to the landing pad
-                    print("its here")
                     command = commands.Command.create_land_command()
                     self.has_sent_landing_command = True
 
