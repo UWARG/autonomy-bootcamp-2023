@@ -100,7 +100,7 @@ class DetectLandingPad:
             source=image,
             conf=0.7,
             device=self.__DEVICE,
-            verbose=True,
+            verbose=False,
         )
 
         # Get the Result object
