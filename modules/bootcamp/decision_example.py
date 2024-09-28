@@ -32,14 +32,22 @@ class DecisionExample(base_decision.BaseDecision):
 
         self.command_index = 0
         self.commands = [
-            commands.Command.create_set_relative_destination_command(50.0, 37.5),
-            commands.Command.create_set_relative_destination_command(0.0, -75.0),
-            commands.Command.create_set_relative_destination_command(-50.0, 37.5),
-            commands.Command.create_set_relative_destination_command(-50.0, -37.5),
-            commands.Command.create_set_relative_destination_command(0.0, 75.0),
-            commands.Command.create_set_relative_destination_command(50.0, -37.5),
-            commands.Command.create_set_relative_destination_command(-50.0, 0.0),
-            commands.Command.create_set_relative_destination_command(50.0, 0.0),
+            commands.Command.create_set_relative_destination_command(
+                50.0, 37.5),
+            commands.Command.create_set_relative_destination_command(
+                0.0, -75.0),
+            commands.Command.create_set_relative_destination_command(
+                -50.0, 37.5),
+            commands.Command.create_set_relative_destination_command(
+                -50.0, -37.5),
+            commands.Command.create_set_relative_destination_command(
+                0.0, 75.0),
+            commands.Command.create_set_relative_destination_command(
+                50.0, -37.5),
+            commands.Command.create_set_relative_destination_command(
+                -50.0, 0.0),
+            commands.Command.create_set_relative_destination_command(
+                50.0, 0.0),
         ]
 
         self.has_sent_landing_command = False
