@@ -48,7 +48,9 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(cls, model_directory: pathlib.Path) -> "tuple[bool, DetectLandingPad | None]":
+    def create(
+        cls, model_directory: pathlib.Path
+    ) -> "tuple[bool, DetectLandingPad | None]":
         """
         model_directory: Directory to models.
         """
@@ -69,15 +71,21 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
+    def __init__(
+        self, class_private_create_key: object, model: ultralytics.YOLO
+    ) -> None:
         """
         Private constructor, use create() method.
         """
-        assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
+        assert (
+            class_private_create_key is DetectLandingPad.__create_key
+        ), "Use create() method"
 
         self.__model = model
 
-    def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    def run(
+        self, image: np.ndarray
+    ) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
 
@@ -98,22 +106,24 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(
+            source=image, conf=0.3, device=self.__DEVICE, verbose=False
+        )
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -121,8 +131,13 @@ class DetectLandingPad:
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
         #     result, box = ...
+        for i in range(0, boxes_cpu.shape[0]):
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
 
-        return [], image_annotated
+            if result:
+                bounding_boxes.append(box)
+
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
