@@ -38,17 +38,47 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         self.command_index = 0
-        self.commands = [
-            commands.Command.create_set_relative_destination_command(
-                waypoint.location_x, waypoint.location_y
-            )
-        ]
+        self.commands = []
         self.counter = 0
         self.has_sent_landing_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def set_directions(self, report: drone_report.DroneReport) -> None:
+        """ "
+        set_directions and append it to the list
+        """
+        self.commands = []
+        x_direction = self.waypoint.location_x - report.position.location_x
+        y_direction = self.waypoint.location_y - report.position.location_y
+
+        overbound = True
+        while overbound:
+            x_temp = x_direction
+            y_temp = y_direction
+            overbound = False
+            if abs(x_direction) > 60:
+                overbound = True
+                if x_direction < 0:
+                    x_temp = -60.0
+                    x_direction += -60.0
+                else:
+                    x_temp = 60.0
+                    x_direction += 60.0
+            if abs(y_direction) > 60:
+                overbound = True
+                if y_direction < 0:
+                    y_temp = -60.0
+                    y_direction += -60.0
+                else:
+                    y_temp = 60.0
+                    y_direction += 60.0
+
+        self.commands.append(
+            commands.Command.create_set_relative_destination_command(x_temp, y_temp)
+        )
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -75,6 +105,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        if len(self.commands) == 0:
+            self.set_directions(report)
+
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
             self.commands
         ):
@@ -87,10 +120,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             self.command_index += 1
 
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
-            print(self.counter)
-            command = commands.Command.create_land_command()
 
-            self.has_sent_landing_command = True
+            if (
+                abs(report.position.location_x - self.waypoint.location_x) > self.acceptance_radius
+                and abs(report.position.location_y - self.waypoint.location_y)
+                > self.acceptance_radius
+            ):
+                self.set_directions(report)
+                self.command_index = 0
+                command = self.commands[0]
+
+            else:
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
 
         self.counter += 1
         # ============
