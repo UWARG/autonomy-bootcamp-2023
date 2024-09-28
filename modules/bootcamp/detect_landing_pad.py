@@ -126,12 +126,16 @@ class DetectLandingPad:
         #     result, box = ...
         bounding_boxes = []  # Initialize an empty list to store bounding boxes
 
-        for xyxy_boxes in boxes_cpu:
-            success, box = bounding_box.BoundingBox.create(xyxy_boxes)
-            if success:
-                bounding_boxes.append(box)  # Add the successfully created box to the list
+        # Initialize an empty list to store bounding boxes
+        bounding_boxes = []
 
-        # Now return the bounding_boxes list along with the image_annotated
+        # Loop over the xyxy_boxes from boxes_cpu
+        for box_coordinates in boxes_cpu:
+            success, box = bounding_box.BoundingBox.create(box_coordinates)
+            if success:
+                bounding_boxes.append(box)  # Add the successfully created bounding box to the list
+
+        # Return the bounding_boxes list along with the annotated image
         return bounding_boxes, image_annotated
 
         # ============
