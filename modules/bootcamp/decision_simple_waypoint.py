@@ -46,7 +46,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
     @staticmethod
     def calculate_distance_squared(
-        from_location: location.Location, to_location_x: float, to_location_y
+        from_location: location.Location, to_location_x: float, to_location_y: float
     ) -> float:
         """
         Calculate the non-square rooted distance between two locations
