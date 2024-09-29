@@ -4,7 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
-from torch import inf
 from .. import commands
 from .. import drone_report
 
@@ -38,6 +37,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         self.nearest_landingpad = None
+
+        # We can assign the acceptance_radius as a tolerance for position!
+        self.position_tolerance = acceptance_radius
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -89,24 +92,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         ):
 
             if (
-                to_landingpad_x is not None
-                and to_landingpad_y is not None
-                and abs(to_landingpad_x) <= self.acceptance_radius
-                and abs(to_landingpad_y) <= self.acceptance_radius
+                self.nearest_landingpad is not None
+                and abs(to_landingpad_x) <= self.position_tolerance
+                and abs(to_landingpad_y) <= self.position_tolerance
             ):
                 command = commands.Command.create_land_command()
             elif (
-                abs(to_waypoint_x) <= self.acceptance_radius
-                and abs(to_waypoint_y) <= self.acceptance_radius
+                abs(to_waypoint_x) <= self.position_tolerance
+                and abs(to_waypoint_y) <= self.position_tolerance
             ):
-                shortest_distance = inf
+                shortest_distance = float("inf")
 
-                for _, landing_pad in enumerate(landing_pad_locations):
-                    distance = (landing_pad.location_x**2 + landing_pad.location_y**2) ** (1 / 2)
+                # pylint: disable=consider-using-enumerate
+                for landing_pad in range(0, len(landing_pad_locations)):
+                    distance = (
+                        landing_pad_locations[landing_pad].location_x ** 2
+                        + landing_pad_locations[landing_pad].location_y ** 2
+                    )
 
                     if shortest_distance > distance:
                         shortest_distance = distance
-                        self.nearest_landingpad = landing_pad
+                        self.nearest_landingpad = landing_pad_locations[landing_pad]
 
                 if self.nearest_landingpad is not None:
                     command = commands.Command.create_set_relative_destination_command(
@@ -121,8 +127,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
         elif report.status == drone_status.DroneStatus.MOVING:
             if (
-                abs(to_waypoint_x) <= self.acceptance_radius
-                and abs(to_waypoint_y) <= self.acceptance_radius
+                abs(to_waypoint_x) <= self.position_tolerance
+                and abs(to_waypoint_y) <= self.position_tolerance
             ):
                 command = commands.Command.create_halt_command()
             if (
