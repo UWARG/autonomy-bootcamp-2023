@@ -38,8 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         self.nearest_landingpad = None
 
-        # We can assign the acceptance_radius as a tolerance for position!
-        self.position_tolerance = acceptance_radius
+        self.acceptance_radius_squared = acceptance_radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -73,16 +72,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        to_waypoint_x = self.waypoint.location_x - report.position.location_x
-        to_waypoint_y = self.waypoint.location_y - report.position.location_y
-        to_landingpad_x = (
-            self.nearest_landingpad.location_x - report.position.location_x
-            if self.nearest_landingpad is not None
-            else None
-        )
-        to_landingpad_y = (
-            self.nearest_landingpad.location_y - report.position.location_y
+        distance_to_waypoint = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2
+        distance_to_landingpad = (
+            (self.nearest_landingpad.location_x - report.position.location_x) ** 2
+            + (self.nearest_landingpad.location_y - report.position.location_y) ** 2
             if self.nearest_landingpad is not None
             else None
         )
@@ -92,15 +87,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         ):
 
             if (
-                self.nearest_landingpad is not None
-                and abs(to_landingpad_x) <= self.position_tolerance
-                and abs(to_landingpad_y) <= self.position_tolerance
+                distance_to_landingpad is not None
+                and distance_to_landingpad < self.acceptance_radius_squared
             ):
                 command = commands.Command.create_land_command()
-            elif (
-                abs(to_waypoint_x) <= self.position_tolerance
-                and abs(to_waypoint_y) <= self.position_tolerance
-            ):
+            elif distance_to_waypoint < self.acceptance_radius_squared:
                 shortest_distance = float("inf")
 
                 for landing_pad in landing_pad_locations:
@@ -119,19 +110,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     command = commands.Command.create_null_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    to_waypoint_x, to_waypoint_y
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
                 )
         elif report.status == drone_status.DroneStatus.MOVING:
-            if (
-                abs(to_waypoint_x) <= self.position_tolerance
-                and abs(to_waypoint_y) <= self.position_tolerance
-            ):
+            if distance_to_waypoint < self.acceptance_radius_squared:
                 command = commands.Command.create_halt_command()
             if (
-                to_landingpad_x is not None
-                and to_landingpad_y is not None
-                and abs(to_landingpad_x) <= self.acceptance_radius
-                and abs(to_landingpad_y) <= self.acceptance_radius
+                distance_to_landingpad is not None
+                and distance_to_landingpad < self.acceptance_radius_squared
             ):
                 commands.Command.create_land_command()
 

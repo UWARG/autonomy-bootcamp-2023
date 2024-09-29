@@ -39,7 +39,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.land_command_issued = False
 
-        self.position_tolerance = acceptance_radius
+        self.acceptance_radius_squared = acceptance_radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -72,26 +72,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        to_waypoint_x = self.waypoint.location_x - report.position.location_x
-        to_waypoint_y = self.waypoint.location_y - report.position.location_y
+        distance_to_waypoint = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2
         if (
             report.status == drone_status.DroneStatus.HALTED
             and not report.status == drone_status.DroneStatus.LANDED
         ):
-            if (
-                abs(to_waypoint_x) <= self.position_tolerance
-                and abs(to_waypoint_y) <= self.position_tolerance
-            ):
+            if distance_to_waypoint < self.acceptance_radius_squared:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    to_waypoint_x, to_waypoint_y
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
                 )
         elif report.status == drone_status.DroneStatus.MOVING:
-            if (
-                abs(to_waypoint_x) <= self.position_tolerance
-                and abs(to_waypoint_y) <= self.position_tolerance
-            ):
+            if distance_to_waypoint < self.acceptance_radius_squared:
                 command = commands.Command.create_land_command()
 
         # ============
