@@ -103,16 +103,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             ):
                 shortest_distance = float("inf")
 
-                # pylint: disable=consider-using-enumerate
-                for landing_pad in range(0, len(landing_pad_locations)):
-                    distance = (
-                        landing_pad_locations[landing_pad].location_x ** 2
-                        + landing_pad_locations[landing_pad].location_y ** 2
-                    )
+                for landing_pad in landing_pad_locations:
+                    distance = landing_pad.location_x**2 + landing_pad.location_y**2
 
                     if shortest_distance > distance:
                         shortest_distance = distance
-                        self.nearest_landingpad = landing_pad_locations[landing_pad]
+                        self.nearest_landingpad = landing_pad
 
                 if self.nearest_landingpad is not None:
                     command = commands.Command.create_set_relative_destination_command(

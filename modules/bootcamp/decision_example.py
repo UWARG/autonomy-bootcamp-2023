@@ -47,9 +47,7 @@ class DecisionExample(base_decision.BaseDecision):
         self.counter = 0
 
     def run(
-        self,
-        report: drone_report.DroneReport,
-        landing_pad_locations: "list[location.Location]",
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
         """
         Makes the drone fly in a figure 8, then land.
