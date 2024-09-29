@@ -50,7 +50,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """ "
         set_directions and append it to the list
         """
-        self.commands = []
         x_direction = self.waypoint.location_x - report.position.location_x
         y_direction = self.waypoint.location_y - report.position.location_y
 
@@ -59,7 +58,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         )
 
     def run(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+        self,
+        report: drone_report.DroneReport,
+        landing_pad_locations: "list[location.Location]",
     ) -> commands.Command:
         """
         Make the drone fly to the waypoint.
@@ -100,13 +101,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
 
             if (
-                abs(report.position.location_x - self.waypoint.location_x) > self.acceptance_radius
-                and abs(report.position.location_y - self.waypoint.location_y)
-                > self.acceptance_radius
-            ):
+                (report.position.location_x - self.waypoint.location_x) ** 2
+                + (report.position.location_y - self.waypoint.location_y) ** 2
+            ) > self.acceptance_radius**2:
                 self.set_directions(report)
-                self.command_index = 0
-                command = self.commands[0]
+                command = self.commands[self.command_index]
+                self.command_index += 1
 
             else:
                 command = commands.Command.create_land_command()

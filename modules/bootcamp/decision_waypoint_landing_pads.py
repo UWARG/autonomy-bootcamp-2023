@@ -41,7 +41,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.commands = []
         self.has_sent_landing_command = False
         self.has_reached_waypoint = False
-        self.closest_index = -1
+        self.closest_location = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -55,7 +55,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """ "
         set_directions and append it to the list
         """
-        self.commands = []
         x_direction = destination.location_x - report.position.location_x
         y_direction = destination.location_y - report.position.location_y
 
@@ -64,7 +63,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         )
 
     def closest_pad(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+        self,
+        report: drone_report.DroneReport,
+        landing_pad_locations: "list[location.Location]",
     ) -> int | None:
         """ "
         Finds the index of the closest pad
@@ -86,7 +87,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return closest_index
 
     def run(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+        self,
+        report: drone_report.DroneReport,
+        landing_pad_locations: "list[location.Location]",
     ) -> commands.Command:
         """
         Make the drone fly to the waypoint and then land at the nearest landing pad.
@@ -127,42 +130,36 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint
         ):  # if halted somewhere on the way to the waypoint
             if (
-                abs(report.position.location_x - self.waypoint.location_x) <= self.acceptance_radius
-                and abs(report.position.location_y - self.waypoint.location_y)
-                <= self.acceptance_radius
-            ):  # if arrive to the waypoint
+                (report.position.location_x - self.waypoint.location_x) ** 2
+                + (report.position.location_y - self.waypoint.location_y) ** 2
+            ) <= self.acceptance_radius**2:  # if arrive to the waypoint
+                print("It arrived")
                 self.has_reached_waypoint = True
             else:
                 self.set_directions(report, self.waypoint)
-                self.command_index = 0
-                command = self.commands[0]
+                command = self.commands[self.command_index]
+                self.command_index += 1
 
         if (
             report.status == drone_status.DroneStatus.HALTED
             and self.has_reached_waypoint
             and not self.has_sent_landing_command
         ):  # if halted somewhere on the way to the pad
-            if self.closest_index == -1:
-                self.closest_index = self.closest_pad(report, landing_pad_locations)
-                if self.closest_index is None:  # if waypoint is directly on the pad simply land
+            if self.closest_location is None:
+                closest_index = self.closest_pad(report, landing_pad_locations)
+                if closest_index is None:  # if waypoint is directly on the pad simply land
                     command = commands.Command.create_land_command()
                     self.has_sent_landing_command = True
+                else:
+                    self.closest_location = landing_pad_locations[closest_index]
             else:
                 if (
-                    abs(
-                        report.position.location_x
-                        - landing_pad_locations[self.closest_index].location_x
-                    )
-                    > self.acceptance_radius
-                    and abs(
-                        report.position.location_y
-                        - landing_pad_locations[self.closest_index].location_y
-                    )
-                    > self.acceptance_radius
-                ):
-                    self.set_directions(report, landing_pad_locations[self.closest_index])
-                    self.command_index = 0
-                    command = self.commands[0]
+                    (report.position.location_x - self.closest_location.location_x) ** 2
+                    + (report.position.location_y - self.closest_location.location_y) ** 2
+                ) > self.acceptance_radius**2:
+                    self.set_directions(report, self.closest_location)
+                    command = self.commands[self.command_index]
+                    self.command_index += 1
                 else:  # if arrive to the landing pad
                     command = commands.Command.create_land_command()
                     self.has_sent_landing_command = True
@@ -170,5 +167,5 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
+        # 1727624842397454200 seed
         return command
