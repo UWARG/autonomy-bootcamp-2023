@@ -1,0 +1,32 @@
+import ultralytics 
+
+model = ultralytics.YOLO('yolov8n.pt')
+
+results = model.predict("modules/bootcamp/tests/map_1_landing_pad.png", show = True, conf = 0.7)
+r = results[0]
+
+       
+# Plot the annotated image from the Result object
+# Include the confidence value
+image_annotated = r.plot()
+
+# Get the xyxy boxes list from the Boxes object in the Result object
+boxes_xyxy = r.boxes.xyxy
+
+
+# Detach the xyxy boxes to make a copy,
+# move the copy into CPU space,
+# and convert to a numpy array
+boxes_cpu = r.boxes.cpu().numpy()
+print (boxes_xyxy)
+
+# Loop over the boxes list and create a list of bounding boxes
+bounding_boxes = []
+
+print ("boxes")
+print (boxes_cpu.xyxy)
+# Hint: .shape gets the dimensions of the numpy array
+# for i in range(0, ...):
+#     # Create BoundingBox object and append to list
+#     result, box = ...
+
