@@ -111,24 +111,28 @@ class DetectLandingPad:
         image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = prediction.boxes.xyxy if prediction.boxes else []
-        print("boxes_xyxy:", boxes_xyxy)
+        if not prediction.boxes:
+            return [], image_annotated
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = [box.cpu().numpy() for box in boxes_xyxy]
-        print("boxes_cpu:", boxes_cpu)
+        boxes_cpu = (
+            boxes_xyxy.detach().cpu().numpy() if isinstance(boxes_xyxy, torch.Tensor) else []
+        )
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        for i in range(0, len(boxes_xyxy)):
+        for box_cpu in boxes_cpu:
             # Create BoundingBox object and append to list
-            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            result, box = bounding_box.BoundingBox.create(box_cpu)
 
             if result and box:
                 bounding_boxes.append(box)
+            else:
+                return [], image_annotated
 
         return bounding_boxes, image_annotated
         # ============
