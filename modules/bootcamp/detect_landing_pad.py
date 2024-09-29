@@ -107,7 +107,7 @@ class DetectLandingPad:
         # * device
         # * verbose
         predictions = self.__model.predict(
-            source=image, conf=0.3, device=self.__DEVICE, verbose=False
+            source=image, conf=0.5, device=self.__DEVICE, verbose=False
         )
 
         # Get the Result object
@@ -123,7 +123,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -134,8 +134,11 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
 
-            if result:
-                bounding_boxes.append(box)
+            if not result:
+                bounding_boxes = []
+                break
+
+            bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
         # ============

@@ -37,9 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.has_sent_landing_command = False
-
-        self.has_sent_flying_command = False
+        self.land_command_issued = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -72,20 +70,29 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        to_waypoint_x = self.waypoint.location_x - report.position.location_x
+        to_waypoint_y = self.waypoint.location_y - report.position.location_y
         if (
             report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_flying_command
+            and not report.status == drone_status.DroneStatus.LANDED
         ):
-            command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            )
-            self.has_sent_flying_command = True
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_landing_command
-        ):
-            command = commands.Command.create_land_command()
-            self.has_sent_landing_command = True
+            if (
+                abs(to_waypoint_x) <= self.acceptance_radius
+                and abs(to_waypoint_y) <= self.acceptance_radius
+            ):
+                command = commands.Command.create_land_command()
+            else:
+                print("go to waypoint")
+                command = commands.Command.create_set_relative_destination_command(
+                    to_waypoint_x, to_waypoint_y
+                )
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if (
+                abs(to_waypoint_x) <= self.acceptance_radius
+                and abs(to_waypoint_y) <= self.acceptance_radius
+            ):
+                print("drone is near waypoint and is moving")
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

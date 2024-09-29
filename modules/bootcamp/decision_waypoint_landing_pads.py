@@ -4,6 +4,7 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
+from torch import inf
 from .. import commands
 from .. import drone_report
 
@@ -12,7 +13,6 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-import math
 
 
 # Disable for bootcamp use
@@ -37,13 +37,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        self.has_sent_landing_command = False
-
-        self.has_sent_fly_to_waypoint_command = False
-
-        self.has_sent_fly_to_landingpad_command = False
-
+        self.nearest_landingpad = None
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -77,42 +71,74 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        to_waypoint_x = self.waypoint.location_x - report.position.location_x
+        to_waypoint_y = self.waypoint.location_y - report.position.location_y
+        to_landingpad_x = (
+            self.nearest_landingpad.location_x - report.position.location_x
+            if self.nearest_landingpad is not None
+            else None
+        )
+        to_landingpad_y = (
+            self.nearest_landingpad.location_y - report.position.location_y
+            if self.nearest_landingpad is not None
+            else None
+        )
         if (
             report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_fly_to_waypoint_command
+            and not report.status == drone_status.DroneStatus.LANDED
         ):
-            command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            )
-            self.has_sent_fly_to_waypoint_command = True
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_fly_to_landingpad_command
-        ):
-            shortest_distance = 100000
-            nearest_landingpad = location.Location(0, 0)
+            print(str(to_waypoint_x) + " and " + str(to_waypoint_y))
 
-            for i in range(0, len(landing_pad_locations)):
-                distance = math.sqrt(
-                    pow(landing_pad_locations[i].location_x, 2)
-                    + pow(landing_pad_locations[i].location_y, 2)
+            if (
+                to_landingpad_x is not None
+                and to_landingpad_y is not None
+                and abs(to_landingpad_x) <= self.acceptance_radius
+                and abs(to_landingpad_y) <= self.acceptance_radius
+            ):
+                command = commands.Command.create_land_command()
+            elif (
+                abs(to_waypoint_x) <= self.acceptance_radius
+                and abs(to_waypoint_y) <= self.acceptance_radius
+            ):
+                print("drone is halted and near waypoint")
+                shortest_distance = inf
+
+                for landing_pad in range(0, len(landing_pad_locations)):
+                    distance = (
+                        landing_pad_locations[landing_pad].location_x ** 2
+                        + landing_pad_locations[landing_pad].location_y ** 2
+                    ) ** (1 / 2)
+
+                    if shortest_distance > distance:
+                        shortest_distance = distance
+                        self.nearest_landingpad = landing_pad_locations[landing_pad]
+
+                if self.nearest_landingpad is not None:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.nearest_landingpad.location_x - report.position.location_x,
+                        self.nearest_landingpad.location_y - report.position.location_y,
+                    )
+                else:
+                    command = commands.Command.create_null_command()
+            else:
+                print("go to waypoint")
+                command = commands.Command.create_set_relative_destination_command(
+                    to_waypoint_x, to_waypoint_y
                 )
-                if shortest_distance > distance:
-                    shortest_distance = distance
-                    nearest_landingpad = landing_pad_locations[i]
-
-            command = commands.Command.create_set_relative_destination_command(
-                nearest_landingpad.location_x - self.waypoint.location_x,
-                nearest_landingpad.location_y - self.waypoint.location_y,
-            )
-            self.has_sent_fly_to_landingpad_command = True
-
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_landing_command
-        ):
-            command = commands.Command.create_land_command()
-            self.has_sent_landing_command = True
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if (
+                abs(to_waypoint_x) <= self.acceptance_radius
+                and abs(to_waypoint_y) <= self.acceptance_radius
+            ):
+                print("drone is near waypoint and is moving")
+                command = commands.Command.create_halt_command()
+            if (
+                to_landingpad_x is not None
+                and to_landingpad_y is not None
+                and abs(to_landingpad_x) <= self.acceptance_radius
+                and abs(to_landingpad_y) <= self.acceptance_radius
+            ):
+                commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
