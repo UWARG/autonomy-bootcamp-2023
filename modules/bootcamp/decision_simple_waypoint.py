@@ -39,13 +39,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
 
-    def within_range(
-        self, loc: location.Location, target: location.Location, radius: float
-    ) -> bool:
-        """Returns whether the given location is within a targets radius"""
+    def within_range(self, loc: location.Location, target: location.Location) -> bool:
+        """Returns whether the given location is within the targets acceptance radius"""
         return (target.location_x - loc.location_x) ** 2 + (
             target.location_y - loc.location_y
-        ) ** 2 < radius**2
+        ) ** 2 < self.acceptance_radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -78,7 +76,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.within_range(report.position, self.waypoint, self.acceptance_radius):
+            if self.within_range(report.position, self.waypoint):
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
@@ -86,7 +84,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     self.waypoint.location_y - report.position.location_y,
                 )
         elif report.status == drone_status.DroneStatus.MOVING and self.within_range(
-            report.position, self.waypoint, self.acceptance_radius
+            report.position, self.waypoint
         ):
             command = commands.Command.create_halt_command()
 
