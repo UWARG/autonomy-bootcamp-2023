@@ -40,13 +40,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.closest_landing_pad = None
 
-    def get_distance_squared(self, loc1: location.Location, loc2: location.Location) -> float:
-        """Returns the distance squared between two locations"""
-        return abs((loc2.location_x - loc1.location_x) + (loc2.location_y - loc1.location_y))
+    def get_distance_squared(
+        self, location_1: location.Location, location_2: location.Location
+    ) -> float:
+        """Returns the euclidian distance squared between two locations"""
+        return abs(
+            (location_2.location_x - location_1.location_x) ** 2
+            + (location_2.location_y - location_1.location_y) ** 2
+        )
 
     def get_closest_landing_pad(
         self, pos: location.Location, landing_pad_locations: "list[location.Location]"
     ) -> location.Location | None:
+        """Returns the location of the nearest landing pad to the given position"""
         shortest_dist = float("inf")
         closest_landing_pad = None
         for loc in landing_pad_locations:
@@ -59,9 +65,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def within_range(
         self, loc: location.Location, target: location.Location, radius: float
     ) -> bool:
+        """Returns whether the given location is within a targets radius"""
         return (target.location_x - loc.location_x) ** 2 + (
             target.location_y - loc.location_y
-        ) ** 2 < self.acceptance_radius**2
+        ) ** 2 < radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -99,12 +106,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.closest_landing_pad = self.get_closest_landing_pad(
                     report.position, landing_pad_locations
                 )
-                if self.closest_landing_pad:
+                if self.closest_landing_pad is not None:
                     command = commands.Command.create_set_relative_destination_command(
                         self.closest_landing_pad.location_x - report.position.location_x,
                         self.closest_landing_pad.location_y - report.position.location_y,
                     )
-            elif self.closest_landing_pad and self.within_range(
+            elif self.closest_landing_pad is not None and self.within_range(
                 report.position, self.closest_landing_pad, self.acceptance_radius
             ):
                 # Drone has reached its nearest landing pad
@@ -115,6 +122,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.waypoint.location_x - report.position.location_x,
                     self.waypoint.location_y - report.position.location_y,
                 )
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if (
+                self.within_range(report.position, self.waypoint, self.acceptance_radius)
+                or self.closest_landing_pad is not None
+                and self.within_range(
+                    report.position, self.closest_landing_pad, self.acceptance_radius
+                )
+            ):
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
