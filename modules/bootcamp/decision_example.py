@@ -66,9 +66,8 @@ class DecisionExample(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
-        if (
-            report.status == drone_status.DroneStatus.HALTED
-            and self.command_index < len(self.commands)
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
+            self.commands
         ):
             # Print some information for debugging
             print(self.counter)
@@ -77,10 +76,7 @@ class DecisionExample(base_decision.BaseDecision):
 
             command = self.commands[self.command_index]
             self.command_index += 1
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_landing_command
-        ):
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
             command = commands.Command.create_land_command()
 
             self.has_sent_landing_command = True
@@ -88,4 +84,3 @@ class DecisionExample(base_decision.BaseDecision):
         self.counter += 1
 
         return command
-

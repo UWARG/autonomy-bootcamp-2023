@@ -48,9 +48,7 @@ class DetectLandingPad:
     __MODEL_NAME = "best-2n.pt"
 
     @classmethod
-    def create(
-        cls, model_directory: pathlib.Path
-    ) -> "tuple[bool, DetectLandingPad | None]":
+    def create(cls, model_directory: pathlib.Path) -> "tuple[bool, DetectLandingPad | None]":
         """
         model_directory: Directory to models.
         """
@@ -71,21 +69,15 @@ class DetectLandingPad:
 
         return True, DetectLandingPad(cls.__create_key, model)
 
-    def __init__(
-        self, class_private_create_key: object, model: ultralytics.YOLO
-    ) -> None:
+    def __init__(self, class_private_create_key: object, model: ultralytics.YOLO) -> None:
         """
         Private constructor, use create() method.
         """
-        assert (
-            class_private_create_key is DetectLandingPad.__create_key
-        ), "Use create() method"
+        assert class_private_create_key is DetectLandingPad.__create_key, "Use create() method"
 
         self.__model = model
 
-    def run(
-        self, image: np.ndarray
-    ) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
+    def run(self, image: np.ndarray) -> "tuple[list[bounding_box.BoundingBox], np.ndarray]":
         """
         Converts an image into a list of bounding boxes.
 
