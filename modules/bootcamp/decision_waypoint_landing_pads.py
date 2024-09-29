@@ -62,13 +62,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 closest_landing_pad = loc
         return closest_landing_pad
 
-    def within_range(
-        self, loc: location.Location, target: location.Location, radius: float
-    ) -> bool:
+    def within_range(self, loc: location.Location, target: location.Location) -> bool:
         """Returns whether the given location is within a targets radius"""
         return (target.location_x - loc.location_x) ** 2 + (
             target.location_y - loc.location_y
-        ) ** 2 < radius**2
+        ) ** 2 < self.acceptance_radius**2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -101,7 +99,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
-            if self.within_range(report.position, self.waypoint, self.acceptance_radius):
+            if self.within_range(report.position, self.waypoint):
                 # Drone has reached its waypoint, calculate nearest landing pad
                 self.closest_landing_pad = self.get_closest_landing_pad(
                     report.position, landing_pad_locations
@@ -112,7 +110,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         self.closest_landing_pad.location_y - report.position.location_y,
                     )
             elif self.closest_landing_pad is not None and self.within_range(
-                report.position, self.closest_landing_pad, self.acceptance_radius
+                report.position, self.closest_landing_pad
             ):
                 # Drone has reached its nearest landing pad
                 command = commands.Command.create_land_command()
@@ -124,11 +122,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
         elif report.status == drone_status.DroneStatus.MOVING:
             if (
-                self.within_range(report.position, self.waypoint, self.acceptance_radius)
+                self.within_range(report.position, self.waypoint)
                 or self.closest_landing_pad is not None
-                and self.within_range(
-                    report.position, self.closest_landing_pad, self.acceptance_radius
-                )
+                and self.within_range(report.position, self.closest_landing_pad)
             ):
                 command = commands.Command.create_halt_command()
 
