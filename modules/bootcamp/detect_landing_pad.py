@@ -118,9 +118,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = (
-            boxes_xyxy.detach().cpu().numpy() if isinstance(boxes_xyxy, torch.Tensor) else []
-        )
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -129,10 +127,9 @@ class DetectLandingPad:
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(box_cpu)
 
-            if result and box:
-                bounding_boxes.append(box)
-            else:
+            if not result:
                 return [], image_annotated
+            bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
         # ============
