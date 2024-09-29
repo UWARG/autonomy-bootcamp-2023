@@ -82,7 +82,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             ):
                 command = commands.Command.create_land_command()
             else:
-                print("go to waypoint")
                 command = commands.Command.create_set_relative_destination_command(
                     to_waypoint_x, to_waypoint_y
                 )
@@ -91,7 +90,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 abs(to_waypoint_x) <= self.acceptance_radius
                 and abs(to_waypoint_y) <= self.acceptance_radius
             ):
-                print("drone is near waypoint and is moving")
                 command = commands.Command.create_land_command()
 
         # ============

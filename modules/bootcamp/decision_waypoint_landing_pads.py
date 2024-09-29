@@ -87,7 +87,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             report.status == drone_status.DroneStatus.HALTED
             and not report.status == drone_status.DroneStatus.LANDED
         ):
-            print(str(to_waypoint_x) + " and " + str(to_waypoint_y))
 
             if (
                 to_landingpad_x is not None
@@ -100,18 +99,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 abs(to_waypoint_x) <= self.acceptance_radius
                 and abs(to_waypoint_y) <= self.acceptance_radius
             ):
-                print("drone is halted and near waypoint")
                 shortest_distance = inf
 
-                for landing_pad in range(0, len(landing_pad_locations)):
-                    distance = (
-                        landing_pad_locations[landing_pad].location_x ** 2
-                        + landing_pad_locations[landing_pad].location_y ** 2
-                    ) ** (1 / 2)
+                for _, landing_pad in enumerate(landing_pad_locations):
+                    distance = (landing_pad.location_x**2 + landing_pad.location_y**2) ** (1 / 2)
 
                     if shortest_distance > distance:
                         shortest_distance = distance
-                        self.nearest_landingpad = landing_pad_locations[landing_pad]
+                        self.nearest_landingpad = landing_pad
 
                 if self.nearest_landingpad is not None:
                     command = commands.Command.create_set_relative_destination_command(
@@ -121,7 +116,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     command = commands.Command.create_null_command()
             else:
-                print("go to waypoint")
                 command = commands.Command.create_set_relative_destination_command(
                     to_waypoint_x, to_waypoint_y
                 )
@@ -130,7 +124,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 abs(to_waypoint_x) <= self.acceptance_radius
                 and abs(to_waypoint_y) <= self.acceptance_radius
             ):
-                print("drone is near waypoint and is moving")
                 command = commands.Command.create_halt_command()
             if (
                 to_landingpad_x is not None
