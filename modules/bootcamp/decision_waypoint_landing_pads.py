@@ -38,6 +38,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.trg_x = 0
+        self.trg_y = 0
+
         self.command_index = 0
         self.commands = [
             commands.Command.create_set_relative_destination_command(
@@ -78,13 +81,41 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        # python -m modules.bootcamp.tests.run_decision_waypoint_landing_pads
+
+        def square(x: float) -> float:
+            return x * x
+
+        def wrong_rel_pos(i: int) -> bool:  # returns true if the drone halts at wrong position
+            if i < 0 or i >= len(self.commands):
+                return False
+            cmd = self.commands[i]
+            if cmd.get_command_type() == commands.Command.CommandType.SET_RELATIVE_DESTINATION:
+                pos_x = report.position.location_x
+                pos_y = report.position.location_y
+                return square(pos_x - self.trg_x) + square(pos_y - self.trg_y) > square(
+                    self.acceptance_radius
+                )
+            return False
+
         # Do something based on the report and the state of this class...
         pos_x = report.position.location_x
         pos_y = report.position.location_y
         if report.status == drone_status.DroneStatus.HALTED:  # if command done
-            if self.command_index < len(self.commands):  # next command
+            if wrong_rel_pos(self.command_index - 1):  # repeat previous command
+                command = commands.Command.create_set_relative_destination_command(
+                    self.trg_x - pos_x, self.trg_y - pos_y
+                )
+            elif self.command_index < len(self.commands):  # next command
                 print(f"frame({self.counter}) cmd({self.command_index}) pos({report.position})")
                 command = self.commands[self.command_index]
+                if (
+                    command.get_command_type()
+                    == commands.Command.CommandType.SET_RELATIVE_DESTINATION
+                ):  # update target position
+                    cmd_x, cmd_y = command.get_relative_destination()
+                    self.trg_x += cmd_x
+                    self.trg_y += cmd_y
                 self.command_index += 1
             elif not self.has_goto_land:  # go to landing
                 min_dist = 1e18
@@ -93,14 +124,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 for landing_pad in landing_pad_locations:
                     land_x = landing_pad.location_x
                     land_y = landing_pad.location_y
-                    dist = (pos_x - land_x) * (pos_x - land_x) + (pos_y - land_y) * (pos_y - land_y)
+                    dist = square(pos_x - land_x) + square(pos_y - land_y)
                     if dist < min_dist:
                         min_dist = dist
                         close_x = land_x
                         close_y = land_y
-                command = commands.Command.create_set_relative_destination_command(
-                    close_x - pos_x, close_y - pos_y
+                self.commands.append(
+                    commands.Command.create_set_relative_destination_command(
+                        close_x - pos_x, close_y - pos_y
+                    )
                 )
+                # command = self.commands[self.command_index]
+                # self.command_index += 1
                 self.has_goto_land = True
             elif not self.has_land:  # start landing
                 command = commands.Command.create_land_command()
