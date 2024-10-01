@@ -47,7 +47,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def is_close(x: float, y: float, target_x: float, target_y: float, tolerance: float) -> bool: 
+    def is_close(x: float, y: float, target_x: float, target_y: float, tolerance: float) -> bool:
         """Determines if coordinate x,y, is within tolerence of coordinate target_x, target_y."""
         return abs(x - target_x) < tolerance and abs(y - target_y) < tolerance
 
