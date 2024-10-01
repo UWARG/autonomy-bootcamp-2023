@@ -38,8 +38,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.trg_x = 0
-        self.trg_y = 0
+        self.target_x = 0
+        self.target_y = 0
 
         self.command_index = 0
         self.commands = [
@@ -49,8 +49,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ]
 
         self.land_status = 0
-        # self.has_land = False
-        # self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -83,9 +81,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # python -m modules.bootcamp.tests.run_decision_simple_waypoint
 
-        def square(x: float) -> float:
-            return x * x
-
         def wrong_rel_pos(i: int) -> bool:  # returns true if the drone halts at wrong position
             if i < 0 or i >= len(self.commands):
                 return False
@@ -93,9 +88,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if cmd.get_command_type() == commands.Command.CommandType.SET_RELATIVE_DESTINATION:
                 pos_x = report.position.location_x
                 pos_y = report.position.location_y
-                return square(pos_x - self.trg_x) + square(pos_y - self.trg_y) > square(
+                return (pos_x - self.target_x) ** 2 + (pos_y - self.target_y) ** 2 > (
                     self.acceptance_radius
-                )
+                ) ** 2
             return False
 
         # Do something based on the report and the state of this class...
@@ -104,7 +99,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:  # if command done
             if wrong_rel_pos(self.command_index - 1):  # repeat previous command
                 command = commands.Command.create_set_relative_destination_command(
-                    self.trg_x - pos_x, self.trg_y - pos_y
+                    self.target_x - pos_x, self.target_y - pos_y
                 )
             elif self.command_index < len(self.commands):  # next command
                 print(f"cmd({self.command_index}) pos({report.position})")
@@ -114,14 +109,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     == commands.Command.CommandType.SET_RELATIVE_DESTINATION
                 ):  # update target position
                     cmd_x, cmd_y = command.get_relative_destination()
-                    self.trg_x += cmd_x
-                    self.trg_y += cmd_y
+                    self.target_x += cmd_x
+                    self.target_y += cmd_y
                 self.command_index += 1
             elif self.land_status == 0:  # start landing
                 command = commands.Command.create_land_command()
                 self.land_status = 2
-
-        # self.counter += 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
