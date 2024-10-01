@@ -40,7 +40,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.waypoint_reached = False
         self.drone_status = None
-        self.last_known_position = None
+        self.delta_x = None
+        self.delta_y = None
+        self.distance_squared = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -71,11 +73,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         if report.status == drone_status.DroneStatus.HALTED and not self.waypoint_reached:
-            delta_x = abs(report.position.location_x - self.waypoint.location_x)
-            delta_y = abs(report.position.location_y - self.waypoint.location_y)
+            self.delta_x = abs(report.position.location_x - self.waypoint.location_x)
+            self.delta_y = abs(report.position.location_y - self.waypoint.location_y)
 
-            if delta_x <= self.acceptance_radius and delta_y <= self.acceptance_radius:
-                print("Waypoint reached")
+            self.distance_squared = self.delta_x**2 + self.delta_y**2
+
+            if self.distance_squared <= self.acceptance_radius**2:
+                print("waypoint reached")
                 command = commands.Command.create_land_command()
                 self.waypoint_reached = True
             else:
