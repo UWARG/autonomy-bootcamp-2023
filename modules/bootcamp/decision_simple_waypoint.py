@@ -47,8 +47,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def is_close(x, y, target_x, target_y, tolerance):
-        return  abs(x - target_x) < tolerance and abs(y - target_y) < tolerance
+    def is_close(x: float, y: float, target_x: float, target_y: float, tolerance: float) -> bool: 
+        """Determines if coordinate x,y, is within tolerence of coordinate target_x, target_y."""
+        return abs(x - target_x) < tolerance and abs(y - target_y) < tolerance
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -70,7 +71,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-        # print(self.is_close(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y, self.acceptance_radius))
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -80,18 +80,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         command = commands.Command.create_null_command()
         print(report.position)
         if report.status == drone_status.DroneStatus.HALTED:
-
             print(f"Halted at: {report.position}")
             command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
             )
 
-        elif report.status == drone_status.DroneStatus.HALTED and (not self.has_sent_landing_command) and self.is_close(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y, self.acceptance_radius):
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and (not self.has_sent_landing_command)
+            and self.is_close(
+                report.position.location_x,
+                report.position.location_y,
+                self.waypoint.location_x,
+                self.waypoint.location_y,
+                self.acceptance_radius,
+            )
+        ):
             command = commands.Command.create_land_command()
             self.has_sent_landing_command = True
-
         self.counter += 1
-
         print(command)
 
         # ============
