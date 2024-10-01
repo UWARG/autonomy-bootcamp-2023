@@ -75,13 +75,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status != drone_status.DroneStatus.HALTED:
             return command
 
-        # If the waypoint has not yet been reached
         if not self.waypoint_found:
-            # Calculate the difference between the current position and the waypoint
             delta_x = abs(report.position.location_x - self.waypoint.location_x)
             delta_y = abs(report.position.location_y - self.waypoint.location_y)
 
-            # Check if the drone is within the acceptance radius for both x and y coordinates
             if delta_x <= self.acceptance_radius and delta_y <= self.acceptance_radius:
                 self.waypoint_found = True
                 print(f"Reached waypoint at {self.waypoint.location_x}, {self.waypoint.location_y}")
@@ -95,9 +92,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 return command
 
-        # If the waypoint is reached but landing pad not found yet
         if self.waypoint_found and not self.landing_pad_found:
-            # Find the closest landing pad only once
             if self.closest_pad is None:
                 self.closest_pad = min(
                     landing_pad_locations,
@@ -108,12 +103,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     f"Closest landing pad determined at {self.closest_pad.location_x}, {self.closest_pad.location_y}"
                 )
 
-            # Calculate the difference between the current position and the closest landing pad
             delta_x = abs(report.position.location_x - self.closest_pad.location_x)
             delta_y = abs(report.position.location_y - self.closest_pad.location_y)
 
-            # Move towards the closest landing pad
-            if delta_x <= self.acceptance_radius and delta_y <= self.acceptance_radius:
+            distance_squared = delta_x**2 + delta_y**2
+
+            if distance_squared <= self.acceptance_radius**2:
                 self.landing_pad_found = True
                 print(
                     f"Reached landing pad at {self.closest_pad.location_x}, {self.closest_pad.location_y}"
@@ -128,7 +123,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 return command
 
-        # If the drone has reached both the waypoint and the landing pad, land the drone
         if self.waypoint_found and self.landing_pad_found:
             command = commands.Command.create_land_command()
             print("Landing the drone.")
