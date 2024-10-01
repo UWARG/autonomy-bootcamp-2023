@@ -48,9 +48,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             )
         ]
 
-        self.has_goto_land = False
-        self.has_land = False
-        self.counter = 0
+        # self.has_goto_land = False
+        # self.has_land = False
+        self.land_status = 0
+        # self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -107,7 +108,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.trg_x - pos_x, self.trg_y - pos_y
                 )
             elif self.command_index < len(self.commands):  # next command
-                print(f"frame({self.counter}) cmd({self.command_index}) pos({report.position})")
+                print(f"cmd({self.command_index}) pos({report.position})")
                 command = self.commands[self.command_index]
                 if (
                     command.get_command_type()
@@ -117,7 +118,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.trg_x += cmd_x
                     self.trg_y += cmd_y
                 self.command_index += 1
-            elif not self.has_goto_land:  # go to landing
+            elif self.land_status == 0:  # go to landing
                 min_dist = 1e18
                 close_x = 0
                 close_y = 0
@@ -136,12 +137,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 )
                 # command = self.commands[self.command_index]
                 # self.command_index += 1
-                self.has_goto_land = True
-            elif not self.has_land:  # start landing
+                self.land_status = 1
+            elif self.land_status == 1:  # start landing
                 command = commands.Command.create_land_command()
-                self.has_land = True
+                self.land_status = 2
 
-        self.counter += 1
+        # self.counter += 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

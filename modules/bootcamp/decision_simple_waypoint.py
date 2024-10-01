@@ -48,8 +48,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             )
         ]
 
-        self.has_land = False
-        self.counter = 0
+        self.land_status = 0
+        # self.has_land = False
+        # self.counter = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -106,7 +107,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     self.trg_x - pos_x, self.trg_y - pos_y
                 )
             elif self.command_index < len(self.commands):  # next command
-                print(f"frame({self.counter}) cmd({self.command_index}) pos({report.position})")
+                print(f"cmd({self.command_index}) pos({report.position})")
                 command = self.commands[self.command_index]
                 if (
                     command.get_command_type()
@@ -116,11 +117,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     self.trg_x += cmd_x
                     self.trg_y += cmd_y
                 self.command_index += 1
-            elif not self.has_land:  # start landing
+            elif self.land_status == 0:  # start landing
                 command = commands.Command.create_land_command()
-                self.has_land = True
+                self.land_status = 2
 
-        self.counter += 1
+        # self.counter += 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
