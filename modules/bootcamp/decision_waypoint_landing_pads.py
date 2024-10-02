@@ -18,12 +18,14 @@ from ..private.decision import base_decision
 # No enable
 # pylint: disable=duplicate-code,unused-argument
 
-def distance_to_landing_pad (landing_pad_x, landing_pad_y, position_x, position_y):
+
+def distance_to_landing_pad(landing_pad_x, landing_pad_y, position_x, position_y):
     """
     Finds the distance to a landing pad
     """
-    distance = ((landing_pad_x - position_x) ** 2 + (landing_pad_y - position_y) ** 2)** (1/2)
+    distance = ((landing_pad_x - position_x) ** 2 + (landing_pad_y - position_y) ** 2) ** (1 / 2)
     return distance
+
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
@@ -75,17 +77,43 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        if (report.status == report.status.HALTED and report.position.location_x == 0 and report.position.location_y == 0):
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-        elif (report.status == report.status.HALTED and report.position.location_x == self.waypoint.location_x and report.position.location_y == self.waypoint.location_y):
+        if (
+            report.status == report.status.HALTED
+            and report.position.location_x == 0
+            and report.position.location_y == 0
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+        elif (
+            report.status == report.status.HALTED
+            and report.position.location_x == self.waypoint.location_x
+            and report.position.location_y == self.waypoint.location_y
+        ):
             command = commands.Command.create_halt_command()
             min_distance = 100000000000
             for landing_pad in landing_pad_locations:
-                if distance_to_landing_pad (landing_pad.location_x, landing_pad.location_y, report.position.location_x, report.position.location_y) < min_distance:
-                    min_distance = distance_to_landing_pad (landing_pad.location_x, landing_pad.location_y, report.position.location_x, report.position.location_y)
+                if (
+                    distance_to_landing_pad(
+                        landing_pad.location_x,
+                        landing_pad.location_y,
+                        report.position.location_x,
+                        report.position.location_y,
+                    )
+                    < min_distance
+                ):
+                    min_distance = distance_to_landing_pad(
+                        landing_pad.location_x,
+                        landing_pad.location_y,
+                        report.position.location_x,
+                        report.position.location_y,
+                    )
                     destination = landing_pad
-            command = commands.Command.create_set_relative_destination_command(destination.location_x - report.position.location_x, destination.location_y - report.position.location_y)
-        elif (report.status == report.status.HALTED and report.position == destination):
+            command = commands.Command.create_set_relative_destination_command(
+                destination.location_x - report.position.location_x,
+                destination.location_y - report.position.location_y,
+            )
+        elif report.status == report.status.HALTED and report.position == destination:
             command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

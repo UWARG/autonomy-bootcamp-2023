@@ -96,27 +96,31 @@ class DetectLandingPad:
         # * device
         # * verbose
         bounding_boxes = []
-        predictions = self.__model.predict(source = image, show = False, conf = 0.7, device = 'cpu', verbose = True)
+        predictions = self.__model.predict(
+            source=image, show=False, conf=0.7, device="cpu", verbose=True
+        )
 
         # Get the Result object
         for r in predictions:
             prediction = r
 
-        # Plot the annotated image from the Result object
-        # Include the confidence value
+            # Plot the annotated image from the Result object
+            # Include the confidence value
             image_annotated = prediction.plot()
 
-        # Get the xyxy boxes list from the Boxes object in the Result object
+            # Get the xyxy boxes list from the Boxes object in the Result object
             boxes_xyxy = prediction.boxes.xyxy
-        # Detach the xyxy boxes to make a copy,
-        # move the copy into CPU space,
-        # and convert to a numpy array
+            # Detach the xyxy boxes to make a copy,
+            # move the copy into CPU space,
+            # and convert to a numpy array
             boxes_cpu = boxes_xyxy.detach().cpu().numpy()
-        # Loop over the boxes list and create a list of bounding boxes
+            # Loop over the boxes list and create a list of bounding boxes
             for i in enumerate(boxes_cpu):
                 index = i[0]
                 (x_min, y_min, x_max, y_max) = boxes_cpu[index]
-                bounding_box_obj = bounding_box.BoundingBox.create(np.array([x_min, y_min, x_max, y_max]))[1]
+                bounding_box_obj = bounding_box.BoundingBox.create(
+                    np.array([x_min, y_min, x_max, y_max])
+                )[1]
                 bounding_boxes.append(bounding_box_obj)
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
@@ -127,4 +131,3 @@ class DetectLandingPad:
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-        
