@@ -19,7 +19,7 @@ from ..private.decision import base_decision
 # pylint: disable=duplicate-code,unused-argument
 
 
-def distance_to_landing_pad(landing_pad_x, landing_pad_y, position_x, position_y):
+def distance_to_landing_pad(landing_pad_x: location.Location, landing_pad_y:location.Location, position_x:location.Location, position_y: location.Location):
     """
     Finds the distance to a landing pad
     """
