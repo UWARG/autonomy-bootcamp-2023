@@ -24,7 +24,7 @@ def distance_to_landing_pad(
     landing_pad_y: location.Location,
     position_x: location.Location,
     position_y: location.Location,
-):
+) -> int:
     """
     Finds the distance to a landing pad
     """
