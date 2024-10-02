@@ -36,7 +36,7 @@ class DetectLandingPad:
     # Chooses the GPU if it exists, otherwise runs on the CPU
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
-    __DEVICE = "cpu"
+    __DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -108,17 +108,14 @@ class DetectLandingPad:
 
         # Get the xyxy boxes list from the Boxes object in the Result object
             boxes_xyxy = prediction.boxes.xyxy
-
-        
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-            boxes_cpu = prediction.boxes.cpu().numpy()
-        
-        
+            boxes_cpu = boxes_xyxy.detach().cpu().numpy()
         # Loop over the boxes list and create a list of bounding boxes
-            for i in range(0, len(boxes_cpu.xyxy)):
-                (x_min, y_min, x_max, y_max) = boxes_cpu.xyxy[i]
+            for i in enumerate(boxes_cpu):
+                index = i[0]
+                (x_min, y_min, x_max, y_max) = boxes_cpu[index]
                 bounding_box_obj = bounding_box.BoundingBox.create(np.array([x_min, y_min, x_max, y_max]))[1]
                 bounding_boxes.append(bounding_box_obj)
         # Hint: .shape gets the dimensions of the numpy array

@@ -36,7 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        
+
         # Add your own
 
 
@@ -72,7 +72,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # HALTED = 1  # Not moving
         # LANDED = 2  # On ground
         # Do something based on the report and the state of this class...
-        
+
         if (report.status == report.status.HALTED and report.position.location_x == 0 and report.position.location_y == 0):
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
         elif (report.status == report.status.HALTED and report.position.location_x == self.waypoint.location_x and report.position.location_y == self.waypoint.location_y):
