@@ -28,7 +28,7 @@ def distance_to_landing_pad(
     """
     Finds the distance to a landing pad
     """
-    distance = ((landing_pad_x - position_x) ** 2 + (landing_pad_y - position_y) ** 2)
+    distance = (landing_pad_x - position_x) ** 2 + (landing_pad_y - position_y) ** 2
     return distance
 
 
