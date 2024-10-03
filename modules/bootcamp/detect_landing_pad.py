@@ -101,27 +101,22 @@ class DetectLandingPad:
         )
 
         # Get the Result object
-        for r in predictions:
-            prediction = r
+        prediction = predictions[0]
 
-            # Plot the annotated image from the Result object
-            # Include the confidence value
-            image_annotated = prediction.plot()
+        # Plot the annotated image from the Result object
+        # Include the confidence value
+        image_annotated = prediction.plot(conf=True)
 
-            # Get the xyxy boxes list from the Boxes object in the Result object
-            boxes_xyxy = prediction.boxes.xyxy
-            # Detach the xyxy boxes to make a copy,
-            # move the copy into CPU space,
-            # and convert to a numpy array
-            boxes_cpu = boxes_xyxy.detach().cpu().numpy()
-            # Loop over the boxes list and create a list of bounding boxes
-            for i in enumerate(boxes_cpu):
-                index = i[0]
-                (x_min, y_min, x_max, y_max) = boxes_cpu[index]
-                bounding_box_obj = bounding_box.BoundingBox.create(
-                    np.array([x_min, y_min, x_max, y_max])
-                )[1]
-                bounding_boxes.append(bounding_box_obj)
+        # Get the xyxy boxes list from the Boxes object in the Result object
+        boxes_xyxy = prediction.boxes.xyxy
+        # Detach the xyxy boxes to make a copy,
+        # move the copy into CPU space,
+        # and convert to a numpy array
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
+        # Loop over the boxes list and create a list of bounding boxes
+        for _, boxes in enumerate(boxes_cpu):
+            box = bounding_box.BoundingBox.create(boxes)[1]
+            bounding_boxes.append(box)
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list

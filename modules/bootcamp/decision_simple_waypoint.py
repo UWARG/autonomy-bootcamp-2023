@@ -74,8 +74,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         if (
             report.status == report.status.HALTED
-            and report.position.location_x == 0
-            and report.position.location_y == 0
+            and 0 <= abs(report.position.location_x) < abs(self.waypoint.location_x)
+            and 0 <= abs(report.position.location_y) < abs(self.waypoint.location_y)
         ):
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
@@ -86,7 +86,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             and report.position.location_y == self.waypoint.location_y
         ):
             command = commands.Command.create_land_command()
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

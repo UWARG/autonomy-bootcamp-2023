@@ -32,6 +32,33 @@ def distance_to_landing_pad(
     return distance
 
 
+def closest_landing_pad(
+    report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+) -> location.Location:
+    """
+    Finds the closest landing pad
+    """
+    min_distance = float("inf")
+    for landing_pad in landing_pad_locations:
+        if (
+            distance_to_landing_pad(
+                landing_pad.location_x,
+                landing_pad.location_y,
+                report.position.location_x,
+                report.position.location_y,
+            )
+            < min_distance
+        ):
+            min_distance = distance_to_landing_pad(
+                landing_pad.location_x,
+                landing_pad.location_y,
+                report.position.location_x,
+                report.position.location_y,
+            )
+            destination = landing_pad
+    return destination
+
+
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
     Travel to the designed waypoint and then land at the nearest landing pad.
@@ -82,43 +109,58 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
         if (
             report.status == report.status.HALTED
-            and report.position.location_x == 0
-            and report.position.location_y == 0
+            and 0 <= abs(report.position.location_x) < abs(self.waypoint.location_x)
+            and 0 <= abs(report.position.location_y) < abs(self.waypoint.location_y)
         ):
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
         elif (
             report.status == report.status.HALTED
-            and report.position.location_x == self.waypoint.location_x
-            and report.position.location_y == self.waypoint.location_y
-        ):
-            command = commands.Command.create_halt_command()
-            min_distance = 100000000000
-            for landing_pad in landing_pad_locations:
-                if (
-                    distance_to_landing_pad(
-                        landing_pad.location_x,
-                        landing_pad.location_y,
-                        report.position.location_x,
-                        report.position.location_y,
-                    )
-                    < min_distance
-                ):
-                    min_distance = distance_to_landing_pad(
-                        landing_pad.location_x,
-                        landing_pad.location_y,
-                        report.position.location_x,
-                        report.position.location_y,
-                    )
-                    destination = landing_pad
-            command = commands.Command.create_set_relative_destination_command(
-                destination.location_x - report.position.location_x,
-                destination.location_y - report.position.location_y,
+            and (
+                self.waypoint.location_x
+                <= report.position.location_x
+                < closest_landing_pad(report, landing_pad_locations).location_x
+                or self.waypoint.location_x
+                >= report.position.location_x
+                > closest_landing_pad(report, landing_pad_locations).location_x
             )
-        elif report.status == report.status.HALTED and report.position == destination:
+            and (
+                self.waypoint.location_y
+                <= report.position.location_y
+                < closest_landing_pad(report, landing_pad_locations).location_y
+                or self.waypoint.location_y
+                >= report.position.location_y
+                > closest_landing_pad(report, landing_pad_locations).location_y
+            )
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                closest_landing_pad(report, landing_pad_locations).location_x
+                - report.position.location_x,
+                closest_landing_pad(report, landing_pad_locations).location_y
+                - report.position.location_y,
+            )
+
+        elif (
+            report.status == report.status.HALTED
+            and (
+                abs(
+                    report.position.location_x
+                    - closest_landing_pad(report, landing_pad_locations).location_x
+                )
+            )
+            < 0.1
+            and (
+                abs(
+                    report.position.location_y
+                    - closest_landing_pad(report, landing_pad_locations).location_y
+                )
+            )
+            < 0.1
+        ):
             command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
