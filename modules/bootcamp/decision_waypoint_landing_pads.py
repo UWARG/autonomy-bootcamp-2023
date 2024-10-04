@@ -75,7 +75,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-        print("waypoint reached", self.waypoint_reached)
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -101,11 +100,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint_reached = True
 
         elif report.status == drone_status.DroneStatus.HALTED and self.waypoint_reached:
-            # self.waypoint_reached = True
             dist = float("inf")
             index = -1
             for i, landing_pad in enumerate(landing_pad_locations):
-                ## put this in a helper method
                 temp = pow((landing_pad.location_x - report.position.location_x), 2) + pow(
                     (landing_pad.location_y - report.position.location_y), 2
                 )
@@ -114,14 +111,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     dist = temp
                     index = i
 
-            print(landing_pad_locations)
-            print("TARGET INDEX:", index)
-
             command = commands.Command.create_set_relative_destination_command(
                 landing_pad_locations[index].location_x - report.position.location_x,
                 landing_pad_locations[index].location_y - report.position.location_y,
             )
-            # print("HALTED AND WAYPOINT REACHED\n\n\n\n\n\n\n\n")
 
             if not self.landing_pad_reached:
                 if index != -1 and (
