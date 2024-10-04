@@ -49,8 +49,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         self.index = -1
 
-        self.counter = 0
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -134,8 +132,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     command = commands.Command.create_land_command()
                     self.landing_pad_reached = True
                     self.has_sent_landing_command = True
-
-        self.counter += 1
 
         print(command)
 
