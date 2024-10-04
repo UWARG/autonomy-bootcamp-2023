@@ -45,6 +45,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         self.landing_pad_reached = False
 
+        self.nearest_pad_found = False
+
+        self.index = -1
+
         self.counter = 0
 
         # ============
@@ -102,28 +106,28 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif report.status == drone_status.DroneStatus.HALTED and self.waypoint_reached:
             dist = float("inf")
-            index = -1
-            for i, landing_pad in enumerate(landing_pad_locations):
-                temp = pow((landing_pad.location_x - report.position.location_x), 2) + pow(
-                    (landing_pad.location_y - report.position.location_y), 2
-                )
-
-                if temp < dist:
-                    dist = temp
-                    index = i
-
+            if not self.nearest_pad_found:
+                for i, landing_pad in enumerate(landing_pad_locations):
+                    temp = pow((landing_pad.location_x - report.position.location_x), 2) + pow(
+                        (landing_pad.location_y - report.position.location_y), 2
+                    )
+                    if temp < dist:
+                        dist = temp
+                        self.index = i
+                self.nearest_pad_found = True
+            
             command = commands.Command.create_set_relative_destination_command(
-                landing_pad_locations[index].location_x - report.position.location_x,
-                landing_pad_locations[index].location_y - report.position.location_y,
+                landing_pad_locations[self.index].location_x - report.position.location_x,
+                landing_pad_locations[self.index].location_y - report.position.location_y,
             )
 
             if not self.landing_pad_reached:
-                if index != -1 and (
+                if self.index != -1 and (
                     self.is_close(
                         report.position.location_x,
                         report.position.location_y,
-                        landing_pad_locations[index].location_x,
-                        landing_pad_locations[index].location_y,
+                        landing_pad_locations[self.index].location_x,
+                        landing_pad_locations[self.index].location_y,
                         self.acceptance_radius,
                     )
                 ):
