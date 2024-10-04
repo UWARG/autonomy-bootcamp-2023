@@ -115,7 +115,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         dist = temp
                         self.index = i
                 self.nearest_pad_found = True
-            
+
             command = commands.Command.create_set_relative_destination_command(
                 landing_pad_locations[self.index].location_x - report.position.location_x,
                 landing_pad_locations[self.index].location_y - report.position.location_y,
