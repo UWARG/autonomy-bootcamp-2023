@@ -44,14 +44,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.counter = 0
 
-
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
     @staticmethod
-    def is_close(x: float, y: float, target_x: float, target_y: float, tolerance: float) -> bool: 
+    def is_close(x: float, y: float, target_x: float, target_y: float, tolerance: float) -> bool:
         """Determines if coordinate x,y, is within tolerence of coordinate target_x, target_y."""
         return abs(x - target_x) < tolerance and abs(y - target_y) < tolerance
 
@@ -89,7 +87,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             report.position.location_y,
             self.waypoint.location_x,
             self.waypoint.location_y,
-            self.acceptance_radius
+            self.acceptance_radius,
         ):
             self.waypoint_reached = True
 
@@ -100,9 +98,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 self.waypoint.location_y - report.position.location_y,
             )
 
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and (not self.has_sent_landing_command)
+        elif report.status == drone_status.DroneStatus.HALTED and (
+            not self.has_sent_landing_command
         ):
             command = commands.Command.create_land_command()
             self.has_sent_landing_command = True
