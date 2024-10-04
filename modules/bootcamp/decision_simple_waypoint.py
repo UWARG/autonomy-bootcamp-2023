@@ -97,21 +97,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         pos_x = report.position.location_x
         pos_y = report.position.location_y
         if report.status == drone_status.DroneStatus.HALTED:  # if command done
-            if wrong_rel_pos(self.command_index - 1):  # repeat previous command
-                command = commands.Command.create_set_relative_destination_command(
-                    self.target_x - pos_x, self.target_y - pos_y
-                )
-            elif self.command_index < len(self.commands):  # next command
+            if self.command_index < len(self.commands):  # next command
                 print(f"cmd({self.command_index}) pos({report.position})")
                 command = self.commands[self.command_index]
                 if (
                     command.get_command_type()
                     == commands.Command.CommandType.SET_RELATIVE_DESTINATION
                 ):  # update target position
-                    cmd_x, cmd_y = command.get_relative_destination()
-                    self.target_x += cmd_x
-                    self.target_y += cmd_y
+                    self.target_x = self.waypoint.location_x
+                    self.target_y = self.waypoint.location_y
                 self.command_index += 1
+            elif wrong_rel_pos(self.command_index - 1):  # repeat previous command
+                command = commands.Command.create_set_relative_destination_command(
+                    self.target_x - pos_x, self.target_y - pos_y
+                )
             elif self.land_status == 0:  # start landing
                 command = commands.Command.create_land_command()
                 self.land_status = 2

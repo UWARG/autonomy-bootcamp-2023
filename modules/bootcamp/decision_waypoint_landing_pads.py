@@ -97,11 +97,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         pos_x = report.position.location_x
         pos_y = report.position.location_y
         if report.status == drone_status.DroneStatus.HALTED:  # if command done
-            if wrong_rel_pos(self.command_index - 1):  # repeat previous command
-                command = commands.Command.create_set_relative_destination_command(
-                    self.target_x - pos_x, self.target_y - pos_y
-                )
-            elif self.command_index < len(self.commands):  # next command
+            if self.command_index < len(self.commands):  # next command
                 print(f"cmd({self.command_index}) pos({report.position})")
                 command = self.commands[self.command_index]
                 if (
@@ -130,6 +126,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     )
                 )
                 self.land_status = 1
+            elif wrong_rel_pos(self.command_index - 1):  # repeat previous command
+                command = commands.Command.create_set_relative_destination_command(
+                    self.target_x - pos_x, self.target_y - pos_y
+                )
             elif self.land_status == 1:  # start landing
                 command = commands.Command.create_land_command()
                 self.land_status = 2
