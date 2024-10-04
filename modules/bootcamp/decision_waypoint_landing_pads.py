@@ -53,8 +53,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     @staticmethod
     def is_close(x: float, y: float, target_x: float, target_y: float, tolerance: float) -> bool:
-        """Determines if coordinate x,y, is within tolerence of coordinate target_x, target_y."""
-        return abs(x - target_x) < tolerance and abs(y - target_y) < tolerance
+        """Determines if coordinate x,y, is within (euclidean distance) tolerence of coordinate target_x, target_y."""
+        dist = pow(pow((x - target_x), 2) + pow((y - target_y), 2), 0.5)
+        return dist < tolerance
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
