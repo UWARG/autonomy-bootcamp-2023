@@ -118,7 +118,7 @@ class DetectLandingPad:
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
 
-        for i in range(len(boxes_cpu)):
+        for i in range(0, boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             if result:  # this way only valid boxes are added
