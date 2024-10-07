@@ -39,15 +39,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
         
-        # Set initial state
-        self.command_index = 0
-        self.commands = [
-            commands.Command.create_set_relative_destination_command(25.0, 25.0)
-        ]
-        self.has_sent_landing_command = False
-        self.reached_destination = False
-
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -73,6 +64,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         # Default command
         
+        command = commands.Command.create_null_command()
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
@@ -80,22 +72,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        # Update the current position from the report
-        self.current_position = report.position
+        # get waypoint and current position
+        waypoint = self.waypoint
+        current_position = report.position
 
-        # Calculate distance to the waypoint
-        distance_to_waypoint = sqrt(
-            (self.current_position[0] - self.waypoint.x) ** 2 + (self.current_position[1] - self.waypoint.y) ** 2
-        )
+        # calculating squared distance (save computational expense from sqrt)
+        distance_horizontal = waypoint.location_x - current_position.location_x
+        distance_vertical = waypoint.location_y - current_position.location_y
+        squared_distance = distance_horizontal**2 + distance_vertical**2
 
-        # Check if the drone is within the acceptance radius of the waypoint
-        if report.status == "HALTED" and not self.has_sent_landing_command:
-            if distance_to_waypoint <= self.acceptance_radius:
-                command = commands.Command.create_land_command()
-                self.has_sent_landing_command = True
-            else:
-                # Move the drone to the waypoint
-                command = self.commands[self.command_index]
+        # checking if dist is within acceptable radius
+        if squared_distance <= self.acceptance_radius**2:
+            return commands.Command.create_land_command()
+
+        # Command to move if the drone is halted
+        if report.status == drone_status.DroneStatus.HALTED:
+            return commands.Command.create_set_relative_destination_command(
+                distance_horizontal, distance_vertical
+            )
+
+        return command
 
 
         # ============
