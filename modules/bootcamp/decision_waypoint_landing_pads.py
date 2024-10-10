@@ -108,19 +108,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif (
             report.status == report.status.HALTED
-            and self.waypoint.location_x == report.position.location_x
+            and distance_between(report.position, self.waypoint) <= self.acceptance_radius**2
             and self.arrived_waypoint is False
         ):
             self.arrived_waypoint = True
+            landing_pad = closest_landing_pad(report, landing_pad_locations)
             command = commands.Command.create_set_relative_destination_command(
-                closest_landing_pad(report, landing_pad_locations).location_x
-                - report.position.location_x,
-                closest_landing_pad(report, landing_pad_locations).location_y
-                - report.position.location_y,
+                landing_pad.location_x - report.position.location_x,
+                landing_pad.location_y - report.position.location_y,
             )
         elif report.status == report.status.HALTED and self.arrived_waypoint is False:
             command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
             )
 
         # ============
