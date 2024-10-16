@@ -37,8 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -68,7 +66,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        waypoint = self.waypoint
+        position = report.position
+
+        x_distance = waypoint.location_x - position.location_x
+        y_distance = waypoint.location_y - position.location_y
+
+        waypoint_radius_squared = x_distance**2 + y_distance**2
+
+        if waypoint_radius_squared <= self.acceptance_radius**2:
+            return commands.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
