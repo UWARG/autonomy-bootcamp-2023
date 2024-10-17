@@ -99,7 +99,9 @@ class DetectLandingPad:
         # * device
         # * verbose
 
-        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
+        )
         if not predictions or len(predictions) == 0:
             return [], image
         # Get the Result object
@@ -119,7 +121,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_numpy = boxes_xyxy.detach().cpu().numpy() #turn into numpy array
+        boxes_numpy = boxes_xyxy.detach().cpu().numpy()  # turn into numpy array
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
