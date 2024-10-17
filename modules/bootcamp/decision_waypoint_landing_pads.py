@@ -101,7 +101,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif status == drone_status.DroneStatus.MOVING:
                 if (
                     self.squared_distance(current_position, self.nearest_landing_pad)
-                    < self.acceptance_radius ** 2
+                    < self.acceptance_radius**2
                 ):
                     command = commands.Command.create_halt_command()
                     print("Halting")
@@ -110,7 +110,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if status == drone_status.DroneStatus.HALTED:
                 if (
                     self.squared_distance(current_position, waypoint_position)
-                    < self.acceptance_radius ** 2
+                    < self.acceptance_radius**2
                 ):
                     self.set_nearest_landing_pads(current_position, landing_pad_locations)
                     self.reached_waypoint = True
@@ -123,7 +123,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif (
                 status == drone_status.DroneStatus.MOVING
                 and self.squared_distance(current_position, waypoint_position)
-                < self.acceptance_radius ** 2
+                < self.acceptance_radius**2
             ):
                 command = commands.Command.create_halt_command()
 
