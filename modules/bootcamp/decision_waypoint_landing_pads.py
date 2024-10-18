@@ -17,7 +17,9 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # No enable
 # pylint: disable=duplicate-code,unused-argument
-def create_move_command_absolute(position: location.Location, destination : location.Location) -> commands.Command:
+def create_move_command_absolute(
+    position: location.Location, destination: location.Location
+) -> commands.Command:
     """
     create a move command from position to destination
     """
@@ -28,7 +30,7 @@ def create_move_command_absolute(position: location.Location, destination : loca
     return command
 
 
-def calc_dist(a : location.Location, b : location.Location) -> float:
+def calc_dist(a: location.Location, b: location.Location) -> float:
     """
     calculate distance squared between two locations
     """
