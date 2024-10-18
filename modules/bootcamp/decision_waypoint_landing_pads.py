@@ -17,16 +17,23 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # No enable
 # pylint: disable=duplicate-code,unused-argument
-def create_move_command_absolute(position, destination):
+def create_move_command_absolute(position: location.Location, destination : location.Location) -> commands.Command:
+    """
+    create a move command from position to destination
+    """
     # move to target zone by calculating displacement
     relative_x = destination.location_x - position.location_x
     relative_y = destination.location_y - position.location_y
-    command = commands.Command.create_set_relative_destination_command(
-        relative_x, relative_y
-    )
+    command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+    return command
 
-def calc_dist(a, b):
-    return (a.location_x - b.location_x) ** 2 + (a.location_y + b.location_y) ** 2
+
+def calc_dist(a : location.Location, b : location.Location) -> float:
+    """
+    calculate distance squared between two locations
+    """
+    return (a.location_x - b.location_x) ** 2 + (a.location_y - b.location_y) ** 2
+
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
@@ -78,7 +85,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         if report.status == drone_status.DroneStatus.MOVING:
-            if calc_dist(report.position, report.destination) < self.acceptance_radius:
+            if calc_dist(report.position, report.destination) < self.acceptance_radius**2:
                 command = commands.Command.create_halt_command()
         elif report.status == drone_status.DroneStatus.HALTED:
 
@@ -93,7 +100,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 # Move to nearest landing pad
                 # Calculate nearest landing pad
                 nearest_landing_pad_location = None
-                nearest_landing_pad_dist = float('inf')
+                nearest_landing_pad_dist = float("inf")
 
                 for landing_pad_location in landing_pad_locations:
                     landing_pad_dist = calc_dist(landing_pad_location, report.position)
@@ -101,15 +108,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     if landing_pad_dist < nearest_landing_pad_dist:
                         nearest_landing_pad_location = landing_pad_location
                         nearest_landing_pad_dist = landing_pad_dist
-                
-                #check if we are already on the nearest landing pad
-                if nearest_landing_pad_dist < self.acceptance_radius ** 2:
-                    #land
+
+                # check if we are already on the nearest landing pad
+                if nearest_landing_pad_dist < self.acceptance_radius**2:
+                    # land
                     command = commands.Command.create_land_command()
                 else:
+                    print(nearest_landing_pad_location)
+                    command = create_move_command_absolute(
+                        report.position, nearest_landing_pad_location
+                    )
 
-                    command = create_move_command_absolute(report.position, nearest_landing_pad_location)
-                
                 self.waypoint_reached = True
 
             else:
