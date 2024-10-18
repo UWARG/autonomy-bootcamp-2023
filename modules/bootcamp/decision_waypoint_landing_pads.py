@@ -17,7 +17,16 @@ from ..private.decision import base_decision
 # Disable for bootcamp use
 # No enable
 # pylint: disable=duplicate-code,unused-argument
+def create_move_command_absolute(position, destination):
+    # move to target zone by calculating displacement
+    relative_x = destination.location_x - position.location_x
+    relative_y = destination.location_y - position.location_y
+    command = commands.Command.create_set_relative_destination_command(
+        relative_x, relative_y
+    )
 
+def calc_dist(a, b):
+    return (a.location_x - b.location_x) ** 2 + (a.location_y + b.location_y) ** 2
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
@@ -37,7 +46,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.waypoint_reached = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +77,45 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.MOVING:
+            if calc_dist(report.position, report.destination) < self.acceptance_radius:
+                command = commands.Command.create_halt_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+
+            if self.waypoint_reached:
+                # We are at landing pad, so land
+                return commands.Command.create_land_command()
+
+            # Get to the way point
+            # check if it is within the appropriate zone
+
+            if calc_dist(report.position, self.waypoint) < self.acceptance_radius**2:
+                # Move to nearest landing pad
+                # Calculate nearest landing pad
+                nearest_landing_pad_location = None
+                nearest_landing_pad_dist = float('inf')
+
+                for landing_pad_location in landing_pad_locations:
+                    landing_pad_dist = calc_dist(landing_pad_location, report.position)
+
+                    if landing_pad_dist < nearest_landing_pad_dist:
+                        nearest_landing_pad_location = landing_pad_location
+                        nearest_landing_pad_dist = landing_pad_dist
+                
+                #check if we are already on the nearest landing pad
+                if nearest_landing_pad_dist < self.acceptance_radius ** 2:
+                    #land
+                    command = commands.Command.create_land_command()
+                else:
+
+                    command = create_move_command_absolute(report.position, nearest_landing_pad_location)
+                
+                self.waypoint_reached = True
+
+            else:
+                command = create_move_command_absolute(report.position, self.waypoint)
+
+        # If drone is already landed, or it is moving and not yet reached the destination, we simply return a null command
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

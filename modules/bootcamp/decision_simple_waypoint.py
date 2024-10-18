@@ -68,7 +68,31 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            # check if it is within the appropriate zone
+            position = report.position
+
+            if (position.location_x - self.waypoint.location_x) ** 2 + (
+                position.location_y - self.waypoint.location_y
+            ) ** 2 < self.acceptance_radius**2:
+                command = commands.Command.create_land_command()
+            else:
+                # move to target zone by calculating displacement
+                relative_x = self.waypoint.location_x - position.location_x
+                relative_y = self.waypoint.location_y - position.location_y
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
+        elif report.status == drone_status.DroneStatus.MOVING:
+            # check if it is within the appropriate zone
+            position = report.position
+
+            if (position.location_x - self.waypoint.location_x) ** 2 + (
+                position.location_y - self.waypoint.location_y
+            ) ** 2 < self.acceptance_radius**2:
+                command = commands.Command.create_halt_command()
+
+        # If drone is already landed, or it is moving and not yet reached the destination, we simply return a null command
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
