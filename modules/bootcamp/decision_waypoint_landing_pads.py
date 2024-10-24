@@ -92,14 +92,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Keep in mind the drone may halt at any moment?
         elif report.status == drone_status.DroneStatus.HALTED:
 
-            if self.nearest_landing_pad_location != None:
+            if self.nearest_landing_pad_location is not None:
                 # Check that we are at the landing pad
-                if calc_dist(report.position, self.nearest_landing_pad_location) < self.acceptance_radius ** 2:
+                if (
+                    calc_dist(report.position, self.nearest_landing_pad_location)
+                    < self.acceptance_radius**2
+                ):
                     return commands.Command.create_land_command()
-                else:
-                    return create_move_command_absolute(
-                        report.position, self.nearest_landing_pad_location
-                    )
+
+                return create_move_command_absolute(
+                    report.position, self.nearest_landing_pad_location
+                )
 
             # Get to the way point
             # check if it is within the appropriate zone
