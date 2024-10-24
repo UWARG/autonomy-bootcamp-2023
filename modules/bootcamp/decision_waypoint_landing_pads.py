@@ -32,29 +32,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
-        self.reached_waypoint = False 
+        self.reachedWaypoint = False
         self.padx = 0
         self.pady = 0
+
+        # ============
+        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+        # ============
+
+        # Add your own
+
+        # ============
+        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+        # ============
 
     def get_nearest_landing(
         self, position: location.Location, landing_pad_locations: "list[location.Location]"
     ) -> list[float]:
-        """
-        Find the nearest landing pad based on the drone's current position.
-
-        Args:
-            position: The current location of the drone.
-            landing_pad_locations: A list of available landing pad locations.
-
-        Returns:
-            A list of floats containing the x and y coordinates of the nearest landing pad.
-        """
         nearest_pad = None
         for pad in landing_pad_locations:
             dx = pad.location_x - position.location_x
             dy = pad.location_y - position.location_y
             distance = (dx) ** 2 + (dy) ** 2
-            if nearest_pad is None: 
+            if nearest_pad == None:
                 nearest_pad = [pad.location_x, pad.location_y]
             elif distance < (nearest_pad[0] ** 2 + nearest_pad[1] ** 2):
                 nearest_pad = [pad.location_x, pad.location_y]
@@ -81,6 +81,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+        # ============
+        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+        # ============
+
         position = report.position
         waypoint = self.waypoint
         status = report.status
@@ -90,13 +94,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         nearest_pad = None
 
-        if not self.reached_waypoint:  # Updated to snake_case
+        if not self.reachedWaypoint:
             if status == drone_status.DroneStatus.HALTED:
                 if (
                     distance_from_waypoint_x <= self.acceptance_radius
                     and distance_from_waypoint_y <= self.acceptance_radius
                 ):
-                    self.reached_waypoint = True  # Updated to snake_case
+                    self.reachedWaypoint = True
                     nearest_pad = self.get_nearest_landing(position, landing_pad_locations)
                     self.padx = nearest_pad[0]
                     self.pady = nearest_pad[1]
@@ -127,5 +131,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if report.destination == report.position:
                     command = commands.Command.create_halt_command()
                     print("Drone done moving")
+        # ============
+        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+        # ============
 
         return command
