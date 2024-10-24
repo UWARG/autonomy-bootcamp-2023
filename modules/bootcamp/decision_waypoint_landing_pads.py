@@ -33,8 +33,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         self.acceptance_radius = acceptance_radius
         self.reached_waypoint = False
+        self.border_radius = 60
         self.padx = 0
         self.pady = 0
+        self.nearest_pad = None
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
@@ -48,7 +50,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     def get_nearest_landing(
         self, position: location.Location, landing_pad_locations: "list[location.Location]"
-    ) -> list[float]:
+    ) -> None:
         """
         Find the nearest landing pad based on the drone's current position.
 
@@ -59,16 +61,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Returns:
             A list of floats containing the x and y coordinates of the nearest landing pad.
         """
-        nearest_pad = None
+        self.padx = landing_pad_locations[0].location_x
+        self.pady = landing_pad_locations[0].location_y
         for pad in landing_pad_locations:
             dx = pad.location_x - position.location_x
             dy = pad.location_y - position.location_y
             distance = (dx) ** 2 + (dy) ** 2
-            if nearest_pad is None:
-                nearest_pad = [pad.location_x, pad.location_y]
-            elif distance < (nearest_pad[0] ** 2 + nearest_pad[1] ** 2):
-                nearest_pad = [pad.location_x, pad.location_y]
-        return nearest_pad
+            print(self.padx, self.pady, dx, dy)
+            if distance < (
+                (self.padx - position.location_x) ** 2 + (self.pady - position.location_y) ** 2
+            ):
+                self.padx = pad.location_x
+                self.pady = pad.location_y
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -102,8 +106,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         distance_from_waypoint_x = waypoint.location_x - position.location_x
         distance_from_waypoint_y = waypoint.location_y - position.location_y
 
-        nearest_pad = None
-
         if not self.reached_waypoint:
             if status == drone_status.DroneStatus.HALTED:
                 if (
@@ -111,16 +113,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     and distance_from_waypoint_y <= self.acceptance_radius
                 ):
                     self.reached_waypoint = True
-                    nearest_pad = self.get_nearest_landing(position, landing_pad_locations)
-                    self.padx = nearest_pad[0]
-                    self.pady = nearest_pad[1]
-                    print("finding pads...", nearest_pad)
-                elif abs(waypoint.location_x) <= 60 and abs(waypoint.location_y) <= 60:
+                    self.get_nearest_landing(position, landing_pad_locations)
+                    print("finding pads...", self.padx, self.pady)
+                elif (
+                    abs(waypoint.location_x) <= self.border_radius
+                    and abs(waypoint.location_y) <= self.border_radius
+                ):
                     command = commands.Command.create_set_relative_destination_command(
                         distance_from_waypoint_x, distance_from_waypoint_y
                     )
             elif status == drone_status.DroneStatus.MOVING:
-                if report.destination == report.position:
+                distance_from_destination = (
+                    report.destination.location_x - report.position.location_x
+                ) ** 2 + (report.destination.location_y - report.position.location_y) ** 2
+                print(distance_from_destination)
+                if distance_from_destination <= self.acceptance_radius**2:
                     command = commands.Command.create_halt_command()
                     print("Drone is moving")
 
@@ -135,10 +142,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if dx <= self.acceptance_radius and dy <= self.acceptance_radius:
                     command = commands.Command.create_land_command()
                     print("Landing at pad...")
-                elif self.padx <= 60 and self.pady <= 60:
+                elif self.padx <= self.border_radius and self.pady <= self.border_radius:
                     command = commands.Command.create_set_relative_destination_command(dx, dy)
             elif status == drone_status.DroneStatus.MOVING:
-                if report.destination == report.position:
+                distance_from_destination = (
+                    report.destination.location_x - report.position.location_x
+                ) ** 2 + (report.destination.location_y - report.position.location_y) ** 2
+                if distance_from_destination <= self.acceptance_radius**2:
                     command = commands.Command.create_halt_command()
                     print("Drone done moving")
         # ============
