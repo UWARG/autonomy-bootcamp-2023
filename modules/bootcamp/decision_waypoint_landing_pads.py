@@ -48,7 +48,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     def get_nearest_landing(
         self, position: location.Location, landing_pad_locations: "list[location.Location]"
-    ):
+    ) -> list[float]:
         nearest_pad = None
         for pad in landing_pad_locations:
             dx = pad.location_x - position.location_x
