@@ -47,6 +47,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def closest_landing_pad(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> location.Location:
+        """
+        Find the nearest landing pad to the drone's current location.
+        """
         nearest_landing_pad = None
         nearest_distance_squared = float("inf")
         for landing_pad in landing_pad_locations:
