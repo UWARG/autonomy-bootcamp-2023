@@ -55,8 +55,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.waypoint_reached = False
-
+        self.nearest_landing_pad_location = None
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -89,11 +88,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.MOVING:
             if calc_dist(report.position, report.destination) < self.acceptance_radius**2:
                 command = commands.Command.create_halt_command()
+
+        # Keep in mind the drone may halt at any moment?
         elif report.status == drone_status.DroneStatus.HALTED:
 
-            if self.waypoint_reached:
-                # We are at landing pad, so land
-                return commands.Command.create_land_command()
+            if self.nearest_landing_pad_location != None:
+                # Check that we are at the landing pad
+                if calc_dist(report.position, self.nearest_landing_pad_location) < self.acceptance_radius ** 2:
+                    return commands.Command.create_land_command()
+                else:
+                    return create_move_command_absolute(
+                        report.position, self.nearest_landing_pad_location
+                    )
 
             # Get to the way point
             # check if it is within the appropriate zone
@@ -101,14 +107,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if calc_dist(report.position, self.waypoint) < self.acceptance_radius**2:
                 # Move to nearest landing pad
                 # Calculate nearest landing pad
-                nearest_landing_pad_location = None
                 nearest_landing_pad_dist = float("inf")
 
                 for landing_pad_location in landing_pad_locations:
                     landing_pad_dist = calc_dist(landing_pad_location, report.position)
 
                     if landing_pad_dist < nearest_landing_pad_dist:
-                        nearest_landing_pad_location = landing_pad_location
+                        self.nearest_landing_pad_location = landing_pad_location
                         nearest_landing_pad_dist = landing_pad_dist
 
                 # check if we are already on the nearest landing pad
@@ -116,12 +121,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     # land
                     command = commands.Command.create_land_command()
                 else:
-                    print(nearest_landing_pad_location)
-                    command = create_move_command_absolute(
-                        report.position, nearest_landing_pad_location
-                    )
 
-                self.waypoint_reached = True
+                    command = create_move_command_absolute(
+                        report.position, self.nearest_landing_pad_location
+                    )
 
             else:
                 command = create_move_command_absolute(report.position, self.waypoint)
