@@ -65,7 +65,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         for pad in landing_pad_locations:
             dx = pad.location_x - position.location_x
             dy = pad.location_y - position.location_y
-            distance = dx ** 2 + dy ** 2
+            distance = dx**2 + dy**2
             print(self.padx, self.pady, dx, dy)
             if distance < (
                 (self.padx - position.location_x) ** 2 + (self.pady - position.location_y) ** 2
