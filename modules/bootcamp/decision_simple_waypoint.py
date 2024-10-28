@@ -38,6 +38,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.reached_waypoint = False
+        self.positionX = 0
+        self.positionY = 0
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,6 +72,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        
+        if report.status == 0:
+            command = commands.Command.create_set_relative_destination_command()
+        elif report.status == 1:
+            command = commands.Command.create_halt_command()
+        elif report.status == 2:
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
