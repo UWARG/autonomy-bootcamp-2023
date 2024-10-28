@@ -75,11 +75,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Also handles if the drone is not on the target after landing
         if (
             report.status == drone_status.DroneStatus.HALTED
-            and (direction_coordinate_x * direction_coordinate_x + direction_coordinate_y * direction_coordinate_y)
+            and (
+                direction_coordinate_x * direction_coordinate_x
+                + direction_coordinate_y * direction_coordinate_y
+            )
             >= self.acceptance_radius * self.acceptance_radius
         ) or (
             report.status == drone_status.DroneStatus.LANDED
-            and (direction_coordinate_x * direction_coordinate_x + direction_coordinate_y * direction_coordinate_y)
+            and (
+                direction_coordinate_x * direction_coordinate_x
+                + direction_coordinate_y * direction_coordinate_y
+            )
             >= self.acceptance_radius * self.acceptance_radius
         ):
             command = commands.Command.create_set_relative_destination_command(
