@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.has_sent_landing_command = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +68,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        direction_coordinate_x = self.waypoint.location_x - report.position.location_x
+        direction_coordinate_y = self.waypoint.location_y - report.position.location_y
+
+        # If the drone is halted and not at the waypoint, send a command to move to the waypoint
+        # Also handles if the drone is not on the target after landing
+        if (
+            report.status == drone_status.DroneStatus.HALTED
+            and (direction_coordinate_x * direction_coordinate_x + direction_coordinate_y * direction_coordinate_y)
+            >= self.acceptance_radius * self.acceptance_radius
+        ) or (
+            report.status == drone_status.DroneStatus.LANDED
+            and (direction_coordinate_x * direction_coordinate_x + direction_coordinate_y * direction_coordinate_y)
+            >= self.acceptance_radius * self.acceptance_radius
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                direction_coordinate_x, direction_coordinate_y
+            )
+        # If the drone is halted, at the waypoint, and not already landed, send a command to land
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            command = commands.Command.create_land_command()
+            self.has_sent_landing_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
