@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.drone_status = None
+        # self.drone_status = None
         self.waypoint_reached = False
 
         # ============
@@ -69,7 +69,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if report.status == drone_status.DroneStatus.HALTED and self.waypoint_reached is False:
+        if report.status == drone_status.DroneStatus.HALTED and not self.waypoint_reached:
             radius_away_squared = (report.position.location_x - self.waypoint.location_x) ** 2 + (
                 report.position.location_y - self.waypoint.location_y
             ) ** 2
@@ -79,7 +79,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     self.waypoint.location_y - report.position.location_y,
                 )
             else:
-                self.waypoint_reached = True
                 command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

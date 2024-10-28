@@ -37,15 +37,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.drone_status = None
+        # self.drone_status = None
         self.waypoint_reached = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    @staticmethod
     def closest_landing_pad(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+        report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> location.Location:
         """
         Find the nearest landing pad to the drone's current location.
@@ -100,7 +101,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     self.waypoint_reached = True
             else:
-                nearest_landing_pad = self.closest_landing_pad(report, landing_pad_locations)
+                nearest_landing_pad = DecisionWaypointLandingPads.closest_landing_pad(
+                    report, landing_pad_locations
+                )
                 command = commands.Command.create_set_relative_destination_command(
                     nearest_landing_pad.location_x - report.position.location_x,
                     nearest_landing_pad.location_y - report.position.location_y,
