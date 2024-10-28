@@ -37,7 +37,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # self.drone_status = None
         self.waypoint_reached = False
 
         # ============
@@ -86,7 +85,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        # define a functin to calculate distance between each item in an array and the current location
 
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.waypoint_reached:
