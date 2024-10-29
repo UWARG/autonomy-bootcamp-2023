@@ -13,7 +13,6 @@ from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
-
 # Disable for bootcamp use
 # No enable
 # pylint: disable=duplicate-code,unused-argument
@@ -21,27 +20,28 @@ from ..private.decision import base_decision
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
-    Travel to the designed waypoint and then land at the nearest landing pad.
+    navigate to the waypoint and land at the nearest available pad.
     """
 
-    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
-        """
-        Initialize all persistent variables here with self.
-        """
+    def __init__(self, waypoint: location.Location, radius: float) -> None:
         self.waypoint = waypoint
-        print(f"Waypoint: {waypoint}")
+        print(f"waypoint at: {waypoint}")
+        self.radius = radius
+        self.arrived = False
+        self.closest_pad = None
 
-        self.acceptance_radius = acceptance_radius
+    def distance_squared(self, a: location.Location, b: location.Location) -> float:
+        dx = a.location_x - b.location_x
+        dy = a.location_y - b.location_y
+        return dx * dx + dy * dy
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
-
-        # Add your own
-
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+    def find_closest_pad(self, pos: location.Location, pads: "list[location.Location]") -> None:
+        min_dist = float("inf")
+        for pad in pads:
+            dist = self.distance_squared(pos, pad)
+            if dist < min_dist:
+                min_dist = dist
+                self.closest_pad = pad
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -61,17 +61,41 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             put_output(command)
         ```
         """
-        # Default command
         command = commands.Command.create_null_command()
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
+        stat = report.status
+        pos_now = report.position
 
-        # Do something based on the report and the state of this class...
-
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+        if self.arrived:
+            if stat == drone_status.DroneStatus.HALTED:
+                if self.distance_squared(pos_now, self.closest_pad) < self.radius**2:
+                    command = commands.Command.create_land_command
+                    print("halted, landing initiated")
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.closest_pad.location_x - pos_now.location_x,
+                        self.closest_pad.location_y - pos_now.location_y,
+                    )
+                    print("navigating to landing pad")
+            elif stat == drone_status.DroneStatus.MOVING:
+                if self.distance_squared(pos_now, self.closest_pad) < self.radius**2:
+                    command = commands.Command.create_halt_command()
+                    print("halting")
+        else:
+            if stat == drone_status.DroneStatus.HALTED:
+                if self.distance_squared(pos_now, self.waypoint) < self.radius**2:
+                    self.find_closest_pad(pos_now, landing_pad_locations)
+                    self.arrived = True
+                else:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x - pos_now.location_x,
+                        self.waypoint.location_y - pos_now.location_y,
+                    )
+                    print("heading to waypoint")
+            elif (
+                stat == drone_status.DroneStatus.MOVING
+                and self.distance_squared(pos_now, self.waypoint) < self.radius**2
+            ):
+                command = commands.Command.create_halt_command()
 
         return command
