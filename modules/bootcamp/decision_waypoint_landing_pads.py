@@ -58,20 +58,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if not landing_pad_locations:
             return None
 
-        closest_landing_pad: location.Location = landing_pad_locations[0]
-        for landing_pad in enumerate(landing_pad_locations):
-            if self.get_squared_distance(
-                report.position.location_x,
-                report.position.location_y,
-                landing_pad[1].location_x,
-                landing_pad[1].location_y,
-            ) < self.get_squared_distance(
-                report.position.location_x,
-                report.position.location_y,
-                closest_landing_pad.location_x,
-                closest_landing_pad.location_y,
+        closest_landing_pad: location.Location = None
+
+        squared_minimum_distance = float("inf")
+
+        for landing_pad in landing_pad_locations:
+            if (
+                self.get_squared_distance(
+                    report.position.location_x,
+                    report.position.location_y,
+                    landing_pad.location_x,
+                    landing_pad.location_y,
+                )
+                < squared_minimum_distance
             ):
-                closest_landing_pad = landing_pad[1]
+                closest_landing_pad = landing_pad
+                squared_minimum_distance = self.get_squared_distance(
+                    report.position.location_x,
+                    report.position.location_y,
+                    closest_landing_pad.location_x,
+                    closest_landing_pad.location_y,
+                )
         return closest_landing_pad
 
     def run(

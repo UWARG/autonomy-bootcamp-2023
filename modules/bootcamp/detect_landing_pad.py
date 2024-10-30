@@ -35,7 +35,6 @@ class DetectLandingPad:
     # Chooses the GPU if it exists, otherwise runs on the CPU
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
-    # __DEVICE = 0 if torch.cuda.is_available() else "cpu"
     __DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
     # ============
@@ -116,10 +115,13 @@ class DetectLandingPad:
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        for boxes in enumerate(boxes_cpu):
-            result, box = bounding_box.BoundingBox.create(boxes[1])
-            if result:
-                bounding_boxes.append(box)
+        for box_cpu in boxes_cpu:
+            result, box = bounding_box.BoundingBox.create(box_cpu)
+
+            if not result:
+                return [], image_annotated
+
+            bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
 
