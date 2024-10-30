@@ -49,15 +49,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def find_nearest_landing_pad(
-        self, landing_pad_locations: "list[location.Location]"
-    ) -> None:
-        nearest_landing_pad_distance = float('inf')
+    def find_nearest_landing_pad(self, landing_pad_locations: "list[location.Location]") -> None:
+        """
+        finds nearest landing pad
+        """
+        nearest_landing_pad_distance = float("inf")
         nearest_landing_pad = landing_pad_locations[0]
 
-        for i in range(len(landing_pad_locations)):
-            distance = (landing_pad_locations[i].location_x - self.position_x) ** 2 + (
-                landing_pad_locations[i].location_y - self.position_y
+        for landing_pad in landing_pad_locations:
+            distance = (landing_pad.location_x - self.position_x) ** 2 + (
+                landing_pad.location_y - self.position_y
             ) ** 2
 
             if distance == 0:
@@ -66,10 +67,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             if distance < nearest_landing_pad_distance**2:
                 nearest_landing_pad_distance = distance
-                nearest_landing_pad = landing_pad_locations[i]
+                nearest_landing_pad = landing_pad
 
         self.nearest_landing_pad = nearest_landing_pad
-
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
