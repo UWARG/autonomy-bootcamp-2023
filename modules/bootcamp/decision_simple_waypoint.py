@@ -32,6 +32,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
+        self.border_radius = 60
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
@@ -80,12 +81,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             ):
                 command = commands.Command.create_land_command()
                 print("Landing...")
-            elif abs(waypoint.location_x) <= 60 and abs(waypoint.location_y) <= 60:
+            elif (
+                abs(waypoint.location_x) <= self.border_radius
+                and abs(waypoint.location_y) <= self.border_radius
+            ):
                 command = commands.Command.create_set_relative_destination_command(
                     distance_from_waypoint_x, distance_from_waypoint_y
                 )
         elif status == drone_status.DroneStatus.MOVING:
-            if report.destination == report.position:
+            if abs(report.destination - report.position) <= self.acceptance_radius:
                 command = commands.Command.create_halt_command()
                 print("Drone is moving")
 
