@@ -39,8 +39,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         self.has_gone_to_waypoint = False
 
-        self.has_sent_landing_command = False
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -49,28 +47,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Calculate the distance between two points and return its square
         """
-        return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+        return (x1 - x2) ** 2 + (y1 - y2) ** 2
 
     def get_closest_landing_pad(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
-    ) -> int:
+    ) -> location.Location | None:
         """
         Find the closest landing pad to the drone.
         """
-        closest_landing_pad = 0
-        for i in range(1, len(landing_pad_locations)):
+        if not landing_pad_locations:
+            return None
+
+        closest_landing_pad: location.Location = landing_pad_locations[0]
+        for landing_pad in enumerate(landing_pad_locations):
             if self.get_squared_distance(
                 report.position.location_x,
                 report.position.location_y,
-                landing_pad_locations[i].location_x,
-                landing_pad_locations[i].location_y,
+                landing_pad[1].location_x,
+                landing_pad[1].location_y,
             ) < self.get_squared_distance(
                 report.position.location_x,
                 report.position.location_y,
-                landing_pad_locations[closest_landing_pad].location_x,
-                landing_pad_locations[closest_landing_pad].location_y,
+                closest_landing_pad.location_x,
+                closest_landing_pad.location_y,
             ):
-                closest_landing_pad = i
+                closest_landing_pad = landing_pad[1]
         return closest_landing_pad
 
     def run(
@@ -106,21 +107,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint.location_x,
                 self.waypoint.location_y,
             )
-            < self.acceptance_radius * self.acceptance_radius
+            < self.acceptance_radius**2
         ):
             self.has_gone_to_waypoint = True
 
         # If the drone has gone to the waypoint, calculate the direction to the closest landing pad
-        if self.has_gone_to_waypoint:
+        if self.has_gone_to_waypoint and landing_pad_locations is not None:
 
             closest_landing_pad = self.get_closest_landing_pad(report, landing_pad_locations)
 
-            direction_coordinate_x = (
-                landing_pad_locations[closest_landing_pad].location_x - report.position.location_x
-            )
-            direction_coordinate_y = (
-                landing_pad_locations[closest_landing_pad].location_y - report.position.location_y
-            )
+            direction_coordinate_x = closest_landing_pad.location_x - report.position.location_x
+            direction_coordinate_y = closest_landing_pad.location_y - report.position.location_y
 
         else:
             direction_coordinate_x = self.waypoint.location_x - report.position.location_x
@@ -131,20 +128,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if (
             report.status in (drone_status.DroneStatus.HALTED, drone_status.DroneStatus.LANDED)
         ) and (
-            direction_coordinate_x * direction_coordinate_x
-            + direction_coordinate_y * direction_coordinate_y
-        ) >= self.acceptance_radius * self.acceptance_radius:
+            direction_coordinate_x**2 + direction_coordinate_y**2
+        ) >= self.acceptance_radius**2:
             command = commands.Command.create_set_relative_destination_command(
                 direction_coordinate_x, direction_coordinate_y
             )
         # If the drone is halted, at the waypoint, not already landed, send a command to land
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and self.has_gone_to_waypoint
-            and not self.has_sent_landing_command
-        ):
+        elif report.status == drone_status.DroneStatus.HALTED and self.has_gone_to_waypoint:
             command = commands.Command.create_land_command()
-            self.has_sent_landing_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

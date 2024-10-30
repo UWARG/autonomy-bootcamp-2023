@@ -7,6 +7,7 @@ Detects landing pads.
 import pathlib
 
 import numpy as np
+import torch
 import ultralytics
 
 from .. import bounding_box
@@ -35,7 +36,7 @@ class DetectLandingPad:
     # If you have a CUDA capable GPU but want to force it to
     # run on the CPU instead, replace the right side with "cpu"
     # __DEVICE = 0 if torch.cuda.is_available() else "cpu"
-    __DEVICE = "cpu"
+    __DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
     # ============
     # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -94,27 +95,31 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        self.__model.predict(image, conf=0.7, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
+        )
 
         # Get the Result object
-        prediction = self.__model(image)
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction[0].plot()
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = prediction[0].boxes.xyxy
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        for result in enumerate(boxes_cpu):
-            bounding_boxes.append(bounding_box.BoundingBox.create(result[1])[1])
+        for boxes in enumerate(boxes_cpu):
+            result, box = bounding_box.BoundingBox.create(boxes[1])
+            if result:
+                bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
 
