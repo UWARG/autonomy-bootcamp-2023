@@ -38,13 +38,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.position_x = 0
-        self.position_y = 0
+        self.position = [0, 0]
         self.reached_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def within_acceptance_radius(self) -> bool:
+        """
+        checks if the current position is within the waypoint's acceptance radius. returns True or False
+        """
+        return (
+            abs(self.waypoint.location_x - self.position[0]) <= self.acceptance_radius
+            and abs(self.waypoint.location_y - self.position[1]) <= self.acceptance_radius
+        )
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -72,16 +80,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-
-        def within_acceptance_radius() -> bool:
-            return (
-                abs(self.waypoint.location_x - self.position_x) <= self.acceptance_radius
-                and abs(self.waypoint.location_y - self.position_y) <= self.acceptance_radius
-            )
-
-        self.position_x = report.position.location_x
-        self.position_y = report.position.location_y
-        self.reached_waypoint = within_acceptance_radius()
+        self.position[0] = report.position.location_x
+        self.position[1] = report.position.location_y
+        self.reached_waypoint = self.within_acceptance_radius()
 
         if report.status == drone_status.DroneStatus.HALTED and not self.reached_waypoint:
             command = commands.Command.create_set_relative_destination_command(
