@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,8 +67,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Do something based on the report and the state of this class...
+        def get_x_difference(initial: location.Location, final: location.Location):
+            return (final.location_x - initial.location_x)
+        
+        def get_y_difference(initial: location.Location, final: location.Location):
+            return (final.location_y - initial.location_y)
+        
+        def get_distance_squared(diff_x, diff_y):
+            return (diff_x*diff_x + diff_y*diff_y)
+        
+        x_difference = get_x_difference(report.position, self.waypoint)
+        y_difference = get_y_difference(report.position, self.waypoint)
+        
+        if (get_distance_squared(x_difference,y_difference) >= (self.acceptance_radius*self.acceptance_radius)):
+            command = commands.Command.create_set_relative_destination_command(x_difference, y_difference)
+        else:
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
