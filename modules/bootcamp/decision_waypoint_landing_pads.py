@@ -37,7 +37,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.reached_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +68,40 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        def get_x_difference(initial: location.Location, final: location.Location):
+            return (final.location_x - initial.location_x)
+        
+        def get_y_difference(initial: location.Location, final: location.Location):
+            return (final.location_y - initial.location_y)
+        
+        def get_distance_squared(diff_x, diff_y):
+            return (diff_x*diff_x + diff_y*diff_y)
+        
+        def get_closest_landing_pad():
+            min_distance = 1e20
+            closest_landing_pad = None
+            for landing_pad in landing_pad_locations:
+                x_difference = get_x_difference(report.position, landing_pad)
+                y_difference = get_y_difference(report.position, landing_pad)
+                if get_distance_squared(x_difference, y_difference) < min_distance:
+                    min_distance = get_distance_squared(x_difference, y_difference)
+                    closest_landing_pad = landing_pad
+            return closest_landing_pad
+
+        if self.reached_waypoint:
+            self.waypoint = get_closest_landing_pad()
+
+        x_difference = get_x_difference(report.position, self.waypoint)
+        y_difference = get_y_difference(report.position, self.waypoint)
+        
+        if (get_distance_squared(x_difference,y_difference) >= (self.acceptance_radius*self.acceptance_radius)):
+            command = commands.Command.create_set_relative_destination_command(x_difference, y_difference)
+        else:
+            if not self.reached_waypoint:
+                self.reached_waypoint = True
+#                command = commands.Command.create_halt_command()
+            else:
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
