@@ -14,7 +14,6 @@ from .. import location
 from ..private.decision import base_decision
 
 
-
 # Disable for bootcamp use
 # No enable
 # pylint: disable=duplicate-code,unused-argument
@@ -45,7 +44,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     @staticmethod
     def calculate_distance(loc1: location.Location, loc2: location.Location) -> float:
         """Calculate the Euclidean distance between two Location objects.
-    
+
         Args:
             loc1 (location.Location): The first location.
             loc2 (location.Location): The second location.
@@ -62,7 +61,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         drone_position: location.Location, landing_pads: "list[location.Location]"
     ) -> location.Location:
         """Find the closest landing pad to the drone's current position.
-    
+
         Args:
             drone_position (location.Location): The current position of the drone.
             landing_pads (list[location.Location]): A list of possible landing pads.

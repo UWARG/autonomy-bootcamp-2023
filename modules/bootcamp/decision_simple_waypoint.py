@@ -48,11 +48,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.has_sent_landing_command = False
 
         self.counter = 0
+
         @staticmethod
-        def check_radius(current_x: location.Location, current_y: location.Location, waypoint_x: location.Location, waypoint_y: location.Location) -> bool:
+        def check_radius(
+            current_x: location.Location,
+            current_y: location.Location,
+            waypoint_x: location.Location,
+            waypoint_y: location.Location,
+        ) -> bool:
             radius = math.sqrt((waypoint_x - current_x) ** 2 + (waypoint_y - current_y) ** 2)
 
             return radius < self.acceptance_radius
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
