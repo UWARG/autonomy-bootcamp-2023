@@ -55,10 +55,28 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Make the drone fly to the waypoint and then land at the nearest landing pad.
 
-        This method will be called in an infinite loop.
+        You are allowed to create as many helper methods as you want,
+        as long as you do not change the __init__() and run() signatures.
+
+        This method will be called in an infinite loop, something like this:
+
+        ```py
+        while True:
+            report, landing_pad_locations = get_input()
+            command = Decision.run(report, landing_pad_locations)
+            put_output(command)
+        ```
         """
         # Default command
         command = commands.Command.create_null_command()
+
+        # ============
+        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+        # ============
+
+        if self.has_sent_landing_command: 
+            # Landing is complete; no further commands needed
+            return command
 
         # Helper functions
         def check_radius(current_x, current_y, target_x, target_y, radius):
@@ -83,20 +101,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Step 1: Navigate to the waypoint
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(self.commands):
             print(f"Halted at: {report.position}")
-
-            # Issue the next movement command towards the waypoint
             command = self.commands[self.command_index]
             self.command_index += 1
 
-        # Step 2: Check if the drone is at the waypoint
+        # Step 2: Navigate to the nearest landing pad
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
-            # If the drone is close enough to the waypoint, find the closest landing pad
+            # If the drone is close enough to the waypoint
             if check_radius(
                 report.position.location_x, report.position.location_y,
                 self.waypoint.location_x, self.waypoint.location_y, self.acceptance_radius
             ):
                 # Find the closest landing pad
                 closest_pad = find_closest_landing_pad(report.position, landing_pad_locations)
+                if closest_pad is None:
+                    print("No landing pads available.")
+                    return command  # Remain idle if no landing pads are found
 
                 # Check if the drone is within landing range of the closest pad
                 if check_radius(
@@ -106,15 +125,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     # Land at the closest landing pad
                     command = commands.Command.create_land_command()
                     self.has_sent_landing_command = True
-                    
+                    #self.landing_complete = True  # Set the landing completion flag
+                    print("Landing command issued.")
                 else:
                     # Move towards the closest landing pad if not already there
                     command = commands.Command.create_set_relative_destination_command(
                         closest_pad.location_x - report.position.location_x,
                         closest_pad.location_y - report.position.location_y
                     )
+                    print(f"Moving towards landing pad at ({closest_pad.location_x}, {closest_pad.location_y}).")
 
         # Increment counter for tracking run calls
         self.counter += 1
+
+         # ============
+        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+        # ============
 
         return command
