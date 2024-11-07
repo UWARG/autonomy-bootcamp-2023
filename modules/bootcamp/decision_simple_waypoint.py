@@ -4,9 +4,11 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
+import math
 from .. import commands
 from .. import drone_report
-import math
+
+
 # Disable for bootcamp use
 # pylint: disable-next=unused-import
 from .. import drone_status
@@ -30,24 +32,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         self.waypoint = waypoint
         print(f"Waypoint: {waypoint}")
-        
 
         self.acceptance_radius = acceptance_radius
-        print(self.acceptance_radius)
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         self.command_index = 0
         self.commands = [
-            commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y),
-     
+            commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            ),
         ]
 
         self.has_sent_landing_command = False
 
         self.counter = 0
+        @staticmethod
+        def check_radius(current_x: location.Location, current_y: location.Location, waypoint_x: location.Location, waypoint_y: location.Location) -> bool:
+            radius = math.sqrt((waypoint_x - current_x) ** 2 + (waypoint_y - current_y) ** 2)
 
+            return radius < self.acceptance_radius
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -77,8 +82,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        
-
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
             self.commands
         ):
@@ -89,18 +92,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
             command = self.commands[self.command_index]
             self.command_index += 1
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and check_radius(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y) :
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_sent_landing_command
+            and self.check_radius(
+                report.position.location_x,
+                report.position.location_y,
+                self.waypoint.location_x,
+                self.waypoint.location_y,
+            )
+        ):
             command = commands.Command.create_land_command()
 
             self.has_sent_landing_command = True
 
         self.counter += 1
-
-        def check_radius(current_x, current_y, waypoint_x, waypoint_y):
-            radius = math.sqrt((waypoint_x - current_x) ** 2 + (waypoint_y - current_y) ** 2)
-
-            return radius < self.acceptance_radius
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
