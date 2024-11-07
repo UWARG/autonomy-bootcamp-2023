@@ -45,12 +45,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
     @staticmethod
     def calculate_distance(loc1: location.Location, loc2: location.Location) -> float:
-        """Calculate the Euclidean distance between two Location objects."""
-        return math.sqrt((loc2.location_x - loc1.location_x) ** 2 + (loc2.location_y - loc1.location_y) ** 2)
+        #Calculate the Euclidean distance between two Location objects.
+        dx = loc2.location_x - loc1.location_x
+        dy = loc2.location_y - loc1.location_y
+        return dx * dx + dy * dy
 
     @staticmethod
     def find_closest_landing_pad(drone_position: location.Location, landing_pads: "list[location.Location]") -> location.Location:
-        """Find the closest landing pad from the drone's current position."""
+        #Find the closest landing pad from the drone's current position.
         closest_pad = None
         min_distance = float('inf')
         for pad in landing_pads:
