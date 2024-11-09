@@ -65,7 +65,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        distance_to_waypoint = self.my_sqrt(report)
+        distance_to_waypoint = self.distance(report)
 
         if self.start_simulator and report.status == drone_status.DroneStatus.HALTED:
             command = commands.Command.create_set_relative_destination_command(
@@ -78,6 +78,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             and distance_to_waypoint <= self.acceptance_radius
         ):
             command = commands.Command.create_land_command()
+        elif report.status == drone_status.DroneStatus.HALTED:
+            self.start_simulator = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -85,7 +87,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return command
 
-    def my_sqrt(self, report: drone_report.DroneReport) -> float:
+    def distance(self, report: drone_report.DroneReport) -> float:
         """
         Find the distance between the reported position and the waypoint
         """

@@ -32,7 +32,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.start_simulator = True
-        self.not_on_pad = True
+        self.index = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -64,7 +64,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        distance_to_waypoint = self.my_sqrt(report, self.waypoint)
+        distance_to_waypoint = self.distance(report, self.waypoint)
 
         # print(
         #     f"report status: {report.status}, ({report.position.location_x}, {report.position.location_y})"
@@ -78,22 +78,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif (
             report.status == drone_status.DroneStatus.HALTED
             and distance_to_waypoint <= self.acceptance_radius
-            and self.not_on_pad
+            and self.index is None
         ):
-            min_location, index = self.my_sqrt(report, landing_pad_locations[0]), 0
+            min_location, index = self.distance(report, landing_pad_locations[0]), 0
             for item in range(1, len(landing_pad_locations)):
-                this_location = self.my_sqrt(report, landing_pad_locations[item])
+                this_location = self.distance(report, landing_pad_locations[item])
                 if this_location < min_location:
                     min_location, index = this_location, item
                 if min_location == 0:
                     break
+            self.index = index
             command = commands.Command.create_set_relative_destination_command(
                 landing_pad_locations[index].location_x - report.position.location_x,
                 landing_pad_locations[index].location_y - report.position.location_y,
             )
-            self.not_on_pad = False
-        elif (not self.not_on_pad) and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_land_command()
+        elif (self.index is not None) and report.status == drone_status.DroneStatus.HALTED:
+            distance_to_pad = self.distance(report, landing_pad_locations[self.index])
+            if distance_to_pad <= self.acceptance_radius:
+                command = commands.Command.create_land_command()
+            else:
+               command = commands.Command.create_set_relative_destination_command(
+                landing_pad_locations[self.index].location_x - report.position.location_x,
+                landing_pad_locations[self.index].location_y - report.position.location_y,
+            )
+        elif report.status == drone_status.DroneStatus.HALTED:
+            self.start_simulator = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -101,7 +110,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
-    def my_sqrt(self, report: location.Location, destination: location.Location) -> float:
+    def distance(self, report: drone_report.DroneReport, destination: location.Location) -> float:
         """
         Find the distance between the reported position and the waypoint
         """
