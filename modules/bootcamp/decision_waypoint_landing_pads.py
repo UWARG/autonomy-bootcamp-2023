@@ -97,10 +97,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if distance_to_pad <= self.acceptance_radius:
                 command = commands.Command.create_land_command()
             else:
-               command = commands.Command.create_set_relative_destination_command(
-                landing_pad_locations[self.index].location_x - report.position.location_x,
-                landing_pad_locations[self.index].location_y - report.position.location_y,
-            )
+                command = commands.Command.create_set_relative_destination_command(
+                    landing_pad_locations[self.index].location_x - report.position.location_x,
+                    landing_pad_locations[self.index].location_y - report.position.location_y,
+                )
         elif report.status == drone_status.DroneStatus.HALTED:
             self.start_simulator = True
 
