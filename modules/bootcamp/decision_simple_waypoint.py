@@ -24,7 +24,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     Travel to the designed waypoint.
     """
 
-    def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
+    def __init__(self, waypoint: location.Location, acceptance_radius: float):
         """
         Initialize all persistent variables here with self.
         """
@@ -39,7 +39,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
         
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -90,9 +89,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             return commands.Command.create_set_relative_destination_command(
                 distance_horizontal, distance_vertical
             )
-
-        return command
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
