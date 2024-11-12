@@ -37,36 +37,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        self.command_index = 0
-        self.commands = [
-            commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            ),
-        ]
-
         self.has_sent_destination_command = False
         self.has_sent_landing_command = False
-        
-
         self.counter = 0
 
         # New variables for handling GPS noise
         self.within_radius_count = 0
         self.consecutive_threshold = 3
 
-        def check_radius(
-            self,
-            current_x: location.Location,
-            current_y: location.Location,
-            waypoint_x: location.Location,
-            waypoint_y: location.Location,
-        ) -> bool:
-            """
-            Check if the drone is within the acceptance radius of the waypoint.
-            """
-            radius = math.sqrt((waypoint_x - current_x) ** 2 + (waypoint_y - current_y) ** 2)
-            return radius < self.acceptance_radius
+    def check_radius(
+        self,
+        current_x: location.Location,
+        current_y: location.Location,
+        waypoint_x: location.Location,
+        waypoint_y: location.Location,
+    ) -> bool:
+        """
+        Check if the drone is within the acceptance radius of the waypoint.
+        """
+        radius = math.sqrt((waypoint_x - current_x) ** 2 + (waypoint_y - current_y) ** 2)
+        return radius < self.acceptance_radius
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -97,8 +87,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_destination_command:
-        # Print some information for debugging
+        if (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_sent_destination_command
+        ):
+            # Print some information for debugging
             print(self.counter)
             print(f"Halted at: {report.position}")
 
