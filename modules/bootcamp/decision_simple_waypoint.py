@@ -45,7 +45,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             ),
         ]
 
+        self.has_sent_destination_command = False
         self.has_sent_landing_command = False
+        
 
         self.counter = 0
 
@@ -95,17 +97,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
-            self.commands
-        ):
-            # Print some information for debugging
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_destination_command:
+        # Print some information for debugging
             print(self.counter)
-            print(self.command_index)
             print(f"Halted at: {report.position}")
 
-            command = self.commands[self.command_index]
-            self.command_index += 1
+            # Send the command to move towards the waypoint
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+            self.has_sent_destination_command = True
 
+        # Check if the drone should land
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
             # Check if the drone is within the acceptance radius
             if self.check_radius(
@@ -125,8 +128,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
 
-        
-
+        # Increment the counter for debugging purposes
         self.counter += 1
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
