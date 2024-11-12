@@ -49,15 +49,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.counter = 0
 
-        @staticmethod
+        # New variables for handling GPS noise
+        self.within_radius_count = 0
+        self.consecutive_threshold = 3
+
         def check_radius(
+            self,
             current_x: location.Location,
             current_y: location.Location,
             waypoint_x: location.Location,
             waypoint_y: location.Location,
         ) -> bool:
+            """
+            Check if the drone is within the acceptance radius of the waypoint.
+            """
             radius = math.sqrt((waypoint_x - current_x) ** 2 + (waypoint_y - current_y) ** 2)
-
             return radius < self.acceptance_radius
 
         # ============
@@ -99,19 +105,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
             command = self.commands[self.command_index]
             self.command_index += 1
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and not self.has_sent_landing_command
-            and self.check_radius(
+
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            # Check if the drone is within the acceptance radius
+            if self.check_radius(
                 report.position.location_x,
                 report.position.location_y,
                 self.waypoint.location_x,
                 self.waypoint.location_y,
-            )
-        ):
-            command = commands.Command.create_land_command()
+            ):
+                # Increment the counter if within radius
+                self.within_radius_count += 1
+            else:
+                # Reset the counter if outside the radius
+                self.within_radius_count = 0
 
-            self.has_sent_landing_command = True
+            # Check if the drone has been within the radius for the required number of checks
+            if self.within_radius_count >= self.consecutive_threshold:
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+
+        
 
         self.counter += 1
         # ============
