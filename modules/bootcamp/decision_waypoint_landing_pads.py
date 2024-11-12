@@ -36,26 +36,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         self.reaching_waypoint = True
-        self.reaching_landing = True
-        self.at_waypoint = False
         self.landing_pad = location.Location
-        self.at_landing_pad = False 
         self.has_sent_landing_command = False
-        self.shortest_dis = 1000000
-        #self.waypoint_to_landing_x = 0
-        #self.waypoint_to_landing_y = 0
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-    def calculate_distance(self, landing_pad: location.Location):
-        # self.waypoint_to_landing_x = landing_pad.location_x - self.waypoint.location_x
-        # self.waypoint_to_landing_y = landing_pad.location_y - self.waypoint.location_y
+    def calculate_distance(self,landing_pad: location.Location):
+        """
+        Calculate distance between waypoint and a landing pad 
+        """
         return (landing_pad.location_x - self.waypoint.location_x)**2 + (landing_pad.location_y - self.waypoint.location_y)**2
-    
-    def reached_destination(self,destination: location.Location, position: location.Location):
+    def reached_destination(self,destination: location.Location,position: location.Location):
+        """
+        Check if drone is within acceptance radius of target destination
+        """
         if (destination.location_x - position.location_x) <= self.acceptance_radius and (destination.location_y - position.location_y) <= self.acceptance_radius:
             return True
         return False
@@ -87,31 +82,25 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if self.reaching_waypoint:
-            self.at_waypoint = self.reached_destination(self.waypoint,report.position)
-
-            if report.status == drone_status.DroneStatus.HALTED and not self.at_waypoint:
+            at_waypoint = self.reached_destination(self.waypoint,report.position)
+            if report.status == drone_status.DroneStatus.HALTED and not at_waypoint:
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x,self.waypoint.location_y)
-
-            elif report.status == drone_status.DroneStatus.HALTED and self.at_waypoint:
-                for i in range(len(landing_pad_locations)):
+            elif report.status == drone_status.DroneStatus.HALTED and at_waypoint:
+                shortest_dis = 1000000
+                for i,distance in enumerate(landing_pad_locations):
                     distance = self.calculate_distance(landing_pad_locations[i])
-                    if distance < self.shortest_dis:
-                        self.shortest_dis = distance
+                    if distance < shortest_dis:
+                        shortest_dis = distance
                         counter=i
                 self.landing_pad = landing_pad_locations[counter]
-                #command = commands.Command.create_set_relative_destination_command(self.waypoint_to_landing_x,self.waypoint_to_landing_y)
-                command = commands.Command.create_set_relative_destination_command(self.landing_pad.location_x - self.waypoint.location_x,self.landing_pad.location_y - self.waypoint.location_y)
+                command = commands.Command.create_set_relative_destination_command(self.landing_pad.location_x - self.waypoint.location_x, self.landing_pad.location_y - self.waypoint.location_y)
                 self.reaching_waypoint = False
         else:
-            self.at_landing_pad = self.reached_destination(self.landing_pad,report.position)
-
-            if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and self.at_landing_pad:
+            at_landing_pad = self.reached_destination(self.landing_pad,report.position)
+            if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command and at_landing_pad:
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
         return command
-    
-    
