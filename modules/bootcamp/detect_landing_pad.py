@@ -19,7 +19,6 @@ from .. import bounding_box
 # Bootcampers remove the following lines:
 # Allow linters and formatters to pass for bootcamp maintainers
 # No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -98,11 +97,12 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(source=image, conf=0.7, device=self.__DEVICE, verbose=False)
+        predictions = self.__model.predict(
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
+        )
 
         # Get the Result object
         prediction = prediction = predictions[0]
-
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -119,14 +119,14 @@ class DetectLandingPad:
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        for i in range(0,boxes_cpu.shape[0]):
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
-                result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-                if not result:
-                    continue
-                assert box is not None
-                bounding_boxes.append(box)
+        for i in range(0, boxes_cpu.shape[0]):
+            #     # Create BoundingBox object and append to list
+            #     result, box = ...
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            if not result:
+                continue
+            assert box is not None
+            bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
         # ============
