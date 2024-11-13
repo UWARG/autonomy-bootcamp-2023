@@ -76,10 +76,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             else:
                 if self.target_landing_pad is None:
                     closest_distance_sq = float("inf")
-                    closest_pad: location.Location =  None
+                    closest_pad: location.Location = None
 
                     for pad in landing_pad_locations:
-                        distance_sq = (pad.location_x - report.position.location_x) ** 2 + ( pad.location_y - report.position.location_y) ** 2
+                        distance_sq = (pad.location_x - report.position.location_x) ** 2 + (
+                            pad.location_y - report.position.location_y
+                        ) ** 2
                         if distance_sq < closest_distance_sq:
                             closest_distance_sq = distance_sq
                             closest_pad = pad
@@ -92,7 +94,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     return command
 
-            distance_sq = (destination_x - report.position.location_x) ** 2 + (destination_y - report.position.location_y) ** 2
+            distance_sq = (destination_x - report.position.location_x) ** 2 + (
+                destination_y - report.position.location_y
+            ) ** 2
 
             if distance_sq < self.acceptance_radius**2:
                 if not self.waypoint_visited:
@@ -102,7 +106,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             else:
                 relative_x = destination_x - report.position.location_x
                 relative_y = destination_y - report.position.location_y
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
