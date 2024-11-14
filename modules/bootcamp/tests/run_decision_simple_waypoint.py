@@ -47,6 +47,7 @@ def main() -> int:
         decision_factory.DecisionEnum.SIMPLE_WAYPOINT, TIME_STEP_SIZE, DISPLAY_SCALE, SEED
     )
 
+
 if __name__ == "__main__":
     result_main = main()
     if result_main != 0:
