@@ -21,12 +21,12 @@ from modules.bootcamp.tests.private import runner
 # to reach the 1st command
 # Increase the step size if your computer is lagging
 # Larger step size is smaller FPS
-TIME_STEP_SIZE = 0.1  # seconds
+TIME_STEP_SIZE = 12.5  # seconds
 
 # OpenCV ignores your display settings,
 # so if the window is too small or too large,
 # change this value (between 0.0 and 1.0)
-DISPLAY_SCALE = 0.8
+DISPLAY_SCALE = 0.5
 
 # Seed for randomly generating the waypoint and landing pad
 # Change to a constant for reproducibility (e.g. debugging)

@@ -5,6 +5,7 @@
 # Python
 __pycache__/
 venv/
+myvenv/
 
 # Logging
 *log*
