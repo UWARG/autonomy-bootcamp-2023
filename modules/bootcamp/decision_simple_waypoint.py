@@ -55,7 +55,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         This method will be called in an infinite loop, something like this:
 
         ```py
-        while True: 
+        while True:
             report, landing_pad_locations = get_input()
             command = Decision.run(report, landing_pad_locations)
             put_output(command)
