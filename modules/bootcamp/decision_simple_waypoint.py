@@ -87,11 +87,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        # Check if the drone is halted and has not yet received a destination command
         if (
             report.status == drone_status.DroneStatus.HALTED
             and not self.has_sent_destination_command
         ):
-            # Print some information for debugging
+            # Print for debugging
             print(self.counter)
             print(f"Halted at: {report.position}")
 
@@ -101,8 +102,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             )
             self.has_sent_destination_command = True
 
-        # Check if the drone should land
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+        # Check if the drone should land or adjust its position
+        elif report.status == drone_status.DroneStatus.HALTED:
             # Check if the drone is within the acceptance radius
             if self.check_radius(
                 report.position.location_x,
@@ -116,8 +117,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 # Reset the counter if outside the radius
                 self.within_radius_count = 0
 
+                # Re-send the move command if the drone is not within the acceptance radius
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
+                self.has_sent_destination_command = True
+
             # Check if the drone has been within the radius for the required number of checks
-            if self.within_radius_count >= self.consecutive_threshold:
+            if (
+                self.within_radius_count >= self.consecutive_threshold
+                and not self.has_sent_landing_command
+            ):
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
 
