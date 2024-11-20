@@ -23,7 +23,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     Travel to the designed waypoint and then land at the nearest landing pad.
     """
 
-    def l2_norm(self, x1: float, y1: float, x2: float, y2: float) -> float:
+    @staticmethod
+    def l2_norm(x1: float, y1: float, x2: float, y2: float) -> float:
         """
         Calculate the L2 norm between two points.
         """
@@ -101,11 +102,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if not self.waypoint_reached:
                 # Check if the drone is at the waypoint
                 if (
-                    abs(self.waypoint.location_x - report.position.location_x)
-                    <= self.acceptance_radius
-                    and abs(self.waypoint.location_y - report.position.location_y)
-                    <= self.acceptance_radius
-                ):
+                    (self.waypoint.location_x - report.position.location_x) ** 2
+                    + (self.waypoint.location_y - report.position.location_y) ** 2
+                ) ** 0.5 <= self.acceptance_radius:
                     self.waypoint_reached = True
                 else:
                     # Move toward the waypoint
@@ -115,7 +114,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     )
                     print("Drone is moving to the waypoint.")
 
-            elif not self.closest_pad_reached:
+            else:
                 if self.closest_pad_x is None and self.closest_pad_y is None:
                     # Calculate closest pad relative to the drone's current position
                     self.closest_pad_x, self.closest_pad_y = self.closest_pad(
@@ -123,10 +122,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     )
 
                 if (
-                    abs(self.closest_pad_x - report.position.location_x) <= self.acceptance_radius
-                    and abs(self.closest_pad_y - report.position.location_y)
-                    <= self.acceptance_radius
-                ):
+                    (self.closest_pad_x - report.position.location_x) ** 2
+                    + (self.closest_pad_y - report.position.location_y) ** 2
+                ) ** 0.5 <= self.acceptance_radius:
                     self.closest_pad_reached = True
                     command = commands.Command.create_land_command()
                 else:
@@ -141,11 +139,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if not self.waypoint_reached:
                 # Check if the drone has reached the waypoint
                 if (
-                    abs(self.waypoint.location_x - report.position.location_x)
-                    <= self.acceptance_radius
-                    and abs(self.waypoint.location_y - report.position.location_y)
-                    <= self.acceptance_radius
-                ):
+                    (self.waypoint.location_x - report.position.location_x) ** 2
+                    + (self.waypoint.location_y - report.position.location_y) ** 2
+                ) ** 0.5 <= self.acceptance_radius:
                     self.waypoint_reached = True
                     command = commands.Command.create_halt_command()
                 else:
@@ -153,10 +149,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif not self.closest_pad_reached:
                 # Check if the drone has reached the closest landing pad
                 if (
-                    abs(self.closest_pad_x - report.position.location_x) <= self.acceptance_radius
-                    and abs(self.closest_pad_y - report.position.location_y)
-                    <= self.acceptance_radius
-                ):
+                    (self.closest_pad_x - report.position.location_x) ** 2
+                    + (self.closest_pad_y - report.position.location_y) ** 2
+                ) ** 0.5 <= self.acceptance_radius:
                     self.closest_pad_reached = True
                     command = commands.Command.create_halt_command()
                 else:

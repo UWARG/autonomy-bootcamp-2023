@@ -70,26 +70,24 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         if report.status == drone_status.DroneStatus.HALTED:
             if (
-                abs(self.waypoint.location_x - report.position.location_x) <= self.acceptance_radius
-                and abs(self.waypoint.location_y - report.position.location_y)
-                <= self.acceptance_radius
-            ):
+                (self.waypoint.location_x - report.position.location_x) ** 2
+                + (self.waypoint.location_y - report.position.location_y) ** 2
+            ) ** 0.5 <= self.acceptance_radius:
                 self.waypoint_reached = True
                 command = commands.Command.create_land_command()
                 print("Drone is landing")
-            elif not self.waypoint_reached:
+            else:
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x,
                     self.waypoint.location_y - report.position.location_y,
                 )
-                print("Drone is moving")
+                print("Drone is moving to waypoint")
 
         elif report.status == drone_status.DroneStatus.MOVING:
             if (
-                abs(self.waypoint.location_x - report.position.location_x) <= self.acceptance_radius
-                and abs(self.waypoint.location_y - report.position.location_y)
-                <= self.acceptance_radius
-            ):
+                (self.waypoint.location_x - report.position.location_x) ** 2
+                + (self.waypoint.location_y - report.position.location_y) ** 2
+            ) ** 0.5 <= self.acceptance_radius:
 
                 if not self.waypoint_reached:
                     self.waypoint_reached = True
