@@ -44,6 +44,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
     def get_dist(self, pad: location.Location) -> float:
+        """
+        Calculate distance between waypoint and a landing pad
+        """
         return (pad.location_x - self.waypoint.location_x) ** 2 + (pad.location_y - self.waypoint.location_y) ** 2
 
     def reached_destination(
@@ -59,7 +62,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return 0
 
     def run(
-        self, report: drone_report.DroneReport, pad_locations: "list[location.Location]"
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
         """
         Make the drone fly to the waypoint and then land at the nearest landing pad.
@@ -71,8 +74,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         ```py
         while True:
-            report, pad_locations = get_input()
-            command = Decision.run(report, pad_locations)
+            report, landing_pad_locations = get_input()
+            command = Decision.run(report, landing_pad_locations)
             put_output(command)
         ```
         """
@@ -90,12 +93,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
             elif report.status == drone_status.DroneStatus.HALTED and reached:
                 mn = float('inf')
-                for i, d in enumerate(pad_locations):
-                    d = self.get_dist(pad_locations[i])
+                for i, d in enumerate(landing_pad_locations):
+                    d = self.get_dist(landing_pad_locations[i])
                     if d < mn:
                         mn = d
                         cnt = i
-                self.pad = pad_locations[cnt]
+                self.pad = landing_pad_locations[cnt]
                 command = commands.Command.create_set_relative_destination_command(
                     self.pad.location_x - self.waypoint.location_x,
                     self.pad.location_y - self.waypoint.location_y,
