@@ -37,7 +37,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.waypoint_visited: bool = False
+        self.target_landing_pad: location.Location = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -66,12 +67,42 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
+        # ============ 
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.visited_waypoint:
+                target_x = self.waypoint.location_x
+                target_y = self.waypoint.location_y
+            else:
+                if self.landing_pad_target is None:
+                    min_distance_sq = float("inf")
+                    nearest_pad: location.Location = None
 
-        # Do something based on the report and the state of this class...
+                    for pad in landing_pad_locations:
+                        distance_sq = (pad.location_x - report.position.location_x) ** 2 + (pad.location_y - report.position.location_y) ** 2
+                        if distance_sq < min_distance_sq:
+                            min_distance_sq = distance_sq
+                            nearest_pad = pad
+                    self.landing_pad_target = nearest_pad 
+                if self.landing_pad_target:
+                    target_x = self.landing_pad_target.location_x
+                    target_y = self.landing_pad_target.location_y
+                else:
+                    return command
+
+            distance_sq = (target_x - report.position.location_x) ** 2 + (target_y - report.position.location_y) ** 2
+
+            if distance_sq < self.acceptance_radius**2:
+                if not self.visited_waypoint:
+                    self.visited_waypoint = True
+                else:
+                    command = commands.Command.create_land_command()
+            else:
+                offset_x = target_x - report.position.location_x
+                offset_y = target_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(offset_x, offset_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-        return command
+        return command 
