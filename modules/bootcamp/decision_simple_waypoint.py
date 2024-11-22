@@ -67,35 +67,32 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        # Calculate the squared distance for efficiency (avoiding square root calculation)
+        delta_x = self.waypoint.location_x - report.position.location_x
+        delta_y = self.waypoint.location_y - report.position.location_y
+        distance_squared = delta_x ** 2 + delta_y ** 2
+        acceptance_radius_squared = self.acceptance_radius ** 2
 
+        # Evaluate based on the drone's current status
         if report.status == drone_status.DroneStatus.HALTED:
-            if (
-                (self.waypoint.location_x - report.position.location_x) ** 2
-                + (self.waypoint.location_y - report.position.location_y) ** 2
-            ) ** 0.5 <= self.acceptance_radius:
-                self.waypoint_reached = True
+            if distance_squared <= acceptance_radius_squared:
+                self.has_reached_waypoint = True
                 command = commands.Command.create_land_command()
-                print("Drone is landing")
+                print("Drone has reached the destination and is landing.")
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y,
+                    delta_x, delta_y
                 )
-                print("Drone is moving to waypoint")
+                print("Drone is on the move to the waypoint.")
 
         elif report.status == drone_status.DroneStatus.MOVING:
-            if (
-                (self.waypoint.location_x - report.position.location_x) ** 2
-                + (self.waypoint.location_y - report.position.location_y) ** 2
-            ) ** 0.5 <= self.acceptance_radius:
-
-                if not self.waypoint_reached:
-                    self.waypoint_reached = True
-                    print("Drone has reached the waypoint and will be instructed to land")
-
+            if distance_squared <= acceptance_radius_squared:
+                if not self.has_reached_waypoint:
+                    self.has_reached_waypoint = True
+                    print("Drone has reached the waypoint and is preparing to land.")
                 command = commands.Command.create_halt_command()
             else:
-                print("Drone is moving towards the waypoint")
+                print("Drone is in transit to the waypoint.")
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
