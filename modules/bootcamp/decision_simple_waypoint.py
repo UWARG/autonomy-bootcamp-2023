@@ -43,6 +43,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def check_proximity(self, position: location.Location) -> bool:
+        """
+        Returns True if position is within self's acceptance radius.
+        """
+        return (
+            abs(position.location_x - self.waypoint.location_x) < self.acceptance_radius
+            and abs(position.location_y - self.waypoint.location_y) < self.acceptance_radius
+        )
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -69,6 +78,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if report.status.name == "HALTED":
+            if self.check_proximity(report.position):
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
+        elif report.status.name == "MOVING":
+            if self.check_proximity(report.position):
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
