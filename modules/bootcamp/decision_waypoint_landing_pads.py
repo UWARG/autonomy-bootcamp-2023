@@ -47,7 +47,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Calculate distance between waypoint and a landing pad
         """
-        return (pad.location_x - self.waypoint.location_x) ** 2 + (pad.location_y - self.waypoint.location_y) ** 2
+        return (pad.location_x - self.waypoint.location_x) ** 2 + (
+            pad.location_y - self.waypoint.location_y
+        ) ** 2
 
     def reached_destination(
         self, destination: location.Location, position: location.Location
@@ -90,9 +92,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if self.reaching:
             reached = self.reached_destination(self.waypoint, report.position)
             if report.status == drone_status.DroneStatus.HALTED and not reached:
-                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
             elif report.status == drone_status.DroneStatus.HALTED and reached:
-                mn = float('inf')
+                mn = float("inf")
                 for i, d in enumerate(landing_pad_locations):
                     d = self.get_dist(landing_pad_locations[i])
                     if d < mn:
@@ -106,11 +110,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.reaching = 0
         else:
             at_pad = self.reached_destination(self.pad, report.position)
-            if (
-                report.status == drone_status.DroneStatus.HALTED
-                and not self.landing
-                and at_pad
-            ):
+            if report.status == drone_status.DroneStatus.HALTED and not self.landing and at_pad:
                 command = commands.Command.create_land_command()
                 self.landing = True
         # ============
