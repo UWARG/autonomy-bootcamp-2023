@@ -45,7 +45,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
     def check_proximity(self, position: location.Location) -> bool:
         """
-        Returns True if position is within self's acceptance radius.
+        Returns True if position is within self's acceptance radius of the waypoint.
         """
         return (
             abs(position.location_x - self.waypoint.location_x) < self.acceptance_radius
