@@ -50,8 +50,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Returns True if the two position differ by less than the acceptance radius.
         """
         return (
-            abs(position1.location_x - position2.location_x) < self.acceptance_radius
-            and abs(position1.location_y - position2.location_y) < self.acceptance_radius
+            abs(position1.location_x - position2.location_x) ** 2
+            + abs(position1.location_y - position2.location_y) ** 2
+            < self.acceptance_radius**2
         )
 
     def find_closest(self, landing_pads: "list[location.Location]") -> None:
@@ -116,7 +117,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         self.waypoint.location_y - report.position.location_y,
                     )
             # At landing pad.
-            else:
+            elif self.is_same(self.closest_landing_pad, report.position):
                 command = commands.Command.create_land_command()
         elif report.status.name == "MOVING":
             # At waypoint OR waypoint has been reached and at landing pad.

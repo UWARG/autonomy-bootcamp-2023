@@ -48,8 +48,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         Returns True if position is within self's acceptance radius of the waypoint.
         """
         return (
-            abs(position.location_x - self.waypoint.location_x) < self.acceptance_radius
-            and abs(position.location_y - self.waypoint.location_y) < self.acceptance_radius
+            abs(position.location_x - self.waypoint.location_x) ** 2
+            + abs(position.location_y - self.waypoint.location_y) ** 2
+            < self.acceptance_radius**2
         )
 
     def run(
