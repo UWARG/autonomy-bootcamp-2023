@@ -83,7 +83,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         if report.status == drone_status.DroneStatus.HALTED:
             if self.reaching:
-                reached = self.reached_destination(self.waypoint, report.position, self.acceptance_radius)
+                reached = self.reached_destination(
+                    self.waypoint, report.position, self.acceptance_radius
+                )
                 if not reached:
                     command = commands.Command.create_set_relative_destination_command(
                         self.waypoint.location_x, self.waypoint.location_y
@@ -108,6 +110,5 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.landing = True
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============ 
+        # ============
         return command
-
