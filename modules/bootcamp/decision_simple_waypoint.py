@@ -83,7 +83,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             )
 
         elif report.status == drone_status.DroneStatus.HALTED and not self.landing and self.ready:
-            command = commands.Command.create_land_command() 
+            command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
