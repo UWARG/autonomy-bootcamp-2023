@@ -38,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.closest_landing_pad = location.Location(0, 0)
+        self.closest_landing_pad = None
         self.reached_waypoint = False
 
         # ============
@@ -120,14 +120,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif self.is_same(self.closest_landing_pad, report.position):
                 command = commands.Command.create_land_command()
         elif report.status.name == "MOVING":
-            # At waypoint OR waypoint has been reached and at landing pad.
-            if self.is_same(self.waypoint, report.position) or (
-                self.reached_waypoint and self.is_same(self.closest_landing_pad, report.position)
-            ):
-                print(self.waypoint)
-                print(report.position)
-                print(self.is_same(self.waypoint, report.position))
-                command = commands.Command.create_halt_command()
+            pass
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
