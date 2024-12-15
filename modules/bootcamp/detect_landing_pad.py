@@ -17,9 +17,6 @@ from .. import bounding_box
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
 # Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -99,7 +96,7 @@ class DetectLandingPad:
         # * device
         # * verbose
         predictions = self.__model.predict(image)
-        
+
 
         # Get the Result object
         prediction = predictions[0]
@@ -122,9 +119,9 @@ class DetectLandingPad:
         dim_box = boxes_cpu.shape
         for i in range(0, dim_box[0]):
             # Create BoundingBox object and append to list
-            result, bbox = bounding_box.BoundingBox.create(boxes_cpu[i])
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             assert result
-            bounding_boxes.append(bbox)
+            bounding_boxes.append(box)
 
 
         return bounding_boxes, image_annotated
