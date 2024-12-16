@@ -84,13 +84,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         distance_from_waypoint = calculate_distance(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y)
         if self.__destination_type == "landing_pad":
             distance_from_pad = calculate_distance(report.position.location_x, report.position.location_y, report.destination.location_x, report.destination.location_y)
-            print("Verifying distance from landing pad")
             if report.status.value == 1:
                 command = commands.Command.create_land_command()
-                print("Reached landing pad, landing")
             elif distance_from_pad < self.acceptance_radius:
                 command = commands.Command.create_halt_command()
-                print("Reached landing pad, halting")
 
 
         elif distance_from_waypoint < self.acceptance_radius:
@@ -106,15 +103,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         closest_pad = location.Location(x2, y2)
 
                 command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - report.position.location_x, closest_pad.location_y - report.position.location_y)
-                print("Destination set to landing pad:", closest_pad.location_x - report.position.location_x, closest_pad.location_y - report.position.location_y)
                 self.__destination_type = "landing_pad"
 
             else:
                 command = commands.Command.create_halt_command()
-                print("Waypoint reached, halting")
         elif report.status.value == 1:
             command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-            print("Destination set to waypoint")
             self.__destination_type = "waypoint"
 
         # ============
