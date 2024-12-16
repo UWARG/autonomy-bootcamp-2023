@@ -37,7 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -70,16 +69,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         # Distance between two points formula
-        distance_from_waypoint = ((self.waypoint.location_x - report.position.location_x) ** 2 + (self.waypoint.location_y - report.position.location_y) ** 2) ** 0.5
+        distance_from_waypoint = (
+            (self.waypoint.location_x - report.position.location_x) ** 2
+            + (self.waypoint.location_y - report.position.location_y) ** 2
+        ) ** 0.5
         if distance_from_waypoint < self.acceptance_radius:
             if report.status.value == 1:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_halt_command()
         elif report.status.value == 1:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-
-
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

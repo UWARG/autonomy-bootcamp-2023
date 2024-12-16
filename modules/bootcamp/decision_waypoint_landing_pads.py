@@ -19,7 +19,7 @@ from ..private.decision import base_decision
 # pylint: disable=duplicate-code,unused-argument
 
 
-def calculate_distance(x1: float, y1: float, x2: float, y2 :float) -> float:
+def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     """
     Calculates the distance between two given points
     :param x1:
@@ -28,7 +28,7 @@ def calculate_distance(x1: float, y1: float, x2: float, y2 :float) -> float:
     :param y2:
     :return:
     """
-    distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2)  ** 0.5
+    distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
     return distance
 
 
@@ -81,18 +81,27 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        distance_from_waypoint = calculate_distance(report.position.location_x, report.position.location_y, self.waypoint.location_x, self.waypoint.location_y)
+        distance_from_waypoint = calculate_distance(
+            report.position.location_x,
+            report.position.location_y,
+            self.waypoint.location_x,
+            self.waypoint.location_y,
+        )
         if self.__destination_type == "landing_pad":
-            distance_from_pad = calculate_distance(report.position.location_x, report.position.location_y, report.destination.location_x, report.destination.location_y)
+            distance_from_pad = calculate_distance(
+                report.position.location_x,
+                report.position.location_y,
+                report.destination.location_x,
+                report.destination.location_y,
+            )
             if report.status.value == 1:
                 command = commands.Command.create_land_command()
             elif distance_from_pad < self.acceptance_radius:
                 command = commands.Command.create_halt_command()
 
-
         elif distance_from_waypoint < self.acceptance_radius:
             if report.status.value == 1:
-                min_distance = float('inf')
+                min_distance = float("inf")
                 closest_pad = None
                 for l in landing_pad_locations:
                     x1, y1 = report.position.location_x, report.position.location_y
@@ -102,13 +111,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         min_distance = distance
                         closest_pad = location.Location(x2, y2)
 
-                command = commands.Command.create_set_relative_destination_command(closest_pad.location_x - report.position.location_x, closest_pad.location_y - report.position.location_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    closest_pad.location_x - report.position.location_x,
+                    closest_pad.location_y - report.position.location_y,
+                )
                 self.__destination_type = "landing_pad"
 
             else:
                 command = commands.Command.create_halt_command()
         elif report.status.value == 1:
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
             self.__destination_type = "waypoint"
 
         # ============

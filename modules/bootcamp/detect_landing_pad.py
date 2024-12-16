@@ -97,7 +97,6 @@ class DetectLandingPad:
         # * verbose
         predictions = self.__model.predict(image)
 
-
         # Get the Result object
         prediction = predictions[0]
 
@@ -122,7 +121,6 @@ class DetectLandingPad:
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             assert result
             bounding_boxes.append(box)
-
 
         return bounding_boxes, image_annotated
         # ============
