@@ -57,6 +57,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def _squared_distance_between_locations(
         self, l1: location.Location, l2: location.Location
     ) -> float:
+        """
+        Returns the squared distance between two locations,
+        used to reduce computational overhead for calculating relative distance parity
+        """
         x1 = l1.location_x
         x2 = l2.location_x
         y1 = l1.location_y
