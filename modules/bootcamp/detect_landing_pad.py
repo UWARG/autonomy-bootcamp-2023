@@ -19,7 +19,7 @@ from .. import bounding_box
 # Bootcampers remove the following lines:
 # Allow linters and formatters to pass for bootcamp maintainers
 # No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
+pylint: disable = unused - argument, unused - private - member, unused - variable
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
