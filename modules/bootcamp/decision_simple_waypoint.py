@@ -33,14 +33,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.acceptance_radius = acceptance_radius
 
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
+        # ============ 
+        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓ 
         # ============
 
         # Add your own
+        
+        self.has_sent_landing_command = False
+        
+        # Destination coords
+        self.destination_x = self.waypoint.location_x
+        self.destination_y = self.waypoint.location_y
+        
+        self.move_command = commands.Command.create_set_relative_destination_command(self.destination_x, self.destination_y)
 
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+        # ============ 
+        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑ 
         # ============
 
     def run(
@@ -64,14 +72,37 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+        # ============ 
+        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓ 
         # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
+
+        # Location coords
+        location_x = report.position.location_x
+        location_y = report.position.location_y
+        
+        # Calculate squared distance to waypoint
+        distance_x = self.destination_x - location_x
+        distance_y = self.destination_y - location_y
+        
+        distance_squared = distance_x ** 2 + distance_y ** 2
+        acceptance_radius_squared = self.acceptance_radius ** 2
+
+        # Check if the drone should land or move toward the waypoint
+        if not self.has_sent_landing_command and report.status == drone_status.DroneStatus.HALTED:
+            
+            # If the drone is halted, start the move command
+            command = self.move_command
+            self.has_sent_landing_command = True
+            
+        elif distance_squared < acceptance_radius_squared and self.has_sent_landing_command == True:
+            
+            # If within acceptance radius and the move command was sent, land the drone
+            command = commands.Command.create_land_command()
 
         # Do something based on the report and the state of this class...
 
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
+        # ============ 
+        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑ 
         # ============
 
         return command
