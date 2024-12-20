@@ -19,7 +19,7 @@ from .. import bounding_box
 # Bootcampers remove the following lines:
 # Allow linters and formatters to pass for bootcamp maintainers
 # No enable
-# pylint: disable = unused - argument, unused - private - member, unused - variable
+# pylint: disable=unused-argument,unused-private-member,unused-variable
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -99,7 +99,7 @@ class DetectLandingPad:
         # * device
         # * verbose
         predictions = self.__model.predict(
-            source=image, conf=0.75, device=self.__DEVICE, verbose=True
+            source=image, conf=0.75, device=self.__DEVICE, verbose=False
         )
 
         # Get the Result object
@@ -126,9 +126,7 @@ class DetectLandingPad:
         #     result, box = ...
 
         for i in range(boxes_cpu.shape[0]):
-            # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-
             if result:
                 bounding_boxes.append(box)
 

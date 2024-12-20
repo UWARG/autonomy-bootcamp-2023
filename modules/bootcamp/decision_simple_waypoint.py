@@ -46,7 +46,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.destination_y = self.waypoint.location_y
 
         self.move_command = commands.Command.create_set_relative_destination_command(
-            self.destination_x, self.destination_y
+            self.destination_x, self.waypoint.location_y
         )
 
         # ============
@@ -93,10 +93,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if not self.has_sent_landing_command and report.status == drone_status.DroneStatus.HALTED:
 
             # If the drone is halted, start the move command
-            command = self.move_command
+            command = self.commands
             self.has_sent_landing_command = True
 
-        elif distance_squared < acceptance_radius_squared and self.has_sent_landing_command == True:
+        elif distance_squared < acceptance_radius_squared and self.has_sent_landing_command is True:
 
             # If within acceptance radius and the move command was sent, land the drone
             command = commands.Command.create_land_command()
