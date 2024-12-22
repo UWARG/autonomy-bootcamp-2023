@@ -128,8 +128,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if distance_to_pad <= self.acceptance_radius:
                 if report.status == drone_status.DroneStatus.HALTED:
                     return commands.Command.create_land_command()
-                else:
-                    return commands.Command.create_halt_command()
+
+                return commands.Command.create_halt_command()
 
             # If halted, move toward pad
             if report.status == drone_status.DroneStatus.HALTED:

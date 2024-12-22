@@ -99,8 +99,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         if distance_to_waypoint <= self.acceptance_radius:
             if report.status == drone_status.DroneStatus.HALTED:
                 return commands.Command.create_land_command()
-            else:
-                return commands.Command.create_halt_command()
+
+            return commands.Command.create_halt_command()
 
         # If halted, either from start or mid-flight
         if report.status == drone_status.DroneStatus.HALTED:
