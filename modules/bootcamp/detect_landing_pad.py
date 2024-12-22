@@ -13,18 +13,6 @@ import ultralytics
 from .. import bounding_box
 
 
-# ============
-# ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-# ============
-# Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
-# ============
-# ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-# ============
-
-
 class DetectLandingPad:
     """
     Contains the YOLOv8 model for prediction.
@@ -98,31 +86,35 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(
+            source=image, conf=0.7, device=self.__DEVICE, verbose=False
+        )
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
+        for box in boxes_cpu:
+            result, bbox = bounding_box.BoundingBox.create(box)
+            if result == False:
+                return [], image_annotated
+            else:
+                bounding_boxes.append(bbox)
 
-        return [], image_annotated
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
