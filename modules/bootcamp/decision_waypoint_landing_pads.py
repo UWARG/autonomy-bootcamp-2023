@@ -42,18 +42,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
-    def _distance_between_locations(self, l1: location.Location, l2: location.Location) -> float:
-        """
-        Returns the distance between two locations, used by the within_radius function
-        """
-        x1 = l1.location_x
-        x2 = l2.location_x
-        y1 = l1.location_y
-        y2 = l2.location_y
-        distance = ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
-        return distance
-
     def _squared_distance_between_locations(
         self, l1: location.Location, l2: location.Location
     ) -> float:
@@ -72,9 +60,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         Returns whether the drone is within the waypoint
         """
-        distance = self._distance_between_locations(current_location, self.waypoint)
-        print(distance, self.acceptance_radius)
-        if distance < self.acceptance_radius:
+        distance = self._squared_distance_between_locations(current_location, self.waypoint)
+        if distance < self.acceptance_radius**2:
             return True
         return False
 
@@ -120,11 +107,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         current_position = report.position
         current_status = report.status
         current_destination = report.destination
-        # moving = 0
-        # halted = 1
-        # landed = 2
 
-        if current_status.value == 1 and self._within_radius(
+        if current_status == drone_status.DroneStatus.HALTED and self._within_radius(
             current_position
         ):  # the drone is at the waypoint and stopped
             closest_landing_pad = self._find_landing_pad(current_position, landing_pad_locations)
@@ -133,23 +117,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
             else:
                 self.land = True
-        elif (
-            current_status.value == 0 and self.waypoint == current_position
+        elif current_status == drone_status.DroneStatus.MOVING and self._within_radius(
+            current_position
         ):  # necessary? Halt when reach the waypoint
             command = commands.Command.create_halt_command()
 
         elif current_destination != self.waypoint or (
-            current_status.value == 1 and not self._within_radius(current_position)
+            current_status == drone_status.DroneStatus.HALTED
+            and not self._within_radius(current_position)
         ):  # incorrect final destination or halt location
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x - current_position.location_x,
                 self.waypoint.location_y - current_position.location_y,
             )
 
-        elif (
-            current_status.value == 0 and current_destination == self.waypoint
-        ) or current_status.value == 2:  # drone is travelling towards waypoint or already landed
-            command = commands.Command.create_null_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
