@@ -42,6 +42,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
     def _squared_distance_between_locations(
         self, l1: location.Location, l2: location.Location
     ) -> float:

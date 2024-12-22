@@ -98,9 +98,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ):  # the drone is at the waypoint and stopped
             command = commands.Command.create_land_command()
 
-        elif (
-            current_status.value == drone_status.DroneStatus.MOVING
-            and self._within_radius(current_position)
+        elif current_status.value == drone_status.DroneStatus.MOVING and self._within_radius(
+            current_position
         ):  # necessary? Halt when reach the waypoint
             command = commands.Command.create_halt_command()
 
