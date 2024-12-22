@@ -42,24 +42,30 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Count consecutive stationary updates to detect if stuck
         self.stationary_count = 0
 
-    def _calculate_distance(self, pos1: location.Location, pos2: location.Location) -> float:
+    def _calculate_squared_distance(
+        self, pos1: location.Location, pos2: location.Location
+    ) -> float:
         """
-        Calculate the Euclidean distance between two locations.
+        Calculate the squared Euclidean distance between two locations.
         """
-        return (
-            (pos1.location_x - pos2.location_x) ** 2 + (pos1.location_y - pos2.location_y) ** 2
-        ) ** 0.5
+        return (pos1.location_x - pos2.location_x) ** 2 + (pos1.location_y - pos2.location_y) ** 2
 
-    def _is_stationary(self, current_pos: location.Location) -> bool:
+    def _is_stationary(self, report: drone_report.DroneReport) -> bool:
         """
         Check if drone hasn't moved significantly since last update.
         """
+        if report.status == drone_status.DroneStatus.HALTED:
+            return True  # If the drone is halted, it's stationary.
+
         if self.last_position is None:
-            self.last_position = current_pos
+            self.last_position = report.position
             return True
 
-        is_stationary = self._calculate_distance(current_pos, self.last_position) < 0.001
-        self.last_position = current_pos
+        # Check if the drone hasn't moved significantly
+        is_stationary = (
+            self._calculate_squared_distance(report.position, self.last_position) < 0.000001
+        )
+        self.last_position = report.position
         return is_stationary
 
     def run(
@@ -87,16 +93,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        distance_to_waypoint = self._calculate_distance(report.position, self.waypoint)
+        sqr_distance_to_waypoint = self._calculate_squared_distance(report.position, self.waypoint)
 
-        # Check if we're stationary
-        if self._is_stationary(report.position):
+        # Check if we're initially halted
+        if self._is_stationary(report):
             self.stationary_count += 1
         else:
             self.stationary_count = 0
 
         # If we're within acceptance radius, land
-        if distance_to_waypoint <= self.acceptance_radius:
+        if sqr_distance_to_waypoint <= self.acceptance_radius**2:
             if report.status == drone_status.DroneStatus.HALTED:
                 return commands.Command.create_land_command()
 
@@ -107,14 +113,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             # Calculate relative movement needed
             dx = self.waypoint.location_x - report.position.location_x
             dy = self.waypoint.location_y - report.position.location_y
-
-            # Verify movement stays within boundaries
-            target_x = report.position.location_x + dx
-            target_y = report.position.location_y + dy
-
-            if abs(target_x) <= 60.0 and abs(target_y) <= 60.0:
-                self.movement_attempted = True
-                return commands.Command.create_set_relative_destination_command(dx, dy)
+            self.movement_attempted = True
+            return commands.Command.create_set_relative_destination_command(dx, dy)
 
         # If we're stuck or outside boundaries, halt
         if self.stationary_count > 5:
