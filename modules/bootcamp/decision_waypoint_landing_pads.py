@@ -39,6 +39,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
+        # Add your own
+        self.command = commands.Command.create_set_relative_destination_command(
+            waypoint.location_x, waypoint.location_y
+        )
+
+        self.has_begun = False
+        self.has_reached_waypoint = False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,6 +77,36 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # halted at the beginning
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_begun:
+            command = self.command
+            self.has_begun = True
+
+        # halted at the waypoint
+        elif report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint:
+            # we now need to check for distances to landing pads, and choose which one is the best
+            min_distance_squared = float("inf")
+            best_landing_pad = -1
+            # iterate through each landing pad
+            for index, landing_pad in enumerate(landing_pad_locations):
+                distance_squared = (landing_pad.location_x - self.waypoint.location_x) ** 2 + (
+                    landing_pad.location_y - self.waypoint.location_y
+                ) ** 2
+                if distance_squared < min_distance_squared:
+                    min_distance_squared = distance_squared
+                    best_landing_pad = index
+
+            # create a relative destination
+            command = commands.Command.create_set_relative_destination_command(
+                landing_pad_locations[best_landing_pad].location_x - self.waypoint.location_x,
+                landing_pad_locations[best_landing_pad].location_y - self.waypoint.location_y,
+            )
+            self.has_reached_waypoint = True
+
+        # halt at the landing pad
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
