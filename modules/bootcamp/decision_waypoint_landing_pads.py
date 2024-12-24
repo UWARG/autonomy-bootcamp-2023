@@ -51,6 +51,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.__destination_type = ""
+        self.__halted = 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -94,13 +95,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 report.destination.location_x,
                 report.destination.location_y,
             )
-            if report.status.value == 1:
+            if report.status.value == self.__halted:
                 command = commands.Command.create_land_command()
             elif distance_from_pad < self.acceptance_radius:
                 command = commands.Command.create_halt_command()
 
         elif distance_from_waypoint < self.acceptance_radius:
-            if report.status.value == 1:
+            if report.status.value == self.__halted:
                 min_distance = float("inf")
                 closest_pad = None
                 for l in landing_pad_locations:
@@ -119,7 +120,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             else:
                 command = commands.Command.create_halt_command()
-        elif report.status.value == 1:
+        elif report.status.value == self.__halted:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
