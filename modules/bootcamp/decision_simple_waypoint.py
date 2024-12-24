@@ -39,6 +39,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
 
+        self.command = commands.Command.create_set_relative_destination_command(
+            waypoint.location_x, waypoint.location_y
+        )
+
+        self.has_begun = False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,6 +75,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # halted at the beginning
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_begun:
+            command = self.command
+            self.has_begun = True
+
+        # halted at the waypoint
+        elif report.status == drone_status.DroneStatus.HALTED:
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
