@@ -119,7 +119,11 @@ class DetectLandingPad:
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for i in range(0, boxes_cpu.shape[0]):
-            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i])[1])
+            try:
+                box = bounding_box.BoundingBox.create(boxes_cpu[i])[1]
+                bounding_boxes.append(box)
+            except ValueError as e:
+                print("Failed to initialize object")
 
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):

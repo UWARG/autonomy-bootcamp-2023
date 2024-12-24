@@ -39,12 +39,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
-        self.command = commands.Command.create_set_relative_destination_command(
-            waypoint.location_x, waypoint.location_y
-        )
-
         self.has_begun = False
         self.has_reached_waypoint = False
+        self.has_reached_landing_pad = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -79,33 +76,54 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # halted at the beginning
         if report.status == drone_status.DroneStatus.HALTED and not self.has_begun:
-            command = self.command
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
+            )
             self.has_begun = True
+
+        # stopped somewhere other than the waypoint
+
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_reached_waypoint
+            and (
+                report.position.location_x != self.waypoint.location_x
+                or report.position.location_y != self.waypoint.location_y
+            )
+        ):
+            # resume moving towards the waypoint
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
+            )
 
         # halted at the waypoint
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint:
             # we now need to check for distances to landing pads, and choose which one is the best
             min_distance_squared = float("inf")
-            best_landing_pad = -1
+            # init dummy location
+            best_landing_pad = location.Location(0, 0)
             # iterate through each landing pad
-            for index, landing_pad in enumerate(landing_pad_locations):
+            for landing_pad in landing_pad_locations:
                 distance_squared = (landing_pad.location_x - self.waypoint.location_x) ** 2 + (
                     landing_pad.location_y - self.waypoint.location_y
                 ) ** 2
                 if distance_squared < min_distance_squared:
                     min_distance_squared = distance_squared
-                    best_landing_pad = index
+                    best_landing_pad = landing_pad
 
             # create a relative destination
             command = commands.Command.create_set_relative_destination_command(
-                landing_pad_locations[best_landing_pad].location_x - self.waypoint.location_x,
-                landing_pad_locations[best_landing_pad].location_y - self.waypoint.location_y,
+                best_landing_pad.location_x - self.waypoint.location_x,
+                best_landing_pad.location_y - self.waypoint.location_y,
             )
             self.has_reached_waypoint = True
 
         # halt at the landing pad
         elif report.status == drone_status.DroneStatus.HALTED:
             command = commands.Command.create_land_command()
+            self.has_reached_landing_pad = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
