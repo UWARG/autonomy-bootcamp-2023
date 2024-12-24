@@ -22,13 +22,14 @@ from ..private.decision import base_decision
 def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     """
     Calculates the distance between two given points
+    NOTE: distance is not squared
     :param x1:
     :param y1:
     :param x2:
     :param y2:
     :return:
     """
-    distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+    distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2)
     return distance
 
 
@@ -100,7 +101,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             elif distance_from_pad < self.acceptance_radius:
                 command = commands.Command.create_halt_command()
 
-        elif distance_from_waypoint < self.acceptance_radius:
+        # Squares the acceptance radius due to lack of square root in the distance calculation
+        elif distance_from_waypoint < self.acceptance_radius ** 2:
             if report.status.value == self.__halted:
                 min_distance = float("inf")
                 closest_pad = None
