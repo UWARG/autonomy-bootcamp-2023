@@ -96,19 +96,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 report.destination.location_x,
                 report.destination.location_y,
             )
-            if report.status.value == self.__halted:
-                command = commands.Command.create_land_command()
-            elif distance_from_pad < self.acceptance_radius:
-                command = commands.Command.create_halt_command()
+            if distance_from_pad < self.acceptance_radius ** 2:
+                if report.status.value == self.__halted:
+                    command = commands.Command.create_land_command()
+                else:
+                    command = commands.Command.create_halt_command()
 
         # Squares the acceptance radius due to lack of square root in the distance calculation
         elif distance_from_waypoint < self.acceptance_radius ** 2:
             if report.status.value == self.__halted:
                 min_distance = float("inf")
                 closest_pad = None
-                for l in landing_pad_locations:
+                for landing_pad in landing_pad_locations:
                     x1, y1 = report.position.location_x, report.position.location_y
-                    x2, y2 = l.location_x, l.location_y
+                    x2, y2 = landing_pad.location_x, landing_pad.location_y
                     distance = calculate_distance(x1, y1, x2, y2)
                     if distance < min_distance:
                         min_distance = distance
