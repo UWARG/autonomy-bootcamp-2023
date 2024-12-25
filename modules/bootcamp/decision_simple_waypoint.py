@@ -69,12 +69,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         # Distance between two points formula without the square root
-        distance_from_waypoint = (
-            (self.waypoint.location_x - report.position.location_x) ** 2
-            + (self.waypoint.location_y - report.position.location_y) ** 2
-        )
+        distance_from_waypoint = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2
         # Squares the acceptance radius due to lack of square root in the distance calculation
-        if distance_from_waypoint < self.acceptance_radius ** 2:
+        if distance_from_waypoint < self.acceptance_radius**2:
             if report.status.value == self.__halted:
                 command = commands.Command.create_land_command()
             else:

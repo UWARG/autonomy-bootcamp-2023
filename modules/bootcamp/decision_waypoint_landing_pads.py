@@ -29,7 +29,7 @@ def calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     :param y2:
     :return:
     """
-    distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    distance = (x2 - x1) ** 2 + (y2 - y1) ** 2
     return distance
 
 
@@ -89,10 +89,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 report.position.location_x,
                 report.position.location_y,
                 self.__closest_pad_location.location_x,
-                self.__closest_pad_location.location_y
+                self.__closest_pad_location.location_y,
             )
 
-            if distance_from_pad < self.acceptance_radius ** 2:
+            if distance_from_pad < self.acceptance_radius**2:
                 if report.status.value == self.__halted:
                     command = commands.Command.create_land_command()
                 else:
@@ -106,7 +106,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint.location_y,
             )
             # Squares the acceptance radius due to lack of square root in the distance calculation
-            if distance_from_waypoint < self.acceptance_radius ** 2:
+            if distance_from_waypoint < self.acceptance_radius**2:
                 if report.status.value == self.__halted:
                     min_distance = float("inf")
                     closest_pad = None
@@ -121,12 +121,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_pad_x_relative = closest_pad.location_x - report.position.location_x
                     closest_pad_y_relative = closest_pad.location_y - report.position.location_y
 
-                    self.__closest_pad_location = location.Location(closest_pad.location_x, closest_pad.location_y)
+                    self.__closest_pad_location = location.Location(
+                        closest_pad.location_x, closest_pad.location_y
+                    )
                     self.__destination_type = "landing_pad"
 
                     command = commands.Command.create_set_relative_destination_command(
-                        closest_pad_x_relative,
-                        closest_pad_y_relative
+                        closest_pad_x_relative, closest_pad_y_relative
                     )
 
                 else:
