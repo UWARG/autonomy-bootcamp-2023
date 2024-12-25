@@ -52,6 +52,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.__destination_type = ""
+        self.__closest_pad_location = None
         self.__halted = 1
 
         # ============
@@ -83,46 +84,53 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        distance_from_waypoint = calculate_distance(
-            report.position.location_x,
-            report.position.location_y,
-            self.waypoint.location_x,
-            self.waypoint.location_y,
-        )
         if self.__destination_type == "landing_pad":
             distance_from_pad = calculate_distance(
                 report.position.location_x,
                 report.position.location_y,
-                report.destination.location_x,
-                report.destination.location_y,
+                self.__closest_pad_location.location_x,
+                self.__closest_pad_location.location_y
             )
+
             if distance_from_pad < self.acceptance_radius ** 2:
                 if report.status.value == self.__halted:
                     command = commands.Command.create_land_command()
                 else:
                     command = commands.Command.create_halt_command()
 
-        # Squares the acceptance radius due to lack of square root in the distance calculation
-        elif distance_from_waypoint < self.acceptance_radius ** 2:
-            if report.status.value == self.__halted:
-                min_distance = float("inf")
-                closest_pad = None
-                for landing_pad in landing_pad_locations:
-                    x1, y1 = report.position.location_x, report.position.location_y
-                    x2, y2 = landing_pad.location_x, landing_pad.location_y
-                    distance = calculate_distance(x1, y1, x2, y2)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_pad = location.Location(x2, y2)
+        elif self.__destination_type == "waypoint":
+            distance_from_waypoint = calculate_distance(
+                report.position.location_x,
+                report.position.location_y,
+                self.waypoint.location_x,
+                self.waypoint.location_y,
+            )
+            # Squares the acceptance radius due to lack of square root in the distance calculation
+            if distance_from_waypoint < self.acceptance_radius ** 2:
+                if report.status.value == self.__halted:
+                    min_distance = float("inf")
+                    closest_pad = None
+                    for landing_pad in landing_pad_locations:
+                        x1, y1 = report.position.location_x, report.position.location_y
+                        x2, y2 = landing_pad.location_x, landing_pad.location_y
+                        distance = calculate_distance(x1, y1, x2, y2)
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_pad = location.Location(x2, y2)
 
-                command = commands.Command.create_set_relative_destination_command(
-                    closest_pad.location_x - report.position.location_x,
-                    closest_pad.location_y - report.position.location_y,
-                )
-                self.__destination_type = "landing_pad"
+                    closest_pad_x_relative = closest_pad.location_x - report.position.location_x
+                    closest_pad_y_relative = closest_pad.location_y - report.position.location_y
 
-            else:
-                command = commands.Command.create_halt_command()
+                    self.__closest_pad_location = location.Location(closest_pad.location_x, closest_pad.location_y)
+                    self.__destination_type = "landing_pad"
+
+                    command = commands.Command.create_set_relative_destination_command(
+                        closest_pad_x_relative,
+                        closest_pad_y_relative
+                    )
+
+                else:
+                    command = commands.Command.create_halt_command()
         elif report.status.value == self.__halted:
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
