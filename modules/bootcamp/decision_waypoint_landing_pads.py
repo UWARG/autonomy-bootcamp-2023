@@ -39,6 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
 
+        self.best_landing_pad = None
         self.has_begun = False
         self.has_reached_waypoint = False
         self.has_reached_landing_pad = False
@@ -83,14 +84,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.has_begun = True
 
         # stopped somewhere other than the waypoint
-
         elif (
             report.status == drone_status.DroneStatus.HALTED
             and not self.has_reached_waypoint
-            and (
-                report.position.location_x != self.waypoint.location_x
-                or report.position.location_y != self.waypoint.location_y
-            )
+            and (report.position.location_x - self.waypoint.location_x) ** 2
+            + (report.position.location_y - self.waypoint.location_y) ** 2
+            > self.acceptance_radius**2
         ):
             # resume moving towards the waypoint
             command = commands.Command.create_set_relative_destination_command(
@@ -102,8 +101,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif report.status == drone_status.DroneStatus.HALTED and not self.has_reached_waypoint:
             # we now need to check for distances to landing pads, and choose which one is the best
             min_distance_squared = float("inf")
-            # init dummy location
-            best_landing_pad = location.Location(0, 0)
             # iterate through each landing pad
             for landing_pad in landing_pad_locations:
                 distance_squared = (landing_pad.location_x - self.waypoint.location_x) ** 2 + (
@@ -111,14 +108,28 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 ) ** 2
                 if distance_squared < min_distance_squared:
                     min_distance_squared = distance_squared
-                    best_landing_pad = landing_pad
+                    self.best_landing_pad = landing_pad
 
             # create a relative destination
             command = commands.Command.create_set_relative_destination_command(
-                best_landing_pad.location_x - self.waypoint.location_x,
-                best_landing_pad.location_y - self.waypoint.location_y,
+                self.best_landing_pad.location_x - self.waypoint.location_x,
+                self.best_landing_pad.location_y - self.waypoint.location_y,
             )
             self.has_reached_waypoint = True
+
+        # stopped somewhere other than the landing pad
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_reached_landing_pad
+            and (report.position.location_x - self.best_landing_pad.location_x) ** 2
+            + (report.position.location_y - self.best_landing_pad.location_y) ** 2
+            > self.acceptance_radius**2
+        ):
+            # continue towards the landing pad
+            command = commands.Command.create_set_relative_destination_command(
+                self.best_landing_pad.location_x - report.position.location_x,
+                self.best_landing_pad.location_y - report.position.location_y,
+            )
 
         # halt at the landing pad
         elif report.status == drone_status.DroneStatus.HALTED:

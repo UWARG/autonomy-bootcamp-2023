@@ -82,9 +82,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             self.has_begun = True
 
         # halted somewhere other than the waypoint
-        elif report.status == drone_status.DroneStatus.HALTED and (
-            report.position.location_x != self.waypoint.location_x
-            or report.position.location_y != self.waypoint.location_y
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and (report.position.location_x - self.waypoint.location_x) ** 2
+            + (report.position.location_y - self.waypoint.location_y) ** 2
+            > self.acceptance_radius**2
         ):
             # resume progress towards the waypoint
             command = commands.Command.create_set_relative_destination_command(
