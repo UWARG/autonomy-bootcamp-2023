@@ -88,9 +88,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             and self.waypoint.location_y >= self.min_flight_boundary
             and self.waypoint.location_y <= self.max_flight_boundary
         ):
-            distance_from_waypoint = (
-                self.waypoint.location_x - report.position.location_x
-            ) ** 2 + (self.waypoint.location_y - report.position.location_y) ** 2
+            distance_from_waypoint = self.squared_distance(report.position)
 
             if report.status == drone_status.DroneStatus.HALTED:
 
@@ -106,10 +104,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                             smallest_distance = self.squared_distance(landing_pad)
                             smallest_distance_pad = landing_pad
 
-                    command = commands.Command.create_set_relative_destination_command(
-                        (smallest_distance_pad.location_x - self.waypoint.location_x),
-                        (smallest_distance_pad.location_y - self.waypoint.location_y),
-                    )
+                    if smallest_distance_pad is None:
+                        command = commands.Command.create_null_command()
+                    else:
+                        command = commands.Command.create_set_relative_destination_command(
+                            (smallest_distance_pad.location_x - self.waypoint.location_x),
+                            (smallest_distance_pad.location_y - self.waypoint.location_y),
+                        )
 
                     self.ready_to_land = True
 
