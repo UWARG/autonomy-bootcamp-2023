@@ -37,7 +37,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.has_sent_landing_command = False
         self.min_flight_boundary = -60
         self.max_flight_boundary = 60
 
@@ -47,7 +46,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def distance_between_locations(self, other_location: location.Location) -> float:
+    def squared_distance(self, other_location: location.Location) -> float:
         """
         Calculate the squared distance between two Location objects
         """
@@ -97,32 +96,24 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                 if self.ready_to_land:
                     command = commands.Command.create_land_command()
-                    self.has_sent_landing_command = True
 
-                elif (
-                    distance_from_waypoint <= self.acceptance_radius**2
-                    and not self.has_sent_landing_command
-                ):
-                    smallest_distance = 999999999
-                    smallest_distance_x = 0
-                    smallest_distance_y = 0
+                elif distance_from_waypoint < self.acceptance_radius**2:
+                    smallest_distance = float("inf")
+                    smallest_distance_pad = None
 
                     for landing_pad in landing_pad_locations:
-                        if self.distance_between_locations(landing_pad) < smallest_distance:
-                            smallest_distance = self.distance_between_locations(landing_pad)
-                            smallest_distance_x = landing_pad.location_x - self.waypoint.location_x
-                            smallest_distance_y = landing_pad.location_y - self.waypoint.location_y
+                        if self.squared_distance(landing_pad) < smallest_distance:
+                            smallest_distance = self.squared_distance(landing_pad)
+                            smallest_distance_pad = landing_pad
 
                     command = commands.Command.create_set_relative_destination_command(
-                        smallest_distance_x, smallest_distance_y
+                        (smallest_distance_pad.location_x - self.waypoint.location_x),
+                        (smallest_distance_pad.location_y - self.waypoint.location_y),
                     )
 
                     self.ready_to_land = True
 
-                elif (
-                    distance_from_waypoint > self.acceptance_radius**2
-                    and not self.has_sent_landing_command
-                ):
+                else:
                     command = commands.Command.create_set_relative_destination_command(
                         self.waypoint.location_x, self.waypoint.location_y
                     )
