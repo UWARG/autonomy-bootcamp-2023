@@ -14,11 +14,6 @@ from .. import location
 from ..private.decision import base_decision
 
 
-# Disable for bootcamp use
-# No enable
-# pylint: disable=duplicate-code,unused-argument
-
-
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
     Travel to the designed waypoint and then land at the nearest landing pad.
@@ -42,6 +37,40 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def get_x_difference(self, initial: location.Location, final: location.Location) -> float:
+        """
+        Get the difference in x values from initial and final locations.
+        """
+        return final.location_x - initial.location_x
+
+    def get_y_difference(self, initial: location.Location, final: location.Location) -> float:
+        """
+        Get the difference in y values from initial and final locations.
+        """
+        return final.location_y - initial.location_y
+
+    def get_distance_squared(self, diff_x: float, diff_y: float) -> float:
+        """
+        Return the distance squared of two locations based on their difference in x and y values.
+        """
+        return diff_x**2 + diff_y**2
+
+    def get_closest_landing_pad(
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+    ) -> location.Location:
+        """
+        Return the closest landing pad based on all landing pad locations.
+        """
+        min_distance = float("inf")
+        closest_landing_pad = None
+        for landing_pad in landing_pad_locations:
+            x_difference = self.get_x_difference(report.position, landing_pad)
+            y_difference = self.get_y_difference(report.position, landing_pad)
+            if self.get_distance_squared(x_difference, y_difference) < min_distance:
+                min_distance = self.get_distance_squared(x_difference, y_difference)
+                closest_landing_pad = landing_pad
+        return closest_landing_pad
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -68,36 +97,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def get_x_difference(initial: location.Location, final: location.Location):
-            return (final.location_x - initial.location_x)
-        
-        def get_y_difference(initial: location.Location, final: location.Location):
-            return (final.location_y - initial.location_y)
-        
-        def get_distance_squared(diff_x, diff_y):
-            return (diff_x*diff_x + diff_y*diff_y)
-        
-        def get_closest_landing_pad():
-            min_distance = 1e20
-            closest_landing_pad = None
-            for landing_pad in landing_pad_locations:
-                x_difference = get_x_difference(report.position, landing_pad)
-                y_difference = get_y_difference(report.position, landing_pad)
-                if get_distance_squared(x_difference, y_difference) < min_distance:
-                    min_distance = get_distance_squared(x_difference, y_difference)
-                    closest_landing_pad = landing_pad
-            return closest_landing_pad
-
         if self.reached_waypoint:
-            self.waypoint = get_closest_landing_pad()
+            result = self.get_closest_landing_pad(report, landing_pad_locations)
+            # No landing pads found => land at current location.
+            self.waypoint = result if result is not None else report.position
 
-        x_difference = get_x_difference(report.position, self.waypoint)
-        y_difference = get_y_difference(report.position, self.waypoint)
-        
-        if (report.status == drone_status.DroneStatus.MOVING):
+        x_difference = self.get_x_difference(report.position, self.waypoint)
+        y_difference = self.get_y_difference(report.position, self.waypoint)
+
+        if report.status == drone_status.DroneStatus.MOVING:
             command = commands.Command.create_null_command()
-        elif (get_distance_squared(x_difference,y_difference) >= (self.acceptance_radius*self.acceptance_radius)):
-            command = commands.Command.create_set_relative_destination_command(x_difference, y_difference)
+        elif self.get_distance_squared(x_difference, y_difference) >= (self.acceptance_radius**2):
+            command = commands.Command.create_set_relative_destination_command(
+                x_difference, y_difference
+            )
         else:
             if not self.reached_waypoint:
                 self.reached_waypoint = True

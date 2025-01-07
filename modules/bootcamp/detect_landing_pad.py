@@ -17,9 +17,7 @@ from .. import bounding_box
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
 # Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
+
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -98,7 +96,7 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.25, device=self.__DEVICE, verbose=True)
+        predictions = self.__model.predict(image, conf=0.7, device=self.__DEVICE, verbose=True)
 
         # Get the Result object
         prediction = predictions[0]
@@ -113,7 +111,7 @@ class DetectLandingPad:
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.cpu().numpy()
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -123,8 +121,10 @@ class DetectLandingPad:
         #     result, box = ...
 
         for i in range(0, boxes_cpu.shape[0]):
-            bounding_boxes.append(bounding_box.BoundingBox.create(boxes_cpu[i])[1])
-                        
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            if result:
+                bounding_boxes.append(box)  # do nothing if a bounding box isn't found.
+
         return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
