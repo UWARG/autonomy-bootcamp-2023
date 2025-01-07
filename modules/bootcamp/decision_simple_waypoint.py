@@ -78,8 +78,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         
         x_difference = get_x_difference(report.position, self.waypoint)
         y_difference = get_y_difference(report.position, self.waypoint)
+
         
-        if (get_distance_squared(x_difference,y_difference) >= (self.acceptance_radius*self.acceptance_radius)):
+        if (report.status == drone_status.DroneStatus.MOVING):
+            command = commands.Command.create_null_command()
+        elif (get_distance_squared(x_difference,y_difference) >= (self.acceptance_radius*self.acceptance_radius)):
             command = commands.Command.create_set_relative_destination_command(x_difference, y_difference)
         else:
             command = commands.Command.create_land_command()
