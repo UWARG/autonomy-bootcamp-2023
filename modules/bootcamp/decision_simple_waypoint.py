@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        # Write here
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,6 +69,25 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        on_waypoint = (
+            report.position.location_x - self.acceptance_radius
+            <= self.waypoint.location_x
+            <= report.position.location_x + self.acceptance_radius
+        ) and (
+            report.position.location_y - self.acceptance_radius
+            <= self.waypoint.location_y
+            <= report.position.location_y + self.acceptance_radius
+        )
+
+        if report.status == drone_status.DroneStatus.HALTED:
+            if on_waypoint:
+                command = commands.Command.create_land_command()
+
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
