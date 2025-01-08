@@ -43,6 +43,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def dist_sq(self, location1: location.Location, location2: location.Location) -> float:
+        """
+        Calculates the squared Euclidean distance between two locations.
+        """
+        return (location1.location_x - location2.location_x) ** 2 + (
+            location1.location_y - location2.location_y
+        ) ** 2
+
+    def clamp(self, val: float, min_val: float, max_val: float) -> float:
+        """
+        Clamps a value between a lower and upper bound.
+        """
+        return min(max_val, max(min_val, val))
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -67,9 +81,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        if report.status == drone_status.DroneStatus.HALTED:
+            dist_waypoint_sq = self.dist_sq(self.waypoint, report.position)
+            if dist_waypoint_sq < self.acceptance_radius**2:
+                command = commands.Command.create_land_command()
+            else:
+                rel_x = self.clamp(self.waypoint.location_x - report.position.location_x, -60, 60)
+                rel_y = self.clamp(self.waypoint.location_y - report.position.location_y, -60, 60)
+                command = commands.Command.create_set_relative_destination_command(rel_x, rel_y)
 
         # Do something based on the report and the state of this class...
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
