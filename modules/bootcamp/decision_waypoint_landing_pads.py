@@ -4,7 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
-import math
 from .. import commands
 from .. import drone_report
 
@@ -99,7 +98,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     command = commands.Command.create_set_relative_destination_command(rel_x, rel_y)
         else:
             if self.closest_landing_location is None:
-                min_dist_sq = math.inf
+                min_dist_sq = float("inf")
                 for landing_pad_location in landing_pad_locations:
                     current_dist_sq = self.dist_sq(report.position, landing_pad_location)
                     if current_dist_sq < min_dist_sq:
