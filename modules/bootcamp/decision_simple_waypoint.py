@@ -83,7 +83,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         
         if (dist <= self.acceptance_radius and self.exited == False):
-            command = commands.command.create_land_command()
+            command = commands.Command.create_land_command()
             # self.exited = true 
             return command 
 
