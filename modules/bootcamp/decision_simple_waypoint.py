@@ -87,7 +87,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         if report.status in {
             drone_status.DroneStatus.MOVING,
-            report.status == drone_status.DroneStatus.LANDED,
+            drone_status.DroneStatus.LANDED,
         }:
             command = commands.Command.create_null_command()
         elif DecisionSimpleWaypoint.get_distance_squared(x_difference, y_difference) >= (

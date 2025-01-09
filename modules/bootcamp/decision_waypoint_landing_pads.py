@@ -59,8 +59,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         return diff_x**2 + diff_y**2
 
+    @staticmethod
     def get_closest_landing_pad(
-        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+        report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> location.Location:
         """
         Return the closest landing pad based on all landing pad locations.
@@ -68,10 +69,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         min_distance = float("inf")
         closest_landing_pad = None
         for landing_pad in landing_pad_locations:
-            x_difference = self.get_x_difference(report.position, landing_pad)
-            y_difference = self.get_y_difference(report.position, landing_pad)
-            if self.get_distance_squared(x_difference, y_difference) < min_distance:
-                min_distance = self.get_distance_squared(x_difference, y_difference)
+            x_difference = DecisionWaypointLandingPads.get_x_difference(
+                report.position, landing_pad
+            )
+            y_difference = DecisionWaypointLandingPads.get_y_difference(
+                report.position, landing_pad
+            )
+            if (
+                DecisionWaypointLandingPads.get_distance_squared(x_difference, y_difference)
+                < min_distance
+            ):
+                min_distance = DecisionWaypointLandingPads.get_distance_squared(
+                    x_difference, y_difference
+                )
                 closest_landing_pad = landing_pad
         return closest_landing_pad
 
@@ -101,15 +111,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         if self.reached_waypoint:
-            self.waypoint = self.get_closest_landing_pad(report, landing_pad_locations)
+            self.waypoint = DecisionWaypointLandingPads.get_closest_landing_pad(
+                report, landing_pad_locations
+            )
 
         x_difference = DecisionWaypointLandingPads.get_x_difference(report.position, self.waypoint)
         y_difference = DecisionWaypointLandingPads.get_y_difference(report.position, self.waypoint)
 
         # If self.waypoint is None (also handles the case when no landing pad is found) default null command is sent
         if (
-            report.status
-            in {drone_status.DroneStatus.MOVING, report.status == drone_status.DroneStatus.LANDED}
+            report.status in {drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED}
             or self.waypoint is None
         ):
             command = commands.Command.create_null_command()
