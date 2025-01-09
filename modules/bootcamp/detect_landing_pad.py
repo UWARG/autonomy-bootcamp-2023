@@ -110,7 +110,7 @@ class DetectLandingPad:
         image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = predictions.boxes.xyxy
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
@@ -119,12 +119,18 @@ class DetectLandingPad:
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+
+        # Hint: .shape gets the dimensions of the numpy array
+        # for i in range(0, ...):
+        #     # Create BoundingBox object and append to list
+        #     result, box = ...
+
         for i in range(boxes_cpu.shape[0]):
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
             if result:
                 bounding_boxes.append(box)
 
-        return [], image_annotated
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============

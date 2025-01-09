@@ -38,6 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.onWaypoint = False 
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,6 +68,48 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+
+       
+        x_dist = None 
+        y_dist = None  
+        dist = None 
+
+        if (self.onWaypoint == False): 
+            x_dist = self.waypoint.location_x - report.position.location_x  
+            y_dist = self.waypoint.location_y - report.position.location_y 
+            dist = (x_dist*x_dist + y_dist*y_dist)**0.5 
+        
+        if (report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius): 
+            # we are currently stopped so check the next closest waypoint to our destination 
+            x_delta = min(max(-60, x_dist), 60) 
+            y_delta = min(max(-60, y_dist), 60)
+            command = commands.command.create_set_relative_destination_command(x_delta, y_delta)
+
+        # if (report.status == drone_status.dronestatus.moving):
+        #     ...
+        
+        # if (dist <= self.acceptance_radius and self.onWaypoint == False):
+        #     self.onWaypoint == True 
+
+
+        # if (self.onWaypoint == True): 
+        #     x_dist_set = 100000 
+        #     y_dist_set = 100000
+        #     dist = (x_dist_set*x_dist_set + y_dist_set*y_dist_set)**0.5 
+            
+        #     for someLocation in landing_pad_locations: 
+        #         x_dist_temp = someLocation.location_x - report.position.location_x 
+        #         y_dist_temp = someLocation.location_y - report.position.location_y
+
+        #         if ((x_dist_temp*x_dist_temp + y_dist_temp*y_dist_temp)**0.5 <= dist): 
+        #             x_dist_set = x_dist_temp 
+        #             y_dist_set = x_dist_temp 
+
+        #     command = commands.command.create_set_relative_destination_command(x_delta, y_delta); 
+
+        # if (dist <= self.acceptance_radius and self.onWaypoint == True): 
+        #     command = commands.command.create_land_command() 
+
 
         # Do something based on the report and the state of this class...
 
