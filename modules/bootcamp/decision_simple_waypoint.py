@@ -81,7 +81,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(x_delta, y_delta)
             # command = commands.command.create_set_relative_destination_command(x_delta, y_delta)
 
-        if dist <= self.acceptance_radius and not self.exited :
+        if dist <= self.acceptance_radius and not self.exited:
             command = commands.Command.create_land_command()
             # self.exited = true
             return command
