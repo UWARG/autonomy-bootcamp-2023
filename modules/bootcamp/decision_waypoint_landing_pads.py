@@ -106,6 +106,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         x_difference = DecisionWaypointLandingPads.get_x_difference(report.position, self.waypoint)
         y_difference = DecisionWaypointLandingPads.get_y_difference(report.position, self.waypoint)
 
+        # If self.waypoint is None (also handles the case when no landing pad is found) default null command is sent
         if (
             report.status
             in {drone_status.DroneStatus.MOVING, report.status == drone_status.DroneStatus.LANDED}
