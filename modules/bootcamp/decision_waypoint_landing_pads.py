@@ -80,8 +80,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             dist = (x_dist*x_dist + y_dist*y_dist)**0.5 
 
         if (self.onWaypoint == True): 
-            x_dist_set = 100000 
-            y_dist_set = 100000
+            print("waypoint reached")
+            x_dist_set = landing_pad_locations[0].location_x - report.position.location_x 
+            y_dist_set = landing_pad_locations[0].location_y - report.position.location_y 
             dist = (x_dist_set*x_dist_set + y_dist_set*y_dist_set)**0.5 
             
             for someLocation in landing_pad_locations: 
@@ -90,12 +91,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                 if ((x_dist_temp*x_dist_temp + y_dist_temp*y_dist_temp)**0.5 <= dist): 
                     x_dist_set = x_dist_temp 
-                    y_dist_set = x_dist_temp 
-
-            command = commands.Command.create_set_relative_destination_command(x_delta, y_delta); 
+                    y_dist_set = y_dist_temp 
+            
+            x_dist = x_dist_set
+            y_dist = y_dist_set 
+            dist = (x_dist_set*x_dist_set + y_dist_set*y_dist_set)**0.5 
 
         if (dist <= self.acceptance_radius and self.onWaypoint == True): 
             command = commands.Command.create_land_command() 
+            return command 
 
         if (dist <= self.acceptance_radius and self.onWaypoint == False): 
             self.onWaypoint = True 
