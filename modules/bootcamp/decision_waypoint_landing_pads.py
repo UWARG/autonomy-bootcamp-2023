@@ -42,16 +42,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.reached_waypoint = False
         self.closest_pad = None
 
-    def calculate_squared_distance(
-            self, loc1: location.Location, loc2: location.Location
-        ) -> float:
-            dx = loc1.location_x - loc2.location_x 
-            dy = loc1.location_y - loc2.location_y
-            return dx * dx + dy * dy
-    
+    def calculate_squared_distance(self, loc1: location.Location, loc2: location.Location) -> float:
+        """
+        calculate squared distance
+        """
+        dx = loc1.location_x - loc2.location_x
+        dy = loc1.location_y - loc2.location_y
+        return dx * dx + dy * dy
+
     def set_closest_pad(
         self, position: location.Location, landing_pads: "list[location.Location]"
     ) -> None:
+        """
+        find and set the closest pad
+        """
         nearest_distance = float("inf")
         for landing_pad in landing_pads:
             landing_pad_distance = self.calculate_squared_distance(position, landing_pad)
@@ -95,7 +99,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if not self.reached_waypoint:
             if (
-                self.calculate_squared_distance(current_position, waypoint_position) < self.acceptance_radius**2
+                self.calculate_squared_distance(current_position, waypoint_position)
+                < self.acceptance_radius**2
             ):
                 self.set_closest_pad(current_position, landing_pad_locations)
                 self.reached_waypoint = True
@@ -107,7 +112,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         else:
             if (
-                self.calculate_squared_distance(current_position, self.closest_pad) < self.acceptance_radius**2
+                self.calculate_squared_distance(current_position, self.closest_pad)
+                < self.acceptance_radius**2
             ):
                 command = commands.Command.create_land_command()
             else:
