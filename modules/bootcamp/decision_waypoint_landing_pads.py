@@ -110,8 +110,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 final_destination.location_x - position.location_x,
                 final_destination.location_y - position.location_y,
             )
-            print(final_destination)
-            print(position)
         elif status == drone_status.DroneStatus.HALTED:
             self.been_halted_once = True
             command = command.create_set_relative_destination_command(
