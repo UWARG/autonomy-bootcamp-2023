@@ -70,6 +70,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        distance_x = self.waypoint.location_x - report.position.location_x
+        distance_y = self.waypoint.location_y - report.position.location_y
+
+        if distance_x**2 + distance_y**2 <= self.acceptance_radius**2:
+            command = commands.Command.create_land_command()
+        else:
+            command = commands.Command.create_set_relative_destination_command(
+                distance_x, distance_y
+            )
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
