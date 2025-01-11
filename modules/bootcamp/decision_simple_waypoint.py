@@ -70,17 +70,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        on_waypoint = (
-            report.position.location_x - self.acceptance_radius
-            <= self.waypoint.location_x
-            <= report.position.location_x + self.acceptance_radius
-        ) and (
-            report.position.location_y - self.acceptance_radius
-            <= self.waypoint.location_y
-            <= report.position.location_y + self.acceptance_radius
-        )
-
         if report.status == drone_status.DroneStatus.HALTED:
+            delta_x = report.position.location_x - self.waypoint.location_x
+            delta_y = report.position.location_y - self.waypoint.location_y
+            on_waypoint = delta_x**2 + delta_y**2 < self.acceptance_radius**2
+
             if on_waypoint:
                 command = commands.Command.create_land_command()
 

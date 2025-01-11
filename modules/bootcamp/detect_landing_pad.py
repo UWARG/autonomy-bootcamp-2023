@@ -125,9 +125,13 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+            # print("RESULT:    ", result)
+            # print("BOX:    ", box)
 
             if result:
                 bounding_boxes.append(box)
+            else:
+                return []
 
         return bounding_boxes, image_annotated
         # ============
