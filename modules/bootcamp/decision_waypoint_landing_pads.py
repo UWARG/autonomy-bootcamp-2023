@@ -4,6 +4,7 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
+from math import sqrt
 from .. import commands
 from .. import drone_report
 
@@ -38,6 +39,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.target = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,6 +70,34 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+        if not self.target and report.status == drone_status.DroneStatus.HALTED:
+            print(landing_pad_locations)
+            self.target = self.distance(report.position, landing_pad_locations)
+            print(f"LOCATION: {self.target}")
+            self.found_location = True
+            
+
+        # If the drone is halted and not at the destination, move the drone to destination
+        if report.status == drone_status.DroneStatus.HALTED and report.destination != self.target:
+
+            command = commands.Command.create_set_relative_destination_command(
+                self.target.location_x, self.target.location_y
+            )
+        # if the drone is at the destination and halted land the drone
+        elif (
+            report.status == drone_status.DroneStatus.HALTED and report.destination == self.target
+        ):
+            command = commands.Command.create_land_command()
+
+        # Case handling to ensure that the drone tries to land again if it lands outside of the acceptance radius
+        if (
+            report.status == drone_status.DroneStatus.LANDED
+            and (report.position - report.destination) > self.acceptance_radius
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                self.target.location_x, self.target.location_y
+            )
+
         # Do something based on the report and the state of this class...
 
         # ============
@@ -75,3 +105,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         return command
+
+    def distance(self, current_location: location.Location, destination_list: "list[location.Location]") -> location.Location:
+        destination = location.Location(1000000000, 1000000000)
+        for landing_pad in destination_list:
+            if sqrt((landing_pad.location_x - current_location.location_x)**2 + (landing_pad.location_y - current_location.location_y)**2) < sqrt((destination.location_x - current_location.location_x)**2 + (destination.location_y - current_location.location_y)**2):
+                destination = landing_pad
+            
+        return destination
