@@ -71,11 +71,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         if not self.target and report.status == drone_status.DroneStatus.HALTED:
-            print(landing_pad_locations)
             self.target = self.distance(report.position, landing_pad_locations)
-            print(f"LOCATION: {self.target}")
-            self.found_location = True
-            
 
         # If the drone is halted and not at the destination, move the drone to destination
         if report.status == drone_status.DroneStatus.HALTED and report.destination != self.target:
@@ -84,9 +80,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.target.location_x, self.target.location_y
             )
         # if the drone is at the destination and halted land the drone
-        elif (
-            report.status == drone_status.DroneStatus.HALTED and report.destination == self.target
-        ):
+        elif report.status == drone_status.DroneStatus.HALTED and report.destination == self.target:
             command = commands.Command.create_land_command()
 
         # Case handling to ensure that the drone tries to land again if it lands outside of the acceptance radius
@@ -106,10 +100,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
-    def distance(self, current_location: location.Location, destination_list: "list[location.Location]") -> location.Location:
+    def distance(
+        self, current_location: location.Location, destination_list: "list[location.Location]"
+    ) -> location.Location:
+        """
+        Takes the current location and a list of possible destinations and calculates the
+        closest destination. This location.Location object is returned.
+
+        Args:
+            current_location (location.Location): Location the drone is currently at (0, 0)
+            destination_list (list[location.Location]): list of possible destinations for the drone
+
+        Returns:
+            location.Location: class implementation of a location defined by x and y
+        """
         destination = location.Location(1000000000, 1000000000)
         for landing_pad in destination_list:
-            if sqrt((landing_pad.location_x - current_location.location_x)**2 + (landing_pad.location_y - current_location.location_y)**2) < sqrt((destination.location_x - current_location.location_x)**2 + (destination.location_y - current_location.location_y)**2):
+            if sqrt(
+                (landing_pad.location_x - current_location.location_x) ** 2
+                + (landing_pad.location_y - current_location.location_y) ** 2
+            ) < sqrt(
+                (destination.location_x - current_location.location_x) ** 2
+                + (destination.location_y - current_location.location_y) ** 2
+            ):
                 destination = landing_pad
-            
+
         return destination
