@@ -73,9 +73,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                     abs(self.waypoint.location_x), abs(self.waypoint.location_y)
                 )
             # if the drone is at the destination and halted land the drone
-            elif (
-                (report.destination - self.waypoint) < self.acceptance_radius
-            ):
+            elif (report.destination - self.waypoint) < self.acceptance_radius:
                 command = commands.Command.create_land_command()
 
         # Do something based on the report and the state of this class...
