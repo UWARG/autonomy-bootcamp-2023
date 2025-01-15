@@ -4,7 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
-from math import sqrt
 from .. import commands
 from .. import drone_report
 
@@ -40,11 +39,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.target = None
+        self.tol = 0.0001
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
+    
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -100,8 +100,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return command
 
+    @staticmethod
     def distance(
-        self, current_location: location.Location, destination_list: "list[location.Location]"
+        current_location: location.Location, destination_list: "list[location.Location]"
     ) -> location.Location:
         """
         Takes the current location and a list of possible destinations and calculates the
@@ -114,15 +115,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Returns:
             location.Location: class implementation of a location defined by x and y
         """
-        destination = location.Location(1000000000, 1000000000)
-        for landing_pad in destination_list:
-            if sqrt(
-                (landing_pad.location_x - current_location.location_x) ** 2
-                + (landing_pad.location_y - current_location.location_y) ** 2
-            ) < sqrt(
-                (destination.location_x - current_location.location_x) ** 2
-                + (destination.location_y - current_location.location_y) ** 2
-            ):
-                destination = landing_pad
-
+        if len(destination_list) > 0:
+            destination = location.Location(float('inf'), float('inf'))
+            for landing_pad in destination_list:
+                landing_pad_distance = (landing_pad.location_x - current_location.location_x) ** 2 + (landing_pad.location_y - current_location.location_y) ** 2
+                destination_distance = (destination.location_x - current_location.location_x) ** 2 + (destination.location_y - current_location.location_y) ** 2
+                if landing_pad_distance < destination_distance:
+                    destination = landing_pad
+        else:
+            destination = location.Location(0, 0)
         return destination
+
+        
