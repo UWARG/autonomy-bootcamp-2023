@@ -71,7 +71,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         if not self.target and report.status == drone_status.DroneStatus.HALTED:
-            self.target = self.distance(report.position, landing_pad_locations)
+            self.target = self.find_closest_landing_pad(report.position, landing_pad_locations)
 
         # If the drone is halted and not at the destination, move the drone to destination
         if report.status == drone_status.DroneStatus.HALTED and report.destination != self.target:
@@ -101,7 +101,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return command
 
     @staticmethod
-    def distance(
+    def find_closest_landing_pad(
         current_location: location.Location, destination_list: "list[location.Location]"
     ) -> location.Location:
         """
