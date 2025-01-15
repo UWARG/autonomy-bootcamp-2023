@@ -37,8 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.been_halted_once = False
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -70,12 +68,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # unpack report attributes
         status = report.status
-        if status == drone_status.DroneStatus.HALTED and self.been_halted_once:
+        position = report.position
+        if status == drone_status.DroneStatus.HALTED and (
+            self.acceptance_radius**2 >= find_squared_dist(self.waypoint, position)
+        ):
             command = command.create_land_command()
         elif status == drone_status.DroneStatus.HALTED:
-            self.been_halted_once = True
             command = command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
+                self.waypoint.location_x - position.location_x,
+                self.waypoint.location_y - position.location_y,
             )
 
         # ============
@@ -83,3 +84,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         return command
+
+
+# helper functions
+def find_squared_dist(loc1: location.Location, loc2: location.Location) -> int:
+    """helper function that finds the squared distance between two Location instances"""
+    return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2

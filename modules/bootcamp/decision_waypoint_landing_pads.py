@@ -38,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.waypoint_achieved = False
-        self.been_halted_once = False
+        self.final_destination = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,51 +69,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # helper functions
-        def find_squared_dist(loc1: location.Location, loc2: location.Location) -> int:
-            """helper function that finds the squared distance between two Location instances"""
-            return (
-                abs(loc1.location_x - loc2.location_x) ** 2
-                + abs(loc1.location_y - loc2.location_y) ** 2
-            )
-
-        def find_closest_location(
-            curr_loc: location.Location, loclist: "list[location.Location]"
-        ) -> location.Location:
-            """find the closest location in a list of locations"""
-            min_dist, res = float("inf"), None
-
-            for l in loclist:
-                dist = find_squared_dist(curr_loc, l)
-                if dist < min_dist:
-                    res = l
-                    min_dist = dist
-
-            return res
-
         # unpack report attributes
         status = report.status
         position = report.position
 
         if (
             status == drone_status.DroneStatus.HALTED
-            and self.been_halted_once
             and self.waypoint_achieved
+            and (self.acceptance_radius**2 >= find_squared_dist(self.final_destination, position))
         ):
             # landing at closest landing pad
             command = command.create_land_command()
-        elif status == drone_status.DroneStatus.HALTED and self.been_halted_once:
-            # landing at closest landing pad
+        elif status == drone_status.DroneStatus.HALTED and (
+            self.acceptance_radius**2 >= find_squared_dist(self.waypoint, position)
+        ):
+            # find closest landing pad
             self.waypoint_achieved = True
             final_destination = find_closest_location(position, landing_pad_locations)
+            self.final_destination = final_destination
             command = command.create_set_relative_destination_command(
                 final_destination.location_x - position.location_x,
                 final_destination.location_y - position.location_y,
             )
         elif status == drone_status.DroneStatus.HALTED:
-            self.been_halted_once = True
             command = command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
+                self.waypoint.location_x - position.location_x,
+                self.waypoint.location_y - position.location_y,
             )
 
         # ============
@@ -121,3 +102,24 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         return command
+
+
+# helper functions
+def find_squared_dist(loc1: location.Location, loc2: location.Location) -> int:
+    """helper function that finds the squared distance between two Location instances"""
+    return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2
+
+
+def find_closest_location(
+    curr_loc: location.Location, location_list: "list[location.Location]"
+) -> location.Location:
+    """find the closest location in a list of locations"""
+    min_dist, closest_location = float("inf"), None
+
+    for loc in location_list:
+        dist = find_squared_dist(curr_loc, loc)
+        if dist < min_dist:
+            closest_location = loc
+            min_dist = dist
+
+    return closest_location
