@@ -71,10 +71,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         current_position = report.position
         drone_status_value = report.status
 
-        distance_to_waypoint = pow(
-            pow(self.waypoint.location_x - current_position.location_x, 2) +
-            pow(self.waypoint.location_y - current_position.location_y, 2), 0.5
-        )
+        distance_to_waypoint = pow(pow(self.waypoint.location_x - current_position.location_x, 2) + pow(self.waypoint.location_y - current_position.location_y, 2), 0.5)
 
         if drone_status_value == drone_status.DroneStatus.HALTED and distance_to_waypoint <= self.acceptance_radius:
             return commands.Command.create_land_command()
