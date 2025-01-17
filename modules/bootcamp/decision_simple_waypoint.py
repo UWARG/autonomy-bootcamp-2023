@@ -81,7 +81,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ):
             return commands.Command.create_land_command()
 
-        elif (
+        if (
             drone_status_value == drone_status.DroneStatus.HALTED
             and distance_to_waypoint > self.acceptance_radius
         ):
