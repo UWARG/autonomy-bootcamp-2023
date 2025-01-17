@@ -23,21 +23,25 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
     Travel to the designed waypoint and then land at the nearest landing pad.
     """
-    def _find_nearest_landing_pad(self, current_position: location.Location, landing_pad_locations: "list[location.Location]") -> location.Location:
+
+    def _find_nearest_landing_pad(
+        self, current_position: location.Location, landing_pad_locations: "list[location.Location]"
+    ) -> location.Location:
         nearest_landing_pad = None
-        min_distance = float('inf')
+        min_distance = float("inf")
 
         for pad in landing_pad_locations:
             distance = pow(
-                pow(pad.location_x - current_position.location_x, 2) +
-                pow(pad.location_y - current_position.location_y, 2), 0.5
+                pow(pad.location_x - current_position.location_x, 2)
+                + pow(pad.location_y - current_position.location_y, 2),
+                0.5,
             )
             if distance < min_distance:
                 min_distance = distance
                 nearest_landing_pad = pad
-        
+
         return nearest_landing_pad
-    
+
     def __init__(self, waypoint: location.Location, acceptance_radius: float) -> None:
         """
         Initialize all persistent variables here with self.
@@ -87,33 +91,49 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         drone_status_value = report.status
 
         distance_to_waypoint = pow(
-            pow(self.waypoint.location_x - current_position.location_x, 2) + 
-            pow(self.waypoint.location_y - current_position.location_y, 2), 0.5
-            )
+            pow(self.waypoint.location_x - current_position.location_x, 2)
+            + pow(self.waypoint.location_y - current_position.location_y, 2),
+            0.5,
+        )
 
         if not self.has_arrived_at_waypoint:
-            if drone_status_value == drone_status.DroneStatus.HALTED and distance_to_waypoint > self.acceptance_radius:
+            if (
+                drone_status_value == drone_status.DroneStatus.HALTED
+                and distance_to_waypoint > self.acceptance_radius
+            ):
                 relative_x = self.waypoint.location_x - current_position.location_x
                 relative_y = self.waypoint.location_y - current_position.location_y
-                command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
 
-            elif drone_status_value == drone_status.DroneStatus.HALTED and distance_to_waypoint <= self.acceptance_radius:
+            elif (
+                drone_status_value == drone_status.DroneStatus.HALTED
+                and distance_to_waypoint <= self.acceptance_radius
+            ):
                 self.has_arrived_at_waypoint = True
-                nearest_landing_pad = self._find_nearest_landing_pad(current_position, landing_pad_locations)
+                nearest_landing_pad = self._find_nearest_landing_pad(
+                    current_position, landing_pad_locations
+                )
                 if nearest_landing_pad:
                     relative_x = nearest_landing_pad.location_x - current_position.location_x
                     relative_y = nearest_landing_pad.location_y - current_position.location_y
-                    command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+                    command = commands.Command.create_set_relative_destination_command(
+                        relative_x, relative_y
+                    )
                 else:
                     command = commands.Command.create_land_command()
 
         if self.has_arrived_at_waypoint and not self.has_arrived_at_landing_pad:
-            nearest_landing_pad = self._find_nearest_landing_pad(current_position, landing_pad_locations)
+            nearest_landing_pad = self._find_nearest_landing_pad(
+                current_position, landing_pad_locations
+            )
             if nearest_landing_pad:
                 distance_to_landing_pad = pow(
-                    pow(nearest_landing_pad.location_x - current_position.location_x, 2) + 
-                    pow(nearest_landing_pad.location_y - current_position.location_y, 2), 0.5
-                    )
+                    pow(nearest_landing_pad.location_x - current_position.location_x, 2)
+                    + pow(nearest_landing_pad.location_y - current_position.location_y, 2),
+                    0.5,
+                )
                 if distance_to_landing_pad <= self.acceptance_radius:
                     self.has_arrived_at_landing_pad = True
                     command = commands.Command.create_land_command()
