@@ -110,7 +110,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if self.has_arrived_at_waypoint and not self.has_arrived_at_landing_pad:
             nearest_landing_pad = self._find_nearest_landing_pad(current_position, landing_pad_locations)
             if nearest_landing_pad:
-                distance_to_landing_pad = pow(pow(nearest_landing_pad.location_x - current_position.location_x, 2) + pow(nearest_landing_pad.location_y - current_position.location_y, 2), 0.5)
+                distance_to_landing_pad = pow(
+                    pow(nearest_landing_pad.location_x - current_position.location_x, 2) + 
+                    pow(nearest_landing_pad.location_y - current_position.location_y, 2), 0.5
+                    )
                 if distance_to_landing_pad <= self.acceptance_radius:
                     self.has_arrived_at_landing_pad = True
                     command = commands.Command.create_land_command()
