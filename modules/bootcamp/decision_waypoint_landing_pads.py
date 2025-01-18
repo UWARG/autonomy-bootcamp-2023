@@ -89,7 +89,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         current_position = report.position
-        drone_status_value = report.status
 
         relative_x = self.waypoint.location_x - current_position.location_x
         relative_y = self.waypoint.location_y - current_position.location_y
