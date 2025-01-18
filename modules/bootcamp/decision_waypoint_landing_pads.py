@@ -95,7 +95,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         distance_to_waypoint = relative_x**2 + relative_y**2
 
         if not self.has_arrived_at_waypoint:
-            if distance_to_waypoint > self.acceptance_radius:
+            if distance_to_waypoint > self.acceptance_radius**2:
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
@@ -111,7 +111,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 landing_y = self.nearest_landing_pad.location_y - current_position.location_y
                 distance_to_landing_pad = landing_x**2 + landing_y**2
 
-                if distance_to_landing_pad > self.acceptance_radius:
+                if distance_to_landing_pad > self.acceptance_radius**2:
                     command = commands.Command.create_set_relative_destination_command(
                         landing_x, landing_y
                     )

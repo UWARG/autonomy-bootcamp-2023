@@ -76,13 +76,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         if (
             drone_status_value == drone_status.DroneStatus.HALTED
-            and distance_to_waypoint <= self.acceptance_radius
+            and distance_to_waypoint <= self.acceptance_radius**2
         ):
             return commands.Command.create_land_command()
 
         if (
             drone_status_value == drone_status.DroneStatus.HALTED
-            and distance_to_waypoint > self.acceptance_radius
+            and distance_to_waypoint > self.acceptance_radius**2
         ):
             new_x = current_position.location_x + relative_x
             new_y = current_position.location_y + relative_y
