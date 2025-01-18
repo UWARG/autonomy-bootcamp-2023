@@ -128,9 +128,6 @@ class DetectLandingPad:
         #     # Create BoundingBox object and append to list
         #     result, box = ...
 
-        if not bounding_boxes:
-            return [], image_annotated
-
         return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
