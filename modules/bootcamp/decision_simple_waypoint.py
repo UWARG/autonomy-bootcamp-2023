@@ -67,11 +67,14 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # If the drone is halted and not at the destination, move the drone to destination
-        sqaured_distance = (self.waypoint.location_x - report.destination.location_x) + (self.waypoint.location_y - report.position.location_y)
+        sqaured_distance = (self.waypoint.location_x - report.destination.location_x) + (
+            self.waypoint.location_y - report.position.location_y
+        )
         if report.status is drone_status.DroneStatus.HALTED:
             if abs(sqaured_distance) > self.acceptance_radius**2:
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_y
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
                 )
             # if the drone is at the destination and halted land the drone
             elif abs(sqaured_distance) < self.acceptance_radius**2:

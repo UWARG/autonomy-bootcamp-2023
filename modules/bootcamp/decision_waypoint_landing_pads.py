@@ -73,13 +73,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.target = self.find_closest_landing_pad(report.position, landing_pad_locations)
 
         # If the drone is halted and not at the destination, move the drone to destination
-        sqaured_distance = (self.target.location_x - report.destination.location_x) + (self.target.location_y - report.position.location_y)
-        if report.status == drone_status.DroneStatus.HALTED and sqaured_distance > self.acceptance_radius**2:
+        sqaured_distance = (self.target.location_x - report.destination.location_x) + (
+            self.target.location_y - report.position.location_y
+        )
+        if (
+            report.status == drone_status.DroneStatus.HALTED
+            and sqaured_distance > self.acceptance_radius**2
+        ):
             command = commands.Command.create_set_relative_destination_command(
-                self.target.location_x - report.position.location_x, self.target.location_x - report.position.location_y
+                self.target.location_x - report.position.location_x,
+                self.target.location_x - report.position.location_y,
             )
         # if the drone is at the destination and halted land the drone
-        elif report.status == drone_status.DroneStatus.HALTED and sqaured_distance < self.acceptance_radius**2:
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and sqaured_distance < self.acceptance_radius**2
+        ):
             command = commands.Command.create_land_command()
 
         # Do something based on the report and the state of this class...
