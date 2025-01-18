@@ -39,7 +39,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Add your own
         self.target = None
-        self.tol = 0.0001
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,27 +69,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if not self.target and report.status == drone_status.DroneStatus.HALTED:
+        if self.target is None and report.status is drone_status.DroneStatus.HALTED:
             self.target = self.find_closest_landing_pad(report.position, landing_pad_locations)
 
         # If the drone is halted and not at the destination, move the drone to destination
-        if report.status == drone_status.DroneStatus.HALTED and report.destination != self.target:
-
+        sqaured_distance = (self.target.location_x - report.destination.location_x) + (self.target.location_y - report.position.location_y)
+        if report.status == drone_status.DroneStatus.HALTED and sqaured_distance > self.acceptance_radius**2:
             command = commands.Command.create_set_relative_destination_command(
-                self.target.location_x, self.target.location_y
+                self.target.location_x - report.position.location_x, self.target.location_x - report.position.location_y
             )
         # if the drone is at the destination and halted land the drone
-        elif report.status == drone_status.DroneStatus.HALTED and report.destination == self.target:
+        elif report.status == drone_status.DroneStatus.HALTED and sqaured_distance < self.acceptance_radius**2:
             command = commands.Command.create_land_command()
-
-        # Case handling to ensure that the drone tries to land again if it lands outside of the acceptance radius
-        if (
-            report.status == drone_status.DroneStatus.LANDED
-            and (report.position - report.destination) > self.acceptance_radius
-        ):
-            command = commands.Command.create_set_relative_destination_command(
-                self.target.location_x, self.target.location_y
-            )
 
         # Do something based on the report and the state of this class...
 
