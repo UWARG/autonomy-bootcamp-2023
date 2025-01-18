@@ -73,9 +73,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.target = self.find_closest_landing_pad(report.position, landing_pad_locations)
 
         # If the drone is halted and not at the destination, move the drone to destination
-        sqaured_distance = (self.target.location_x - report.destination.location_x) + (
+        sqaured_distance = (self.target.location_x - report.destination.location_x) ** 2 + (
             self.target.location_y - report.position.location_y
-        )
+        ) ** 2
         if (
             report.status == drone_status.DroneStatus.HALTED
             and sqaured_distance > self.acceptance_radius**2
