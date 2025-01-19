@@ -12,6 +12,7 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
+from math import sqrt
 
 
 # Disable for bootcamp use
@@ -29,7 +30,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
-        print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
 
@@ -37,7 +37,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        # a boolean to see if the drone has reached the waypoint
+        self.reached = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,6 +68,25 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+
+        status = report.status
+        position = report.position
+
+        distance_from_waypoint = sqrt((self.waypoint.location_x - position.location_x) ** 2 + (self.waypoint.location_y - position.location_y) ** 2)
+
+        # if the drone is in the acceptance radius, we have reached
+        if distance_from_waypoint < self.acceptance_radius:
+            self.reached = True
+
+        if self.reached:
+            if status == drone_status.DroneStatus.HALTED:
+                return commands.Command.create_land_command()
+            return commands.Command.create_halt_command()
+        # otherwise, the drone has not reached in the acceptance radius
+        # If the drone is not at the waypoint yet
+        if status == drone_status.DroneStatus.HALTED:
+            relative_destination = location.Location(self.waypoint.location_x - position.location_x, self.waypoint.location_y - position.location_y)
+            return commands.Command.create_set_relative_destination_command(relative_destination.location_x, relative_destination.location_y)
 
         # Do something based on the report and the state of this class...
 
