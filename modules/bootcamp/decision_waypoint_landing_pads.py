@@ -37,7 +37,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.reached_waypoint = False
+        self.reached_landing_pad = False
+        self.landing_pad = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +70,44 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        def find_distance_sqr(other: location.Location) -> float:
+            x_distance = report.position.location_x - other.location_x
+            y_distance = report.position.location_y - other.location_y
+
+            return x_distance**2 + y_distance**2
+
+        def set_closest_landing_pad_location() -> None:
+            self.landing_pad = landing_pad_locations[0]
+            for landing_pad in landing_pad_locations:
+                if find_distance_sqr(landing_pad) < find_distance_sqr(self.landing_pad):
+                    self.landing_pad = landing_pad
+
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.reached_waypoint:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
+            elif not self.reached_landing_pad:
+                set_closest_landing_pad_location()
+
+                landing_pad_relative_x = self.landing_pad.location_x - report.position.location_x
+                landing_pad_relative_y = self.landing_pad.location_y - report.position.location_y
+
+                command = commands.Command.create_set_relative_destination_command(
+                    landing_pad_relative_x, landing_pad_relative_y
+                )
+            else:
+                command = commands.Command.create_land_command()
+
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if not self.reached_waypoint:
+                if find_distance_sqr(self.waypoint) < self.acceptance_radius**2:
+                    self.reached_waypoint = True
+                    command = commands.Command.create_halt_command()
+            elif not self.reached_landing_pad:
+                if find_distance_sqr(self.landing_pad) < self.acceptance_radius**2:
+                    self.reached_landing_pad = True
+                    command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
