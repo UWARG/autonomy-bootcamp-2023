@@ -4,6 +4,7 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
+from math import sqrt
 from .. import commands
 from .. import drone_report
 
@@ -12,7 +13,6 @@ from .. import drone_report
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
-from math import sqrt
 
 
 # Disable for bootcamp use
