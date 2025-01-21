@@ -12,7 +12,6 @@ import ultralytics
 
 from .. import bounding_box
 
-
 # ============
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
@@ -98,31 +97,37 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(image, conf=0.70, device=self.__DEVICE)
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot()
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.cpu().detach().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
+
+        for box in boxes_cpu:
+            bound_box = bounding_box.BoundingBox.create(box)
+            if bound_box[0] is not False:
+                bounding_boxes.append(bound_box[1])
+
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
         #     result, box = ...
 
-        return [], image_annotated
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
