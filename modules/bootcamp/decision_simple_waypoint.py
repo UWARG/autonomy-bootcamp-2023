@@ -37,9 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
-        self.exited = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -70,25 +67,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        x_dist = self.waypoint.location_x - report.position.location_x
-        y_dist = self.waypoint.location_y - report.position.location_y
-        dist = (x_dist * x_dist + y_dist * y_dist) ** 0.5
+        x_delta = self.waypoint.location_x - report.position.location_x
+        y_delta = self.waypoint.location_y - report.position.location_y
+
+        if (x_delta > 60 or x_delta < -60) or (y_delta > 60 or y_delta < -60):
+            command = commands.Command.create_null_command()
+            return command
+
+        dist = (x_delta * x_delta + y_delta * y_delta) ** 0.5
 
         if report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius:
             # we are currently stopped so check the next closest waypoint to our destination
-            x_delta = min(max(-60, x_dist), 60)
-            y_delta = min(max(-60, y_dist), 60)
             command = commands.Command.create_set_relative_destination_command(x_delta, y_delta)
-            # command = commands.command.create_set_relative_destination_command(x_delta, y_delta)
 
-        if dist <= self.acceptance_radius and not self.exited:
+        if dist < self.acceptance_radius:
             command = commands.Command.create_land_command()
-            # self.exited = true
             return command
-
-        print("Info: ", x_dist, y_dist, dist)
-
-        # Do something based on the report and the state of this class...
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

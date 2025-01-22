@@ -38,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.on_waypoint = False
+        self.reached_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,44 +69,45 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        x_dist = 0
-        y_dist = 0
+        x_delta = 0
+        y_delta = 0
         dist = 10000
 
-        if self.on_waypoint is False:
-            x_dist = self.waypoint.location_x - report.position.location_x
-            y_dist = self.waypoint.location_y - report.position.location_y
-            dist = (x_dist * x_dist + y_dist * y_dist) ** 0.5
+        if self.reached_waypoint is False:
+            x_delta = self.waypoint.location_x - report.position.location_x
+            y_delta = self.waypoint.location_y - report.position.location_y
+            dist = (x_delta * x_delta + y_delta * y_delta) ** 0.5
 
-        if self.on_waypoint is True:
+        if self.reached_waypoint is True:
             print("waypoint reached")
-            x_dist_set = landing_pad_locations[0].location_x - report.position.location_x
-            y_dist_set = landing_pad_locations[0].location_y - report.position.location_y
-            dist = (x_dist_set * x_dist_set + y_dist_set * y_dist_set) ** 0.5
+            x_delta_set = landing_pad_locations[0].location_x - report.position.location_x
+            y_delta_set = landing_pad_locations[0].location_y - report.position.location_y
+            dist = (x_delta_set * x_delta_set + y_delta_set * y_delta_set) ** 0.5
 
             for landing_pad in landing_pad_locations:
-                x_dist_temp = landing_pad.location_x - report.position.location_x
-                y_dist_temp = landing_pad.location_y - report.position.location_y
+                x_delta_landing = landing_pad.location_x - report.position.location_x
+                y_delta_landing = landing_pad.location_y - report.position.location_y
 
-                if (x_dist_temp * x_dist_temp + y_dist_temp * y_dist_temp) ** 0.5 <= dist:
-                    x_dist_set = x_dist_temp
-                    y_dist_set = y_dist_temp
+                if (x_delta_landing * x_delta_landing + y_delta_landing * y_delta_landing) <= dist**2:
+                    x_delta_set = x_delta_landing
+                    y_delta_set = y_delta_landing
+                    dist = (x_delta_set * x_delta_set + y_delta_set * y_delta_set) ** 0.5
 
-            x_dist = x_dist_set
-            y_dist = y_dist_set
-            dist = (x_dist_set * x_dist_set + y_dist_set * y_dist_set) ** 0.5
+            x_delta = x_delta_set
+            y_delta = y_delta_set
 
-        if dist <= self.acceptance_radius and self.on_waypoint is True:
+        if dist <= self.acceptance_radius and self.reached_waypoint is True:
             command = commands.Command.create_land_command()
             return command
 
-        if dist <= self.acceptance_radius and self.on_waypoint is False:
-            self.on_waypoint = True
+        if dist <= self.acceptance_radius and self.reached_waypoint is False:
+            self.reached_waypoint = True
 
         if report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius:
             # we are currently stopped so check the next closest waypoint to our destination
-            x_delta = min(max(-60, x_dist), 60)
-            y_delta = min(max(-60, y_dist), 60)
+            if (x_delta > 60 or x_delta < -60) or (y_delta > 60 or y_delta < -60):
+                command = commands.Command.create_null_command()
+                return command
             command = commands.Command.create_set_relative_destination_command(x_delta, y_delta)
         # Do something based on the report and the state of this class...
 
