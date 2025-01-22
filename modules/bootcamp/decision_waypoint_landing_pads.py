@@ -3,6 +3,7 @@ BOOTCAMPERS TO COMPLETE.
 
 Travel to designated waypoint and then land at a nearby landing pad.
 """
+
 from math import sqrt
 
 from .. import commands
@@ -18,7 +19,8 @@ from ..private.decision import base_decision
 # No enable
 # pylint: disable=duplicate-code,unused-argument
 
-def calculate_distance(position, landing_pad):
+
+def calculate_distance(position: location.Location, landing_pad: location.Location) -> float:
     """
     Calculate the Euclidean distance between a given position and a landing pad.
 
@@ -29,7 +31,11 @@ def calculate_distance(position, landing_pad):
     Returns:
         float: The Euclidean distance between the position and the landing pad.
     """
-    return sqrt((landing_pad.location_x - position.location_x) ** 2 + (landing_pad.location_y - position.location_y) ** 2)
+    return sqrt(
+        (landing_pad.location_x - position.location_x) ** 2
+        + (landing_pad.location_y - position.location_y) ** 2
+    )
+
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
     """
@@ -89,22 +95,38 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         position = report.position
 
         if not self.reached:
-            distance_from_waypoint = sqrt((self.waypoint.location_x - position.location_x) ** 2 + (self.waypoint.location_y - position.location_y) ** 2)
+            distance_from_waypoint = sqrt(
+                (self.waypoint.location_x - position.location_x) ** 2
+                + (self.waypoint.location_y - position.location_y) ** 2
+            )
 
             # if the drone is in the acceptance radius, we have reached
             if distance_from_waypoint < self.acceptance_radius:
                 self.reached = True
 
             if self.reached:
-                self.nearest_landing_pad = min(landing_pad_locations, key=lambda landing_pad: calculate_distance(position, landing_pad))
-                relative_destination = location.Location(self.nearest_landing_pad.location_x - position.location_x, self.nearest_landing_pad.location_y - position.location_y)
-                return commands.Command.create_set_relative_destination_command(relative_destination.location_x, relative_destination.location_y)
+                self.nearest_landing_pad = min(
+                    landing_pad_locations,
+                    key=lambda landing_pad: calculate_distance(position, landing_pad),
+                )
+                relative_destination = location.Location(
+                    self.nearest_landing_pad.location_x - position.location_x,
+                    self.nearest_landing_pad.location_y - position.location_y,
+                )
+                return commands.Command.create_set_relative_destination_command(
+                    relative_destination.location_x, relative_destination.location_y
+                )
                 # return commands.Command.create_halt_command()
             # otherwise, the drone has not reached in the acceptance radius
             # If the drone is not at the waypoint yet
             if status == drone_status.DroneStatus.HALTED:
-                relative_destination = location.Location(self.waypoint.location_x - position.location_x, self.waypoint.location_y - position.location_y)
-                return commands.Command.create_set_relative_destination_command(relative_destination.location_x, relative_destination.location_y)
+                relative_destination = location.Location(
+                    self.waypoint.location_x - position.location_x,
+                    self.waypoint.location_y - position.location_y,
+                )
+                return commands.Command.create_set_relative_destination_command(
+                    relative_destination.location_x, relative_destination.location_y
+                )
             return command
         distance_to_pad = calculate_distance(position, self.nearest_landing_pad)
         # if we are within the acceptance radius of the landing pad, we land
@@ -114,15 +136,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return commands.Command.create_halt_command()
         # if we are not within the acceptance radius of the landing pad, we head towards it
         if status == drone_status.DroneStatus.HALTED:
-            relative_destination = location.Location(self.nearest_landing_pad.location_x - position.location_x, self.nearest_landing_pad.location_y - position.location_y)
-            return commands.Command.create_set_relative_destination_command(relative_destination.location_x, relative_destination.location_y)
-
-
-
-
-
-
-
+            relative_destination = location.Location(
+                self.nearest_landing_pad.location_x - position.location_x,
+                self.nearest_landing_pad.location_y - position.location_y,
+            )
+            return commands.Command.create_set_relative_destination_command(
+                relative_destination.location_x, relative_destination.location_y
+            )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

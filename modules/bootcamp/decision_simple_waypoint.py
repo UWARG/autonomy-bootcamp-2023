@@ -72,7 +72,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         status = report.status
         position = report.position
 
-        distance_from_waypoint = sqrt((self.waypoint.location_x - position.location_x) ** 2 + (self.waypoint.location_y - position.location_y) ** 2)
+        distance_from_waypoint = sqrt(
+            (self.waypoint.location_x - position.location_x) ** 2
+            + (self.waypoint.location_y - position.location_y) ** 2
+        )
 
         # if the drone is in the acceptance radius, we have reached
         if distance_from_waypoint < self.acceptance_radius:
@@ -85,10 +88,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # otherwise, the drone has not reached in the acceptance radius
         # If the drone is not at the waypoint yet
         if status == drone_status.DroneStatus.HALTED:
-            relative_destination = location.Location(self.waypoint.location_x - position.location_x, self.waypoint.location_y - position.location_y)
-            return commands.Command.create_set_relative_destination_command(relative_destination.location_x, relative_destination.location_y)
-
-        # Do something based on the report and the state of this class...
+            relative_destination = location.Location(
+                self.waypoint.location_x - position.location_x,
+                self.waypoint.location_y - position.location_y,
+            )
+            return commands.Command.create_set_relative_destination_command(
+                relative_destination.location_x, relative_destination.location_y
+            )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
