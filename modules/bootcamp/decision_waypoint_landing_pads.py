@@ -89,12 +89,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             distance_from_waypoint = (
                 self.waypoint.location_x - report.position.location_x
             ) ** 2 + ((self.waypoint.location_y - report.position.location_y) ** 2)
-          
+
             if report.status == drone_status.DroneStatus.HALTED:
 
-                if self.waypoint_reached and self.closest_pad is not None and (
-                    self.closest_pad.location_x - report.position.location_x) ** 2 + (
-                        self.closest_pad.location_y - report.position.location_y) ** 2 < self.acceptance_radius**2:
+                if (
+                    self.waypoint_reached
+                    and self.closest_pad is not None
+                    and (self.closest_pad.location_x - report.position.location_x) ** 2
+                    + (self.closest_pad.location_y - report.position.location_y) ** 2
+                    < self.acceptance_radius**2
+                ):
                     command = commands.Command.create_land_command()
 
                 elif distance_from_waypoint < self.acceptance_radius**2:
