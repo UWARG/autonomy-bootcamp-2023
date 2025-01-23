@@ -45,6 +45,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def find_distance_sqr(
+        self, report: drone_report.DroneReport, other: location.Location
+    ) -> float:
+        """Finds the distance squared between the drone and an inputted location."""
+        x_distance = report.position.location_x - other.location_x
+        y_distance = report.position.location_y - other.location_y
+
+        return x_distance**2 + y_distance**2
+
+    def set_closest_landing_pad_location(
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+    ) -> None:
+        """Sets the landing pad location to the nearest landing to the drone's current location."""
+        self.landing_pad = landing_pad_locations[0]
+        for landing_pad in landing_pad_locations:
+            if self.find_distance_sqr(report, landing_pad) < self.find_distance_sqr(
+                report, self.landing_pad
+            ):
+                self.landing_pad = landing_pad
+
+    def reached_destination(
+        self, report: drone_report.DroneReport, other: location.Location
+    ) -> bool:
+        """Checks if the drone has reached the inputted destination."""
+        return self.find_distance_sqr(report, other) < self.acceptance_radius**2
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -70,25 +96,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def find_distance_sqr(other: location.Location) -> float:
-            x_distance = report.position.location_x - other.location_x
-            y_distance = report.position.location_y - other.location_y
-
-            return x_distance**2 + y_distance**2
-
-        def set_closest_landing_pad_location() -> None:
-            self.landing_pad = landing_pad_locations[0]
-            for landing_pad in landing_pad_locations:
-                if find_distance_sqr(landing_pad) < find_distance_sqr(self.landing_pad):
-                    self.landing_pad = landing_pad
-
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.reached_waypoint:
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x, self.waypoint.location_y
                 )
             elif not self.reached_landing_pad:
-                set_closest_landing_pad_location()
+                self.set_closest_landing_pad_location(report, landing_pad_locations)
 
                 landing_pad_relative_x = self.landing_pad.location_x - report.position.location_x
                 landing_pad_relative_y = self.landing_pad.location_y - report.position.location_y
@@ -99,15 +113,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             else:
                 command = commands.Command.create_land_command()
 
-        elif report.status == drone_status.DroneStatus.MOVING:
-            if not self.reached_waypoint:
-                if find_distance_sqr(self.waypoint) < self.acceptance_radius**2:
-                    self.reached_waypoint = True
-                    command = commands.Command.create_halt_command()
-            elif not self.reached_landing_pad:
-                if find_distance_sqr(self.landing_pad) < self.acceptance_radius**2:
-                    self.reached_landing_pad = True
-                    command = commands.Command.create_halt_command()
+        if not self.reached_waypoint:
+            if self.reached_destination(report, self.waypoint):
+                self.reached_waypoint = True
+                command = commands.Command.create_halt_command()
+        elif not self.reached_landing_pad:
+            if self.reached_destination(report, self.landing_pad):
+                self.reached_landing_pad = True
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

@@ -43,6 +43,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def find_distance(self, report: drone_report.DroneReport) -> float:
+        """Finds the distance squared between the drone and an inputted location."""
+        x_distance = report.position.location_x - self.waypoint.location_x
+        y_distance = report.position.location_y - self.waypoint.location_y
+        return (x_distance**2 + y_distance**2) ** 0.5
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -68,12 +74,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def find_distance() -> float:
-            x_distance = report.position.location_x - self.waypoint.location_x
-            y_distance = report.position.location_y - self.waypoint.location_y
-            return (x_distance**2 + y_distance**2) ** 0.5
-
-        distance = find_distance()
+        distance = self.find_distance(report)
 
         if distance < self.acceptance_radius:
             self.reached_destination = True
