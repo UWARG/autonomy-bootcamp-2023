@@ -29,10 +29,9 @@ def calculate_distance(position: location.Location, landing_pad: location.Locati
     Returns:
         float: The Euclidean distance between the position and the landing pad.
     """
-    return (
-        (landing_pad.location_x - position.location_x) ** 2
-        + (landing_pad.location_y - position.location_y) ** 2
-    ) ** 0.5
+    return (landing_pad.location_x - position.location_x) ** 2 + (
+        landing_pad.location_y - position.location_y
+    ) ** 2
 
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
@@ -93,10 +92,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         position = report.position
 
         if not self.reached:
-            distance_from_waypoint = (
-                (self.waypoint.location_x - position.location_x) ** 2
-                + (self.waypoint.location_y - position.location_y) ** 2
-            ) ** 0.5
+            distance_from_waypoint = (self.waypoint.location_x - position.location_x) ** 2 + (
+                self.waypoint.location_y - position.location_y
+            ) ** 2
 
             # if the drone is in the acceptance radius, we have reached
             if distance_from_waypoint < self.acceptance_radius:

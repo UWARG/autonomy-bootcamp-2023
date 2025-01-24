@@ -68,10 +68,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         status = report.status
         position = report.position
 
-        distance_from_waypoint = (
-            (self.waypoint.location_x - position.location_x) ** 2
-            + (self.waypoint.location_y - position.location_y) ** 2
-        ) ** 0.5
+        distance_from_waypoint = (self.waypoint.location_x - position.location_x) ** 2 + (
+            self.waypoint.location_y - position.location_y
+        ) ** 2
 
         # check if status is HALTED; if it is, set the relative destination
         if status == drone_status.DroneStatus.HALTED:
