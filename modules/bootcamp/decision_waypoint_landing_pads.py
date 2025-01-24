@@ -97,7 +97,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             ) ** 2
 
             # if the drone is in the acceptance radius, we have reached
-            if distance_from_waypoint < self.acceptance_radius:
+            if distance_from_waypoint < (self.acceptance_radius ** 2):
                 self.reached = True
                 self.nearest_landing_pad = min(
                     landing_pad_locations,
@@ -124,7 +124,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return command
         distance_to_pad = calculate_distance(position, self.nearest_landing_pad)
         # if we are within the acceptance radius of the landing pad, we land
-        if distance_to_pad < self.acceptance_radius:
+        if distance_to_pad < (self.acceptance_radius ** 2):
             if status == drone_status.DroneStatus.HALTED:
                 return commands.Command.create_land_command()
             return commands.Command.create_halt_command()
