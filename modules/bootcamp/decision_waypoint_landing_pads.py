@@ -4,8 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint and then land at a nearby landing pad.
 """
 
-from math import sqrt
-
 from .. import commands
 from .. import drone_report
 
@@ -31,10 +29,10 @@ def calculate_distance(position: location.Location, landing_pad: location.Locati
     Returns:
         float: The Euclidean distance between the position and the landing pad.
     """
-    return sqrt(
+    return (
         (landing_pad.location_x - position.location_x) ** 2
         + (landing_pad.location_y - position.location_y) ** 2
-    )
+    ) ** 0.5
 
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
@@ -95,16 +93,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         position = report.position
 
         if not self.reached:
-            distance_from_waypoint = sqrt(
+            distance_from_waypoint = (
                 (self.waypoint.location_x - position.location_x) ** 2
                 + (self.waypoint.location_y - position.location_y) ** 2
-            )
+            ) ** 0.5
 
             # if the drone is in the acceptance radius, we have reached
             if distance_from_waypoint < self.acceptance_radius:
                 self.reached = True
-
-            if self.reached:
                 self.nearest_landing_pad = min(
                     landing_pad_locations,
                     key=lambda landing_pad: calculate_distance(position, landing_pad),

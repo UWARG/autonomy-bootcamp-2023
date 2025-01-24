@@ -4,7 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
-from math import sqrt
 from .. import commands
 from .. import drone_report
 
@@ -36,9 +35,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # a boolean to see if the drone has reached the waypoint
-        self.reached = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -72,22 +68,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         status = report.status
         position = report.position
 
-        distance_from_waypoint = sqrt(
+        distance_from_waypoint = (
             (self.waypoint.location_x - position.location_x) ** 2
             + (self.waypoint.location_y - position.location_y) ** 2
-        )
+        ) ** 0.5
 
-        # if the drone is in the acceptance radius, we have reached
-        if distance_from_waypoint < self.acceptance_radius:
-            self.reached = True
-
-        if self.reached:
-            if status == drone_status.DroneStatus.HALTED:
-                return commands.Command.create_land_command()
-            return commands.Command.create_halt_command()
-        # otherwise, the drone has not reached in the acceptance radius
-        # If the drone is not at the waypoint yet
+        # check if status is HALTED; if it is, set the relative destination
         if status == drone_status.DroneStatus.HALTED:
+            # if the drone is in the acceptance radius, we have reached
+            if distance_from_waypoint < self.acceptance_radius:
+                return commands.Command.create_land_command()
             relative_destination = location.Location(
                 self.waypoint.location_x - position.location_x,
                 self.waypoint.location_y - position.location_y,
@@ -95,7 +85,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             return commands.Command.create_set_relative_destination_command(
                 relative_destination.location_x, relative_destination.location_y
             )
-
+        # if the drone is in the acceptance radius, we have reached
+        if distance_from_waypoint < self.acceptance_radius:
+            return commands.Command.create_halt_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
