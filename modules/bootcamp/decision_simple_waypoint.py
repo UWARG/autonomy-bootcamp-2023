@@ -70,6 +70,23 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
+        curr_position = report.position
+
+        # Find the distance between the current position and the waypoint
+        distance_x = curr_position.x - self.waypoint.x
+        distance_y = curr_position.y - self.waypoint.y
+
+        if report.status == drone_status.DroneStatus.HALTED:
+
+            # check if the drone is close enough to the waypoint
+            if (distance_x**2 + distance_y**2) < self.acceptance_radius**2:
+                command = commands.Command.create_landing_command()
+
+            else:
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
