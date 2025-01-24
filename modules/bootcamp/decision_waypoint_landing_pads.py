@@ -95,9 +95,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             # land the drone if it has reached the waypoint, no more landing pads and is within the acceptance radius
             if (
-                self.waypoint_reached and
-                self.within_accepepted_radius(report.position, self.closest_landing_pad) and
-                self.closest_landing_pad is not None
+                self.waypoint_reached
+                and self.within_accepepted_radius(report.position, self.closest_landing_pad)
+                and self.closest_landing_pad is not None
             ):
                 command = commands.Command.create_land_command()
 
