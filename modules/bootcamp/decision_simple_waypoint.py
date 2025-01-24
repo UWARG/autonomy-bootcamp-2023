@@ -75,7 +75,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # check if status is HALTED; if it is, set the relative destination
         if status == drone_status.DroneStatus.HALTED:
             # if the drone is in the acceptance radius, we have reached
-            if distance_from_waypoint < (self.acceptance_radius ** 2):
+            if distance_from_waypoint < (self.acceptance_radius**2):
                 return commands.Command.create_land_command()
             relative_destination = location.Location(
                 self.waypoint.location_x - position.location_x,
@@ -85,7 +85,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 relative_destination.location_x, relative_destination.location_y
             )
         # if the drone is in the acceptance radius, we have reached
-        if distance_from_waypoint < (self.acceptance_radius ** 2):
+        if distance_from_waypoint < (self.acceptance_radius**2):
             return commands.Command.create_halt_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
