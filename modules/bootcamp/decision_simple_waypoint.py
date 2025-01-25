@@ -73,8 +73,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         curr_position = report.position
 
         # Find the distance between the current position and the waypoint
-        distance_x = curr_position.x - self.waypoint.x
-        distance_y = curr_position.y - self.waypoint.y
+        distance_x = self.waypoint.x - curr_position.x
+        distance_y = self.waypoint.y - curr_position.y
 
         if report.status == drone_status.DroneStatus.HALTED:
 
@@ -84,7 +84,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
+                    distance_x, distance_y
                 )
 
         # ============

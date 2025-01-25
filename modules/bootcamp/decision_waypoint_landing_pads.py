@@ -56,7 +56,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             start_location.location_y - final_location.location_y
         ) ** 2
 
-    def within_accepepted_radius(
+    def within_accepted_radius(
         self, start_location: location.Location, final_location: location.Location
     ) -> bool:
         """
@@ -96,8 +96,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # land the drone if it has reached the waypoint, no more landing pads and is within the acceptance radius
             if (
                 self.waypoint_reached
-                and self.within_accepepted_radius(report.position, self.closest_landing_pad)
                 and self.closest_landing_pad is not None
+                and self.within_accepepted_radius(report.position, self.closest_landing_pad)
             ):
                 command = commands.Command.create_land_command()
 
@@ -121,8 +121,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint_reached = True
 
             else:
+                distance_x = self.waypoint.location_x - report.position.location_x
+                distance_y = self.waypoint.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
+                    distance_x, distance_y
                 )
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
