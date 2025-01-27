@@ -101,8 +101,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             ):
                 command = commands.Command.create_land_command()
 
+            # move the drone to the waypoint
+            elif not self.within_accepepted_radius(report.position, self.waypoint):
+                distance_x = self.waypoint.location_x - report.position.location_x
+                distance_y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(
+                    distance_x, distance_y
+                )
+
             # find the next closest landing pad
-            elif self.within_accepepted_radius(report.position, self.waypoint):
+            else:
                 shortest_distance = float("inf")
 
                 for landing_pad in landing_pad_locations:
@@ -120,12 +128,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                 self.waypoint_reached = True
 
-            else:
-                distance_x = self.waypoint.location_x - report.position.location_x
-                distance_y = self.waypoint.location_y - report.position.location_y
-                command = commands.Command.create_set_relative_destination_command(
-                    distance_x, distance_y
-                )
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
