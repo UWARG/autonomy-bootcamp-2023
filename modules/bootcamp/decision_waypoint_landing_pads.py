@@ -8,15 +8,12 @@ from .. import commands
 from .. import drone_report
 
 # Disable for bootcamp use
-# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
-# No enable
-# pylint: disable=duplicate-code,unused-argument
 
 
 class DecisionWaypointLandingPads(base_decision.BaseDecision):
@@ -38,10 +35,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
+        self.has_sent_landing_command = False
+        self.min_bounds = -60
+        self.max_bounds = 60
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def min_dist_squared(self, landing_pads: location.Location) -> float:
+        """returns distance squared"""
+        dist = (self.waypoint.location_x - landing_pads.location_x) ** 2 + (
+            self.waypoint.location_y - landing_pads.location_y
+        ) ** 2
+        return dist
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -69,6 +76,39 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        if (
+            self.waypoint.location_x >= self.min_bounds
+            and self.waypoint.location_x <= self.max_bounds
+            and self.waypoint.location_y >= self.min_bounds
+            and self.waypoint.location_y <= self.max_bounds
+        ):
+            proximity = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+                self.waypoint.location_y - report.position.location_y
+            ) ** 2
+            new_pad = location.Location(0, 0)
+            # when the drone is halted but not at the destination
+            if report.status == drone_status.DroneStatus.HALTED:
+                if self.has_sent_landing_command:
+                    command = commands.Command.create_land_command()
+
+                elif not self.has_sent_landing_command and proximity < self.acceptance_radius**2:
+                    smallest_dist = float("inf")
+                    for landing_pads in landing_pad_locations:
+                        new_dist = self.min_dist_squared(landing_pads)
+                        if new_dist < smallest_dist:
+                            smallest_dist = new_dist
+                            new_pad = landing_pads
+
+                    command = commands.Command.create_set_relative_destination_command(
+                        new_pad.location_x - self.waypoint.location_x,
+                        new_pad.location_y - self.waypoint.location_y,
+                    )
+                    self.has_sent_landing_command = True
+
+                elif proximity > self.acceptance_radius and not self.has_sent_landing_command:
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x, self.waypoint.location_y
+                    )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
