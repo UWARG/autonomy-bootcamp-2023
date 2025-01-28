@@ -89,11 +89,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # checking if the drone is halted
             if report.status == drone_status.DroneStatus.HALTED:
 
-                #when drone is at the nearest landing pad
+                # when drone is at the nearest landing pad
                 if self.has_sent_landing_command:
                     command = commands.Command.create_land_command()
 
-                #finding nearest landing pad anf setting relative destination
+                # finding nearest landing pad anf setting relative destination
                 elif not self.has_sent_landing_command and proximity < self.acceptance_radius**2:
                     smallest_dist = float("inf")
                     for landing_pads in landing_pad_locations:
@@ -108,7 +108,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     )
                     self.has_sent_landing_command = True
 
-                #setting relative destination to waypoint
+                # setting relative destination to waypoint
                 elif proximity > self.acceptance_radius and not self.has_sent_landing_command:
                     command = commands.Command.create_set_relative_destination_command(
                         self.waypoint.location_x, self.waypoint.location_y
