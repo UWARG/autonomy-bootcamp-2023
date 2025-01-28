@@ -128,7 +128,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                 self.waypoint_reached = True
 
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
