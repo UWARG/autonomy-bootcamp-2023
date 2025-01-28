@@ -102,7 +102,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
 
             # move the drone to the waypoint
-            elif not self.within_accepepted_radius(report.position, self.waypoint):
+            elif (
+                not self.within_accepepted_radius(report.position, self.waypoint)
+                and not self.waypoint_reached
+            ):
                 distance_x = self.waypoint.location_x - report.position.location_x
                 distance_y = self.waypoint.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(
