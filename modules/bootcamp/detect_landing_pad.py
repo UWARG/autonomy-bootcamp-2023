@@ -9,6 +9,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
+import ultralytics.utils
 
 from .. import bounding_box
 
@@ -17,7 +18,6 @@ from .. import bounding_box
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
 # Bootcampers remove the following lines:
-
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -96,14 +96,16 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = self.__model.predict(image, conf=0.7, device=self.__DEVICE, verbose=True)
+        predictions = self.__model.predict(
+            source=image, device=self.__DEVICE, verbose=True, conf=0.5
+        )
 
         # Get the Result object
         prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot(conf=True)
+        image_annotated = prediction.plot()
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -116,11 +118,12 @@ class DetectLandingPad:
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
-        for i in range(0, boxes_cpu.shape[0]):
-            # Create BoundingBox object and append to list
-            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            if result:
-                bounding_boxes.append(box)
+        for i in range(boxes_xyxy.shape[0]):
+            #     # Create BoundingBox object and append to list
+            box = bounding_box.BoundingBox.create(bounds=boxes_cpu[i])[1]
+            print("BOXES BOXES: ", box)
+            bounding_boxes.append(box)
+        # result, box = ...
 
         return bounding_boxes, image_annotated
         # ============
