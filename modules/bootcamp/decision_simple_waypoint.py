@@ -29,15 +29,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         Initialize all persistent variables here with self.
         """
         self.waypoint = waypoint
-        print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Add your own
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,8 +65,28 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        status = report.status
+        position = report.position
 
+        distance_from_waypoint = (self.waypoint.location_x - position.location_x) ** 2 + (
+            self.waypoint.location_y - position.location_y
+        ) ** 2
+
+        # check if status is HALTED; if it is, set the relative destination
+        if status == drone_status.DroneStatus.HALTED:
+            # if the drone is in the acceptance radius, we have reached
+            if distance_from_waypoint < (self.acceptance_radius**2):
+                return commands.Command.create_land_command()
+            relative_destination = location.Location(
+                self.waypoint.location_x - position.location_x,
+                self.waypoint.location_y - position.location_y,
+            )
+            return commands.Command.create_set_relative_destination_command(
+                relative_destination.location_x, relative_destination.location_y
+            )
+        # if the drone is in the acceptance radius, we have reached
+        if distance_from_waypoint < (self.acceptance_radius**2):
+            return commands.Command.create_halt_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
