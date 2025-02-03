@@ -40,14 +40,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         print("Accept radius: ", self.acceptance_radius)
 
-        self.pos = [waypoint.location_x, waypoint.location_y]
-        self.final = [0,0]
         self.command_index = 0
         self.commands = []
+        self.counter = 0
 
         self.has_sent_landing_command = False
 
-        self.counter = 0
         self.can_land = False
 
         # ============
@@ -82,18 +80,21 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         if self.counter == 0:
-            self.commands = [commands.Command.create_set_relative_destination_command(self.pos[0], self.pos[1])]
-        elif report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
+            self.commands = [commands.Command.create_set_relative_destination_command( self.waypoint.location_x - report.position.location_x, self.waypoint.location_y - report.position.location_x)]
+        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
             self.commands
         ):
-            if pow(
-                (report.position.location_x - self.waypoint.location_x) ** 2
-                + (report.position.location_y - self.waypoint.location_y) ** 2,
-                0.5,
-            ) > self.acceptance_radius:
+            if (
+                pow(
+                    (report.position.location_x - self.waypoint.location_x) ** 2
+                    + (report.position.location_y - self.waypoint.location_y) ** 2,
+                    0.5,
+                )
+                > self.acceptance_radius
+            ):
                 print("Not within acceptable range")
                 command = self.commands[self.command_index - 1]
-            else:                  
+            else:
                 print(self.counter)
                 print(self.command_index)
                 print(len(self.commands))
@@ -116,32 +117,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 dist = pad_x_diff * pad_x_diff + pad_y_diff * pad_y_diff
                 if dist < closest:
                     closest = dist
-                    closest_index = i            
-            self.commands.append(
-                commands.Command.create_set_relative_destination_command(
+                    closest_index = i
+            command = commands.Command.create_set_relative_destination_command(
                     landing_pad_locations[closest_index].location_x - cur_x,
                     landing_pad_locations[closest_index].location_y - cur_y,
-                )
             )
-            self.final = [landing_pad_locations[closest_index].location_x, landing_pad_locations[closest_index].location_y]
             self.can_land = True
             print("APPEND + FLAG UP")
             print(len(self.commands))
             print(self.command_index)
             print(landing_pad_locations[closest_index].location_x)
             print(landing_pad_locations[closest_index].location_y)
-            command = self.commands[self.command_index]
             self.command_index += 1
         elif (
             report.status == drone_status.DroneStatus.HALTED
             and self.can_land
             and not self.has_sent_landing_command
         ):
-            if pow(
-                (report.position.location_x - self.final[0]) ** 2
-                + (report.position.location_y - self.final[1]) ** 2,
-                0.5,
-            ) > self.acceptance_radius:
+            if (
+                pow(
+                    (report.position.location_x - self.final[0]) ** 2
+                    + (report.position.location_y - self.final[1]) ** 2,
+                    0.5,
+                )
+                > self.acceptance_radius
+            ):
                 command = self.commands[self.command_index - 1]
                 print("landing not within acceptable radius")
             else:
@@ -149,9 +149,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 print("LAND | within acceptable range")
                 self.has_sent_landing_command = True
 
-        self.counter += 1
         print("x: ", report.position.location_x, " y: ", report.position.location_y)
-
+        self.counter += 1
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
