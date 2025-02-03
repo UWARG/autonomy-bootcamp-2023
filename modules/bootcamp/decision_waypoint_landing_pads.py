@@ -40,10 +40,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         print("Accept radius: ", self.acceptance_radius)
 
-        x = waypoint.location_x
-        y = waypoint.location_y
+        self.pos = [waypoint.location_x, waypoint.location_y]
+        self.final = [0,0]
         self.command_index = 0
-        self.commands = [commands.Command.create_set_relative_destination_command(x, y)]
+        self.commands = []
 
         self.has_sent_landing_command = False
 
@@ -81,34 +81,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
+        if self.counter == 0:
+            self.commands = [commands.Command.create_set_relative_destination_command(self.pos[0], self.pos[1])]
+        elif report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
             self.commands
         ):
-            print(self.counter)
-            print(self.command_index)
-            print(len(self.commands))
-            print(f"Halted at: {report.position}")
-            command = self.commands[self.command_index]
-            self.command_index += 1
-        elif (
-            report.status == drone_status.DroneStatus.HALTED
-            and pow(
+            if pow(
                 (report.position.location_x - self.waypoint.location_x) ** 2
                 + (report.position.location_y - self.waypoint.location_y) ** 2,
                 0.5,
-            )
-            > self.acceptance_radius
-            and not self.can_land
-        ):
-            print("not inside acceptance radius")
-            self.command_index -= 1
+            ) > self.acceptance_radius:
+                print("Not within acceptable range")
+                command = self.commands[self.command_index - 1]
+            else:                  
+                print(self.counter)
+                print(self.command_index)
+                print(len(self.commands))
+                print(f"Halted at: {report.position}, acceptable range")
+                command = self.commands[self.command_index]
+                self.command_index += 1
         elif (
             report.status == drone_status.DroneStatus.HALTED
             and not self.has_sent_landing_command
             and not self.can_land
         ):
-            closest = pow(60**2 + 60**2, 0.5)
+            closest = 10000000
             closest_index = 0
             cur_x = report.position.location_x
             cur_y = report.position.location_y
@@ -126,6 +123,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     landing_pad_locations[closest_index].location_y - cur_y,
                 )
             )
+            self.final = [landing_pad_locations[closest_index].location_x, landing_pad_locations[closest_index].location_y]
             self.can_land = True
             print("APPEND + FLAG UP")
             print(len(self.commands))
@@ -139,12 +137,20 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             and self.can_land
             and not self.has_sent_landing_command
         ):
-            command = commands.Command.create_land_command()
-            print("LAND")
-
-            self.has_sent_landing_command = True
+            if pow(
+                (report.position.location_x - self.final[0]) ** 2
+                + (report.position.location_y - self.final[1]) ** 2,
+                0.5,
+            ) > self.acceptance_radius:
+                command = self.commands[self.command_index - 1]
+                print("landing not within acceptable radius")
+            else:
+                command = commands.Command.create_land_command()
+                print("LAND | within acceptable range")
+                self.has_sent_landing_command = True
 
         self.counter += 1
+        print("x: ", report.position.location_x, " y: ", report.position.location_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
