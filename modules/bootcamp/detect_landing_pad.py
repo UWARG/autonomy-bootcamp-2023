@@ -97,7 +97,7 @@ class DetectLandingPad:
         # * device
         # * verbose
         predictions = self.__model.predict(
-            source=image, device=self.__DEVICE, verbose=True, conf=0.5
+            source=image, conf=0.5, device=self.__DEVICE, verbose=True
         )
 
         # Get the Result object
@@ -105,7 +105,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot()
+        image_annotated = prediction.plot(conf=0.5)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -119,10 +119,13 @@ class DetectLandingPad:
         bounding_boxes = []
         # Hint: .shape gets the dimensions of the numpy array
         for i in range(boxes_xyxy.shape[0]):
-            #     # Create BoundingBox object and append to list
-            box = bounding_box.BoundingBox.create(bounds=boxes_cpu[i])[1]
-            print("BOXES BOXES: ", box)
-            bounding_boxes.append(box)
+            # Create BoundingBox object and append to list
+            result, box = bounding_box.BoundingBox.create(bounds=boxes_cpu[i])
+            if result:
+                bounding_boxes.append(box)
+            else:
+                print("Error creating boxes")
+            # print("BOXES BOXES: ", box)
         # result, box = ...
 
         return bounding_boxes, image_annotated
