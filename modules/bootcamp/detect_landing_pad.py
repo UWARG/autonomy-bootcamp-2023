@@ -97,11 +97,9 @@ class DetectLandingPad:
         predictions = self.__model.predict(
             source=image, conf=0.7, device=self.__DEVICE, verbose=False
         )
-        # print("PREDICTIONSSS:  ", prediction)
 
         # Get the Result object
         prediction = predictions[0]
-        # print("PREDICTION:  ", prediction)
 
         # Plot the annotated image from the Result object
         # Include the confidence value
@@ -114,9 +112,6 @@ class DetectLandingPad:
         # move the copy into CPU space, --> cuda
         # and convert to a numpy array --> numpy
         boxes_cpu = boxes_xyxy.detach().cpu().numpy()
-        # print("BOXES-CPU TYPE:  ", type(boxes_cpu))
-        # print("BOXES-CPU:  ", boxes_cpu)
-        # print("BOXES-CPU ND SHAPE", boxes_cpu.shape)
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -125,13 +120,11 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
-            # print("RESULT:    ", result)
-            # print("BOX:    ", box)
 
-            if result:
-                bounding_boxes.append(box)
-            else:
-                return []
+            if not result:
+                return [], image_annotated
+
+            bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
         # ============
