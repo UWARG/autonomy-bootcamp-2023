@@ -65,49 +65,58 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             put_output(command)
         ```
         """
+        # Default command
+        command = commands.Command.create_null_command()
+
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # print("RUN")
-        # Default command
-        command = commands.Command.create_null_command()
-
         if report.status == drone_status.DroneStatus.HALTED:
-            print("HALTED AT:   ", report.position.location_x, report.position.location_y)
+            print(f"HALTED AT: ({report.position.location_x}, {report.position.location_y})")
             print(
-                "DESTINATION WAS:   ", report.destination.location_x, report.destination.location_y
+                f"DESTINATION WAS: ({report.destination.location_x}, {report.destination.location_y})"
             )
 
             # Handle unexpected halts
-            delta_x = report.position.location_x - report.destination.location_x
-            delta_y = report.position.location_y - report.destination.location_y
+            delta_x = report.destination.location_x - report.position.location_x
+            delta_y = report.destination.location_y - report.position.location_y
             self.above_destination = delta_x**2 + delta_y**2 < self.acceptance_radius**2
 
             if not self.above_destination:
                 print("^^UNEXPECTED HALT")
-                command = commands.Command.create_set_relative_destination_command(
-                    report.destination.location_x - report.position.location_x,
-                    report.destination.location_y - report.position.location_y,
-                )
+                command = commands.Command.create_set_relative_destination_command(delta_x, delta_y)
 
+            # Go to waypoint
             elif not self.approaching_wp:
+                waypoint_delta_x = self.waypoint.location_x - report.position.location_x
+                waypoint_delta_y = self.waypoint.location_y - report.position.location_y
+
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
+                    waypoint_delta_x, waypoint_delta_y
                 )
                 self.approaching_wp = True
                 print("APPROACHING WP:  ", self.waypoint.location_x, self.waypoint.location_y)
 
+            # Find and go to nearest landing pad
             elif not self.approaching_lp:
                 self.target_lp = self.find_closest_lp(report, landing_pad_locations)
-                lp_relative_x, lp_relative_y = self.relative_target(self.target_lp, report)
 
-                command = commands.Command.create_set_relative_destination_command(
-                    lp_relative_x, lp_relative_y
-                )
-                self.approaching_lp = True
-                print("APPROACHING LP:  ", self.target_lp.location_x, self.target_lp.location_y)
+                if self.target_lp:
+                    lp_delta_x = self.target_lp.location_x - report.position.location_x
+                    lp_delta_y = self.target_lp.location_y - report.position.location_y
 
+                    command = commands.Command.create_set_relative_destination_command(
+                        lp_delta_x, lp_delta_y
+                    )
+                    self.approaching_lp = True
+                    print("APPROACHING LP:  ", self.target_lp.location_x, self.target_lp.location_y)
+
+                # Give a null command if there are no landing pads in landing_pad_locations
+                else:
+                    command = commands.Command.create_null_command()
+
+            # Landing
             else:
                 command = commands.Command.create_land_command()
                 print("LANDING")
@@ -125,22 +134,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Given a list of landing pads,
         determines the index of the closest one to the waypoint.
         """
+        # If there's only one pad, default to that one
         if len(landing_pad_locations) == 1:
             return landing_pad_locations[0]
 
-        drone_x = report.position.location_x
-        drone_y = report.position.location_y
-
         i = 0
-        winning_pad = landing_pad_locations[0]
+        winning_pad = None
         winning_sq_dist = float("inf")
 
         for lp in landing_pad_locations:
-            lp_x = lp.location_x
-            lp_y = lp.location_y
-
-            delta_x = lp_x - drone_x
-            delta_y = lp_y - drone_y
+            delta_x = report.position.location_x - lp.location_x
+            delta_y = report.position.location_y - lp.location_y
 
             sq_dist = delta_x**2 + delta_y**2
 
@@ -150,20 +154,4 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             i += 1
 
-        # print("TARGET LP FOUND, INDEX: ", winning_i)
-        # print("^^SQDIST FROM WP:  ", winning_dist)
         return winning_pad
-
-    @staticmethod
-    def relative_target(
-        target: location.Location, report: drone_report.DroneReport
-    ) -> tuple[int, int]:
-        """
-        Returns the x and y of a target relative to the drone's current position
-        """
-
-        diff_x = target.location_x - report.position.location_x
-        diff_y = target.location_y - report.position.location_y
-
-        # print("RELATIVE TARGET: ", diff_x, diff_y)
-        return diff_x, diff_y
