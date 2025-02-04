@@ -77,18 +77,22 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             and self.waypoint.location_y >= self.min_bounds
             and self.waypoint.location_y <= self.max_bounds
         ):
+            proximity = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+                self.waypoint.location_y - report.position.location_y
+            ) ** 2
             # when the drone is halted but not at the destination
             if (
                 report.status == drone_status.DroneStatus.HALTED
-                and report.destination != self.waypoint
+                and proximity > self.acceptance_radius**2
             ):
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x, self.waypoint.location_y
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
                 )
             # when the drone is at the destination and is halted
             if (
                 report.status == drone_status.DroneStatus.HALTED
-                and report.destination == self.waypoint
+                and proximity < self.acceptance_radius
             ):
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
