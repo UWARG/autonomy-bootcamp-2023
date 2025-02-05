@@ -73,12 +73,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         y_delta = 0
         dist = float("inf")
 
-        if self.reached_waypoint is False:
+        if not self.reached_waypoint:
             x_delta = self.waypoint.location_x - report.position.location_x
             y_delta = self.waypoint.location_y - report.position.location_y
             dist = x_delta * x_delta + y_delta * y_delta
 
-        if self.reached_waypoint is True:
+        if self.reached_waypoint:
             print("waypoint reached")
             x_delta_lp = landing_pad_locations[0].location_x - report.position.location_x
             y_delta_lp = landing_pad_locations[0].location_y - report.position.location_y
@@ -98,12 +98,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             y_delta = y_delta_lp
 
         # Once we find closest landing pad and we already visited the waypoint we can land
-        if dist < self.acceptance_radius and self.reached_waypoint is True:
+        if dist < self.acceptance_radius and self.reached_waypoint:
             command = commands.Command.create_land_command()
             return command
 
         # Once we've reached the waypoint we can now start looking at the nearest landing pads
-        if dist < self.acceptance_radius and self.reached_waypoint is False:
+        if dist < self.acceptance_radius and not self.reached_waypoint:
             self.reached_waypoint = True
 
         if report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius:
