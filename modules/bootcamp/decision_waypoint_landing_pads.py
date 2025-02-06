@@ -87,9 +87,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 x_delta_landing = landing_pad.location_x - report.position.location_x
                 y_delta_landing = landing_pad.location_y - report.position.location_y
 
-                if (x_delta_landing ** 2 + y_delta_landing ** 2) < (
-                    best_landing_pad.location_x ** 2
-                    + best_landing_pad.location_y ** 2):
+                if (x_delta_landing**2 + y_delta_landing**2) < (
+                    best_landing_pad.location_x**2 + best_landing_pad.location_y**2
+                ):
                     best_landing_pad = landing_pad
 
             x_delta = best_landing_pad.location_x - report.position.location_x

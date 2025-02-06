@@ -73,7 +73,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.Command.create_null_command()
             return command
 
-        dist = x_delta ** 2 + y_delta ** 2
+        dist = x_delta**2 + y_delta**2
 
         if report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius**2:
             # we are currently stopped so check the next closest waypoint to our destination
