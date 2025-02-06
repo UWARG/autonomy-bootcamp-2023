@@ -80,33 +80,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if self.reached_waypoint:
             print("waypoint reached")
-            x_delta_lp = landing_pad_locations[0].location_x - report.position.location_x
-            y_delta_lp = landing_pad_locations[0].location_y - report.position.location_y
-            dist = x_delta_lp * x_delta_lp + y_delta_lp * y_delta_lp
+            best_landing_pad = landing_pad_locations[0]
 
             # Calculate closest landing pad
             for landing_pad in landing_pad_locations:
                 x_delta_landing = landing_pad.location_x - report.position.location_x
                 y_delta_landing = landing_pad.location_y - report.position.location_y
 
-                if (x_delta_landing * x_delta_landing + y_delta_landing * y_delta_landing) <= dist:
-                    x_delta_lp = x_delta_landing
-                    y_delta_lp = y_delta_landing
-                    dist = x_delta_lp * x_delta_lp + y_delta_lp * y_delta_lp
+                if (x_delta_landing * x_delta_landing + y_delta_landing * y_delta_landing) < (
+                    best_landing_pad.location_x * best_landing_pad.location_x
+                    + best_landing_pad.location_y * best_landing_pad.location_y
+                ):
+                    best_landing_pad = landing_pad
 
-            x_delta = x_delta_lp
-            y_delta = y_delta_lp
+            x_delta = best_landing_pad.location_x - report.position.location_x
+            y_delta = best_landing_pad.location_y - report.position.location_y
 
         # Once we find closest landing pad and we already visited the waypoint we can land
-        if dist < self.acceptance_radius and self.reached_waypoint:
+        if dist < self.acceptance_radius**2 and self.reached_waypoint:
             command = commands.Command.create_land_command()
             return command
 
         # Once we've reached the waypoint we can now start looking at the nearest landing pads
-        if dist < self.acceptance_radius and not self.reached_waypoint:
+        if dist < self.acceptance_radius**2 and not self.reached_waypoint:
             self.reached_waypoint = True
 
-        if report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius:
+        if report.status == drone_status.DroneStatus.HALTED and dist > self.acceptance_radius**2:
             # we are currently stopped so check the next closest waypoint to our destination
             if (x_delta > 60 or x_delta < -60) or (y_delta > 60 or y_delta < -60):
                 command = commands.Command.create_null_command()
