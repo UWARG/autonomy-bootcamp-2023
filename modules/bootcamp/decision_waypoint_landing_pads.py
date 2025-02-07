@@ -37,6 +37,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.has_sent_landing_command = False
         self.send_landing_command = False
+        self.has_reached_waypoint = False
         self.min_bounds = -60
         self.max_bounds = 60
 
@@ -83,9 +84,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             and self.waypoint.location_y >= self.min_bounds
             and self.waypoint.location_y <= self.max_bounds
         ):
-            proximity = (self.waypoint.location_x - report.position.location_x) ** 2 + (
-                self.waypoint.location_y - report.position.location_y
-            ) ** 2
+            if not self.has_reached_waypoint:
+                proximity = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+                    self.waypoint.location_y - report.position.location_y
+                ) ** 2
+                if proximity < self.acceptance_radius**2:
+                    self.has_reached_waypoint = True
+
             new_pad = location.Location(0, 0)
             # checking if the drone is halted
             if report.status == drone_status.DroneStatus.HALTED:
@@ -104,11 +109,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                             smallest_dist = new_dist
                             new_pad = landing_pads
 
-                    command = commands.Command.create_set_relative_destination_command(
-                        new_pad.location_x - self.waypoint.location_x,
-                        new_pad.location_y - self.waypoint.location_y,
-                    )
-                    self.send_landing_command = True
+                    # if the landing pad is at the waypoint
+                    if new_pad == self.waypoint:
+                        command = commands.Command.create_set_relative_destination_command(
+                            self.waypoint.location_x - report.position.location_x,
+                            self.waypoint.location_y - report.position.location_y,
+                        )
+                        self.send_landing_command = True
+                    else:
+                        command = commands.Command.create_set_relative_destination_command(
+                            new_pad.location_x - report.position.location_x,
+                            new_pad.location_y - report.position.location_y,
+                        )
+                        self.send_landing_command = True
 
                 # setting relative destination to designated waypoint
                 elif proximity > self.acceptance_radius**2 and not self.has_sent_landing_command:

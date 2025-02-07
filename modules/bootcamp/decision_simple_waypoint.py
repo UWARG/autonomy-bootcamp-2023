@@ -92,7 +92,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             # when the drone is at the destination and is halted
             if (
                 report.status == drone_status.DroneStatus.HALTED
-                and proximity < self.acceptance_radius
+                and proximity < self.acceptance_radius**2
             ):
                 command = commands.Command.create_land_command()
                 self.has_sent_landing_command = True
