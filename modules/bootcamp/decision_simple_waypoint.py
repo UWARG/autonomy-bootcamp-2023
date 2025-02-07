@@ -39,9 +39,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Add your own
 
-        self.command_index = 0
         self.has_sent_landing_command = False
-        self.commands = []
         self.counter = 0
 
         # ============
@@ -75,27 +73,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if self.counter == 0:
-            self.commands = [
-                commands.Command.create_set_relative_destination_command(
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
+            )
+        if report.status == drone_status.DroneStatus.HALTED:
+            if (
+                ((report.position.location_x - self.waypoint.location_x) ** 2) 
+                + ((report.position.location_y - self.waypoint.location_y) ** 2)
+             < self.acceptance_radius ** 2):
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+            else: #halted without getting to the right destination
+                command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x,
                     self.waypoint.location_y - report.position.location_y,
                 )
-            ]
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
-            self.commands
-        ):
-            command = self.commands[self.command_index]
-            self.command_index += 1
-        elif report.status == drone_status.DroneStatus.HALTED and (
-            (
-                ((report.position.location_x - self.waypoint.location_x) ** 2)
-                + (report.position.location_y - self.waypoint.location_y) ** 2
-            )
-            ** 0.5
-            < self.acceptance_radius
-        ):
-            command = commands.Command.create_land_command()
-            self.has_sent_landing_command = True
+        
+        # print("COMAND TYPE:", command.get_command_type())
+        # print("COMAND REL:", report.destination.location_x, report.destination.location_y)
+
+        self.counter += 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
