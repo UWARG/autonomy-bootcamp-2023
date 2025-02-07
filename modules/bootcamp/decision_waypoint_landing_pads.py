@@ -92,22 +92,22 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         closest_dist = dist
                         closest_dist_x = pad.location_x
                         closest_dist_y = pad.location_y
-                
-                if (((report.position.location_x - closest_dist_x) ** 2) + ((report.position.location_y - closest_dist_y) ** 2) < self.acceptance_radius ** 2):
+
+                if ((report.position.location_x - closest_dist_x) ** 2) + (
+                    (report.position.location_y - closest_dist_y) ** 2
+                ) < self.acceptance_radius**2:
                     command = commands.Command.create_land_command()
                     self.has_sent_landing_command = True
-                else: 
+                else:
                     command = commands.Command.create_set_relative_destination_command(
                         closest_dist_x - report.position.location_x,
                         closest_dist_y - report.position.location_y,
                     )
                     self.passed_waypoint = True
             else:
-                if (
-                    ((report.position.location_x - self.waypoint.location_x) ** 2)
-                    + ((report.position.location_y - self.waypoint.location_y) ** 2)
-                    < self.acceptance_radius ** 2
-                    ):
+                if ((report.position.location_x - self.waypoint.location_x) ** 2) + (
+                    (report.position.location_y - self.waypoint.location_y) ** 2
+                ) < self.acceptance_radius**2:
                     closest_dist_x = float("inf")
                     closest_dist_y = float("inf")
                     closest_dist = closest_dist_x**2 + closest_dist_y**2
@@ -125,7 +125,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         closest_dist_y - report.position.location_y,
                     )
                     self.passed_waypoint = True
-                else: #stopped unexpectedly 
+                else:  # stopped unexpectedly
                     command = commands.Command.create_set_relative_destination_command(
                         self.waypoint.location_x - report.position.location_x,
                         self.waypoint.location_y - report.position.location_y,
