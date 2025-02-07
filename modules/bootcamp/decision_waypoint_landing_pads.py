@@ -38,8 +38,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.command_index = 0
-        self.commands = []
         self.has_sent_landing_command = False
         self.passed_waypoint = False
         self.counter = 0
@@ -74,52 +72,65 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         if self.counter == 0:
-            self.commands = [
-                commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y,
-                )
-            ]
-        if report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
-            self.commands
-        ):
-            # print("STAGE 1")
-            command = self.commands[self.command_index]
-            self.command_index += 1
-        elif (
-            (report.status == drone_status.DroneStatus.HALTED)
-            and (
-                (
-                    ((report.position.location_x - self.waypoint.location_x) ** 2)
-                    + (report.position.location_y - self.waypoint.location_y) ** 2
-                )
-                ** 0.5
-                < self.acceptance_radius
-            )
-            and not self.passed_waypoint
-        ):
-            # print("STAGE 3")
-            closest_dist_x = float("inf")
-            closest_dist_y = float("inf")
-            closest_dist = closest_dist_x**2 + closest_dist_y**2
-
-            for pad in landing_pad_locations:
-                dist = ((report.position.location_x - pad.location_x) ** 2) + (
-                    (report.position.location_x - pad.location_x) ** 2
-                )
-                if closest_dist > dist:
-                    closest_dist = dist
-                    closest_dist_x = pad.location_x
-                    closest_dist_y = pad.location_y
             command = commands.Command.create_set_relative_destination_command(
-                closest_dist_x - report.position.location_x,
-                closest_dist_y - report.position.location_y,
+                self.waypoint.location_x - report.position.location_x,
+                self.waypoint.location_y - report.position.location_y,
             )
-            self.passed_waypoint = True
-        elif (report.status == drone_status.DroneStatus.HALTED) and self.passed_waypoint:
-            # print("STAGE 4")
-            command = commands.Command.create_land_command()
-            self.has_sent_landing_command = True
+        if self.counter == 15:
+            command = commands.Command.create_halt_command()
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.passed_waypoint:
+                closest_dist_x = float("inf")
+                closest_dist_y = float("inf")
+                closest_dist = closest_dist_x**2 + closest_dist_y**2
+
+                for pad in landing_pad_locations:
+                    dist = ((report.position.location_x - pad.location_x) ** 2) + (
+                        (report.position.location_x - pad.location_x) ** 2
+                    )
+                    if closest_dist > dist:
+                        closest_dist = dist
+                        closest_dist_x = pad.location_x
+                        closest_dist_y = pad.location_y
+                
+                if (((report.position.location_x - closest_dist_x) ** 2) + ((report.position.location_y - closest_dist_y) ** 2) < self.acceptance_radius ** 2):
+                    command = commands.Command.create_land_command()
+                    self.has_sent_landing_command = True
+                else: 
+                    command = commands.Command.create_set_relative_destination_command(
+                        closest_dist_x - report.position.location_x,
+                        closest_dist_y - report.position.location_y,
+                    )
+                    self.passed_waypoint = True
+            else:
+                if (
+                    ((report.position.location_x - self.waypoint.location_x) ** 2)
+                    + ((report.position.location_y - self.waypoint.location_y) ** 2)
+                    < self.acceptance_radius ** 2
+                    ):
+                    closest_dist_x = float("inf")
+                    closest_dist_y = float("inf")
+                    closest_dist = closest_dist_x**2 + closest_dist_y**2
+
+                    for pad in landing_pad_locations:
+                        dist = ((report.position.location_x - pad.location_x) ** 2) + (
+                            (report.position.location_x - pad.location_x) ** 2
+                        )
+                        if closest_dist > dist:
+                            closest_dist = dist
+                            closest_dist_x = pad.location_x
+                            closest_dist_y = pad.location_y
+                    command = commands.Command.create_set_relative_destination_command(
+                        closest_dist_x - report.position.location_x,
+                        closest_dist_y - report.position.location_y,
+                    )
+                    self.passed_waypoint = True
+                else: #stopped unexpectedly 
+                    command = commands.Command.create_set_relative_destination_command(
+                        self.waypoint.location_x - report.position.location_x,
+                        self.waypoint.location_y - report.position.location_y,
+                    )
+        self.counter += 1
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
