@@ -9,7 +9,6 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
-import ultralytics.utils
 
 from .. import bounding_box
 

@@ -76,8 +76,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 self.waypoint.location_x - report.position.location_x,
                 self.waypoint.location_y - report.position.location_y,
             )
-        if self.counter == 15:
-            command = commands.Command.create_halt_command()
         if report.status == drone_status.DroneStatus.HALTED:
             if self.passed_waypoint:
                 closest_dist_x = float("inf")
@@ -103,7 +101,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         closest_dist_x - report.position.location_x,
                         closest_dist_y - report.position.location_y,
                     )
-                    self.passed_waypoint = True
             else:
                 if ((report.position.location_x - self.waypoint.location_x) ** 2) + (
                     (report.position.location_y - self.waypoint.location_y) ** 2
