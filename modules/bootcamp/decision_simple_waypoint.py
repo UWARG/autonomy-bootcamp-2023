@@ -41,7 +41,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         print("Accept radius: ", self.acceptance_radius)
 
-        self.pos = [waypoint.location_x, waypoint.location_y]
         self.command_index = 0
         self.commands = []
 
@@ -81,8 +80,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             self.counter = 1
             self.commands = [
                 commands.Command.create_set_relative_destination_command(
-                    self.pos[0] - report.position.location_x,
-                    self.pos[1] - report.position.location_y,
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
                 )
             ]
         elif report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
