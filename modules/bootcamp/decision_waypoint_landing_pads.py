@@ -105,7 +105,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if dist < closest_dist:
                     closest_dist = dist
                     closest_landing_pad = landing_pad
-            print("closest, x:", closest_landing_pad.location_x, "y:", closest_landing_pad.location_y)
+            print(
+                "closest, x:", closest_landing_pad.location_x, "y:", closest_landing_pad.location_y
+            )
             return closest_landing_pad
 
         if report.status == drone_status.DroneStatus.HALTED:
