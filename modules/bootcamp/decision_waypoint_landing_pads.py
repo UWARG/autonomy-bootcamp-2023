@@ -40,7 +40,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         print("Accept radius: ", self.acceptance_radius)
 
-        self.pad = self.waypoint
+        self.command_index = 0
         self.commands = []
         self.counter = 0
 
@@ -83,19 +83,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # if no commands remaining, search for landing pad, new command to move to pad
         # if at landing pad, check if within acceptable radius, if not, redo command, else land
 
-        def landed(report: drone_report.DroneReport, x, y, radius):
+        def landed(report: drone_report.DroneReport, x: float, y: float, radius: float) -> bool:
             rad2 = radius * radius
             loc = pow(report.position.location_x - x, 2) + pow(report.position.location_y - y, 2)
             if loc > rad2:
                 return False
             return True
 
-        def get_distance_squared(report: drone_report.DroneReport, x, y):
+        def get_distance_squared(report: drone_report.DroneReport, x: float, y: float) -> float:
             return pow(report.position.location_x - x, 2) + pow(report.position.location_y - y, 2)
 
         def closest_landing(
             report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
-        ):
+        ) -> location.Location:
             closest_dist = 10000000
             closest_landing_pad = landing_pad_locations[0]
             print("me, x:", report.position.location_x, "y: ", report.position.location_y)
@@ -119,10 +119,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     self.acceptance_radius,
                 ):
                     self.waypoint_complete = True
-                    self.pad = closest_landing(report, landing_pad_locations)
+                    self.waypoint = closest_landing(report, landing_pad_locations)
                     command = commands.Command.create_set_relative_destination_command(
-                        self.pad.location_x - report.position.location_x,
-                        self.pad.location_y - report.position.location_y,
+                        self.waypoint.location_x - report.position.location_x,
+                        self.waypoint.location_y - report.position.location_y,
                     )
                 else:
                     command = commands.Command.create_set_relative_destination_command(
@@ -130,13 +130,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         self.waypoint.location_y - report.position.location_y,
                     )
             else:
-                if landed(report, self.pad.location_x, self.pad.location_y, self.acceptance_radius):
+                if landed(
+                    report,
+                    self.waypoint.location_x,
+                    self.waypoint.location_y,
+                    self.acceptance_radius,
+                ):
                     command = commands.Command.create_land_command()
                     self.has_sent_landing_command = True
                 else:
                     command = commands.Command.create_set_relative_destination_command(
-                        self.pad.location_x - report.position.location_x,
-                        self.pad.location_y - report.position.location_y,
+                        self.waypoint.location_x - report.position.location_x,
+                        self.waypoint.location_y - report.position.location_y,
                     )
 
         # ============

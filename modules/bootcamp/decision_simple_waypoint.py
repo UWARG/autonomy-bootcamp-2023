@@ -77,7 +77,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def landed(report: drone_report.DroneReport, x, y, radius):
+        def landed(report: drone_report.DroneReport, x: float, y: float, radius: float) -> bool:
             rad2 = radius * radius
             loc = pow(report.position.location_x - x, 2) + pow(report.position.location_y - y, 2)
             if loc > rad2:
