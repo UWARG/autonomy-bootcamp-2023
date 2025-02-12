@@ -82,15 +82,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # if no commands remaining, search for landing pad, new command to move to pad
         # if at landing pad, check if within acceptable radius, if not, redo command, else land
 
-        cur_x = report.position.location_x
-        cur_y = report.position.location_y
+        # cur_x = report.position.location_x
+        # cur_y = report.position.location_y
 
-        if self.counter == 0:
-            self.commands = [commands.Command.create_set_relative_destination_command(self.waypoint.location_x - cur_x, self.waypoint.location_y - cur_y)]
-        if report.status == drone_status.DroneStatus.HALTED:
-            if 
+        # if self.counter == 0:
+        #     self.commands = [commands.Command.create_set_relative_destination_command(self.waypoint.location_x - cur_x, self.waypoint.location_y - cur_y)]
+        # if report.status == drone_status.DroneStatus.HALTED:
+        #     if 
 
-        self.counter += 1
+        # self.counter += 1
 
 
         # ============

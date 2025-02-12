@@ -76,37 +76,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        if self.counter == 0:
-            self.counter = 1
-            self.commands = [
-                commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y,
-                )
-            ]
-        elif report.status == drone_status.DroneStatus.HALTED and self.command_index < len(
-            self.commands
-        ):
-            print(self.counter)
-            print(self.command_index)
-            print(f"Halted at: {report.position}")
-            command = self.commands[self.command_index]
-            self.command_index += 1
-        elif report.status == drone_status.DroneStatus.HALTED and (
-            pow(
-                (report.position.location_x - self.waypoint.location_x) ** 2
-                + (report.position.location_y - self.waypoint.location_y) ** 2,
-                0.5,
-            )
-            > self.acceptance_radius
-        ):
-            print("not inside acceptance radius")
-            self.command_index += -1
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
-            command = commands.Command.create_land_command()
-            self.has_sent_landing_command = True
 
-        self.counter += 1
+        def landed(report: drone_report.DroneReport, x, y, radius):
+            rad2 = radius * radius
+            loc = pow(report.position.location_x - x, 2) + pow(report.position.location_y - y, 2)
+            if (loc > rad2):
+                return False
+            return True
+        
+        if report.status == drone_status.DroneStatus.HALTED:
+            if landed(report, self.waypoint.location_x, self.waypoint.location_y, self.acceptance_radius):
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+            else:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x - report.position.location_x , self.waypoint.location_y - report.position.location_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
