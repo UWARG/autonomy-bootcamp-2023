@@ -8,15 +8,12 @@ from .. import commands
 from .. import drone_report
 
 # Disable for bootcamp use
-# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
-# No enable
-# pylint: disable=duplicate-code,unused-argument
 
 
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
@@ -38,6 +35,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Add your own
+
+        self.has_sent_landing_command = False
+        self.min_bounds = -60
+        self.max_bounds = 60
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,6 +70,32 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+        # ensuring drone is within bounds
+        if (
+            self.waypoint.location_x >= self.min_bounds
+            and self.waypoint.location_x <= self.max_bounds
+            and self.waypoint.location_y >= self.min_bounds
+            and self.waypoint.location_y <= self.max_bounds
+        ):
+            proximity = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+                self.waypoint.location_y - report.position.location_y
+            ) ** 2
+            # when the drone is halted but not at the destination
+            if (
+                report.status == drone_status.DroneStatus.HALTED
+                and proximity > self.acceptance_radius**2
+            ):
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
+            # when the drone is at the destination and is halted
+            if (
+                report.status == drone_status.DroneStatus.HALTED
+                and proximity < self.acceptance_radius**2
+            ):
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
