@@ -62,7 +62,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             put_output(command)
         ```
         """
-        # Default comment
+        # Default command
         command = commands.Command.create_null_command()
 
         # ============
@@ -86,9 +86,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_dist_sq = float("inf")
                     chosen_pad = None
                     for pad in landing_pad_locations:
-                        pad_dist = dist_sq(self.waypoint, pad)
-                        if pad_dist < closest_dist_sq:
-                            closest_dist_sq = pad_dist
+                        pad_dist_sq = dist_sq(self.waypoint, pad)
+                        if pad_dist_sq < closest_dist_sq:
+                            closest_dist_sq = pad_dist_sq
                             chosen_pad = pad
                     if chosen_pad is None:
                         return commands.Command.create_land_command()
