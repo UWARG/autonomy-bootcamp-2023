@@ -98,9 +98,8 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        confidence = 0.7
         predictions = self.__model.predict(
-            source=image, verbose=True, conf=confidence, device=self.__DEVICE
+            source=image, verbose=True, conf=0.7, device=self.__DEVICE
         )
 
         # Get the Result object
@@ -108,7 +107,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot(conf=confidence)
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy

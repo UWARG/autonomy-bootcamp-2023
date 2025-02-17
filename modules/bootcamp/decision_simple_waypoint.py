@@ -41,13 +41,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         print("Accept radius: ", self.acceptance_radius)
 
-        self.command_index = 0
-        self.commands = []
-
-        self.has_sent_landing_command = False
-
-        self.counter = 0
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -77,7 +70,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def landed(report: drone_report.DroneReport, x: float, y: float, radius: float) -> bool:
+        def within_radius(
+            report: drone_report.DroneReport, x: float, y: float, radius: float
+        ) -> bool:
             rad2 = radius * radius
             loc = pow(report.position.location_x - x, 2) + pow(report.position.location_y - y, 2)
             if loc > rad2:
@@ -85,11 +80,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             return True
 
         if report.status == drone_status.DroneStatus.HALTED:
-            if landed(
+            if within_radius(
                 report, self.waypoint.location_x, self.waypoint.location_y, self.acceptance_radius
             ):
                 command = commands.Command.create_land_command()
-                self.has_sent_landing_command = True
             else:
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x,
