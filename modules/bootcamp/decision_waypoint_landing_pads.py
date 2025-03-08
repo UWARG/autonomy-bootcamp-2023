@@ -46,7 +46,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             "closest_landing_pad_y": 0,
             "distance_x": 0,
             "distance_y": 0,
-            "relative_distance": 0
+            "relative_distance": 0,
         }
 
         # ============
@@ -81,7 +81,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         position = report.position
 
-
         def get_closest_landing_pad() -> location.Location:
             """
             Returns the location of the closest landing pad.
@@ -91,7 +90,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             for landing_pad in landing_pad_locations:
                 distance_x = landing_pad.location_x - self.waypoint.location_x
                 distance_y = landing_pad.location_y - self.waypoint.location_y
-                relative_distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
+                relative_distance = (distance_x**2 + distance_y**2) ** 0.5
                 if relative_distance < closest_distance:
                     closest_landing_pad = landing_pad
 
@@ -111,14 +110,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             self.state["distance_y"] = self.state["closest_landing_pad_y"] - position.location_y
 
         self.state["relative_distance"] = (
-            (self.state["distance_x"] ** 2 + self.state["distance_y"] ** 2) ** 0.5
-        )
+            self.state["distance_x"] ** 2 + self.state["distance_y"] ** 2
+        ) ** 0.5
 
-        if (self.state["relative_distance"] < self.acceptance_radius
+        if (
+            self.state["relative_distance"] < self.acceptance_radius
             and not self.state["reached_waypoint"]
         ):
             self.state["reached_waypoint"] = True
-        elif (self.state["relative_distance"] < self.acceptance_radius
+        elif (
+            self.state["relative_distance"] < self.acceptance_radius
             and not self.state["reached_landing_pad"]
         ):
             self.state["reached_landing_pad"] = True
@@ -128,8 +129,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    relative_x=self.state["distance_x"],
-                    relative_y=self.state["distance_y"]
+                    relative_x=self.state["distance_x"], relative_y=self.state["distance_y"]
                 )
 
         # ============

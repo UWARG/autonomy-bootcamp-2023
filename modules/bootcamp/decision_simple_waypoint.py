@@ -74,7 +74,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         distance_x = self.waypoint.location_x - position.location_x
         distance_y = self.waypoint.location_y - position.location_y
-        relative_distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
+        relative_distance = (distance_x**2 + distance_y**2) ** 0.5
 
         if relative_distance < self.acceptance_radius:
             self.reached_waypoint = True
@@ -84,8 +84,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
-                    relative_x=distance_x,
-                    relative_y=distance_y
+                    relative_x=distance_x, relative_y=distance_y
                 )
 
         # ============
