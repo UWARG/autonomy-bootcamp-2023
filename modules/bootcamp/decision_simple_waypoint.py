@@ -83,7 +83,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             if self.reached_waypoint:
                 command = commands.Command.create_land_command()
             else:
-                command = commands.Command.create_set_relative_destination_command(relative_x=distance_x, relative_y=distance_y)
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x=distance_x,
+                    relative_y=distance_y
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
