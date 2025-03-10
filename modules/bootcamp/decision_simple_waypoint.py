@@ -74,10 +74,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         distance_x = self.waypoint.location_x - position.location_x
         distance_y = self.waypoint.location_y - position.location_y
-        relative_distance = (distance_x**2 + distance_y**2) ** 0.5
+        relative_distance_squared = distance_x**2 + distance_y**2
 
-        if relative_distance < self.acceptance_radius:
+        if relative_distance_squared <= self.acceptance_radius**2:
             self.reached_waypoint = True
+            command = commands.Command.create_halt_command()
 
         if report.status == drone_status.DroneStatus.HALTED:
             if self.reached_waypoint:

@@ -41,12 +41,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.state = {
             "reached_waypoint": False,
             "reached_landing_pad": False,
-            "got_closest_landing_pad": False,
-            "closest_landing_pad_x": 0,
-            "closest_landing_pad_y": 0,
+            "closest_landing_pad_x": None,
+            "closest_landing_pad_y": None,
             "distance_x": 0,
             "distance_y": 0,
-            "relative_distance": 0,
+            "relative_distance_squared": 0,
         }
 
         # ============
@@ -81,48 +80,49 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
         position = report.position
 
-        def get_closest_landing_pad() -> location.Location:
+        def get_closest_landing_pad(current_position: location.Location) -> location.Location:
             """
             Returns the location of the closest landing pad.
             """
-            closest_distance = float("inf")
+            closest_distance_squared = float("inf")
             closest_landing_pad = None
             for landing_pad in landing_pad_locations:
-                distance_x = landing_pad.location_x - self.waypoint.location_x
-                distance_y = landing_pad.location_y - self.waypoint.location_y
-                relative_distance = (distance_x**2 + distance_y**2) ** 0.5
-                if relative_distance < closest_distance:
+                distance_x = landing_pad.location_x - current_position.location_x
+                distance_y = landing_pad.location_y - current_position.location_y
+                relative_distance_squared = distance_x**2 + distance_y**2
+                if relative_distance_squared < closest_distance_squared:
                     closest_landing_pad = landing_pad
+                    closest_distance_squared = relative_distance_squared
 
             return closest_landing_pad
-
-        if not self.state["got_closest_landing_pad"]:
-            closest_landing_pad = get_closest_landing_pad()
-            self.state["closest_landing_pad_x"] = closest_landing_pad.location_x
-            self.state["closest_landing_pad_y"] = closest_landing_pad.location_y
-            self.state["got_closest_landing_pad"] = True
 
         if not self.state["reached_waypoint"]:
             self.state["distance_x"] = self.waypoint.location_x - position.location_x
             self.state["distance_y"] = self.waypoint.location_y - position.location_y
         else:
+            if not self.state["closest_landing_pad_x"] and not self.state["closest_landing_pad_y"]:
+                closest_landing_pad = get_closest_landing_pad(position)
+                self.state["closest_landing_pad_x"] = closest_landing_pad.location_x
+                self.state["closest_landing_pad_y"] = closest_landing_pad.location_y
             self.state["distance_x"] = self.state["closest_landing_pad_x"] - position.location_x
             self.state["distance_y"] = self.state["closest_landing_pad_y"] - position.location_y
 
-        self.state["relative_distance"] = (
+        self.state["relative_distance_squared"] = (
             self.state["distance_x"] ** 2 + self.state["distance_y"] ** 2
-        ) ** 0.5
+        )
 
         if (
-            self.state["relative_distance"] < self.acceptance_radius
+            self.state["relative_distance_squared"] <= self.acceptance_radius**2
             and not self.state["reached_waypoint"]
         ):
             self.state["reached_waypoint"] = True
+            command = commands.Command.create_halt_command()
         elif (
-            self.state["relative_distance"] < self.acceptance_radius
+            self.state["relative_distance_squared"] <= self.acceptance_radius**2
             and not self.state["reached_landing_pad"]
         ):
             self.state["reached_landing_pad"] = True
+            command = commands.Command.create_halt_command()
 
         if report.status == drone_status.DroneStatus.HALTED:
             if self.state["reached_landing_pad"]:
