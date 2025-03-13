@@ -84,12 +84,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if (self.x_difference**2 + self.y_difference**2)**0.5 > self.acceptance_radius:
             print(f"Moving toward waypoint at ({self.waypoint_x}, {self.waypoint_y})")
             try:
-                command = commands.Command.create_set_relative_destination_command((self.x_difference, self.y_difference))
+                command = commands.Command.create_set_relative_destination_command(self.x_difference, self.y_difference)
             except Exception as e:
                 print("Error sending move command:", e)
                 print("Issuing hover command instead.")
                 command = commands.Command.create_hover_command()
-                
+
         else:
             print("Waypoint reached! Searching for nearest landing pad...")
 
