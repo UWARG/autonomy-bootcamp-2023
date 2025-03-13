@@ -36,8 +36,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Add your own
+        self.waypoint_x = waypoint.location_x
+        self.waypoint_y = waypoint.location_y
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,6 +68,55 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        self.drone_x_pos = report.position.location_x
+        self.drone_y_pos = report.position.location_y
+
+        # Compute movement toward waypoint
+        self.x_difference = self.waypoint_x - self.drone_x_pos
+        self.y_difference = self.waypoint_y - self.drone_y_pos
+
+        # Helper function to calculate Euclidean distance using index
+        def Euclidean_Dist(i):
+            pad = landing_pad_locations[i]
+            return ((pad.location_x - self.drone_x_pos) ** 2 + (pad.location_y - self.drone_y_pos) ** 2) ** 0.5
+
+        # Default to moving towards waypoint
+        if abs(self.x_difference) > self.acceptance_radius or abs(self.y_difference) > self.acceptance_radius:
+            print(f"Moving toward waypoint at ({self.waypoint_x}, {self.waypoint_y})")
+            command = commands.Command.create_set_relative_destination_command((self.x_difference, self.y_difference))
+        else:
+            print("Waypoint reached! Searching for nearest landing pad...")
+
+            if not landing_pad_locations:
+                print("No landing pads detected. Landing at waypoint.")
+                return commands.Command.create_land_command()
+
+            # Initialize variables for finding the nearest landing pad
+            nearest_pad_index = 0
+            nearest_distance = Euclidean_Dist(nearest_pad_index)
+
+            # Find the nearest landing pad using Euclidean distance
+            for i in range(1, len(landing_pad_locations)):
+                current_distance = Euclidean_Dist(i)
+                if current_distance < nearest_distance:
+                    nearest_pad_index = i
+                    nearest_distance = current_distance
+
+            # Get the nearest landing pad location
+            nearest_pad = landing_pad_locations[nearest_pad_index]
+
+            # Calculate the differences toward the landing pad
+            pad_x_diff = nearest_pad.location_x - self.drone_x_pos
+            pad_y_diff = nearest_pad.location_y - self.drone_y_pos
+            pad_distance = (pad_x_diff ** 2 + pad_y_diff ** 2) ** 0.5
+
+            # Move towards the landing pad if not close enough, otherwise land
+            if pad_distance > self.acceptance_radius:
+                print(f"Moving toward landing pad at ({nearest_pad.location_x}, {nearest_pad.location_y})")
+                command = commands.Command.create_set_relative_destination_command((pad_x_diff, pad_y_diff))
+            else:
+                print(f"Landing at nearest pad at ({nearest_pad.location_x}, {nearest_pad.location_y})")
+                command = commands.Command.create_land_command()
 
         # Do something based on the report and the state of this class...
 
