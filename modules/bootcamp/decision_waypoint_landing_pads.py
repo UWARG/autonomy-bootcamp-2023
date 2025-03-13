@@ -81,9 +81,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return ((pad.location_x - self.drone_x_pos) ** 2 + (pad.location_y - self.drone_y_pos) ** 2) ** 0.5
 
         # Default to moving towards waypoint
-        if abs(self.x_difference) > self.acceptance_radius or abs(self.y_difference) > self.acceptance_radius:
+        if (self.x_difference**2 + self.y_difference**2)**0.5 > self.acceptance_radius:
             print(f"Moving toward waypoint at ({self.waypoint_x}, {self.waypoint_y})")
-            command = commands.Command.create_set_relative_destination_command((self.x_difference, self.y_difference))
+            try:
+                command = commands.Command.create_set_relative_destination_command((self.x_difference, self.y_difference))
+            except Exception as e:
+                print("Error sending move command:", e)
+                print("Issuing hover command instead.")
+                command = commands.Command.create_hover_command()
+                
         else:
             print("Waypoint reached! Searching for nearest landing pad...")
 
