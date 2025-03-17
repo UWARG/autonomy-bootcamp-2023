@@ -63,14 +63,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         # Default command
         command = commands.Command.create_null_command()
-
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         drone_x_pos = report.position.location_x
         drone_y_pos = report.position.location_y
 
-        def euclidean_dist(i: int):
+        def euclidean_dist(i: int)->float:
             pad = landing_pad_locations[i]
             return (
                 (pad.location_x - drone_x_pos) ** 2 + (pad.location_y - drone_y_pos) ** 2
