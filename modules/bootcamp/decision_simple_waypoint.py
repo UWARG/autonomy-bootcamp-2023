@@ -73,7 +73,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         x_difference = self.waypoint_x - drone_x_pos
         y_difference = self.waypoint_y - drone_y_pos
 
-        if abs(x_difference) <= self.acceptance_radius and abs(y_difference) <= self.acceptance_radius:
+        if (
+            abs(x_difference) <= self.acceptance_radius
+            and abs(y_difference) <= self.acceptance_radius
+        ):
             command = commands.Command.create_land_command()
         else:
             command = commands.Command.create_set_relative_destination_command(

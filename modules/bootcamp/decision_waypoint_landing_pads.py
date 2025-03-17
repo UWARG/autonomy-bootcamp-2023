@@ -72,7 +72,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         def euclidean_dist(i: int):
             pad = landing_pad_locations[i]
-            return ((pad.location_x - drone_x_pos) ** 2 + (pad.location_y - drone_y_pos) ** 2) ** 0.5
+            return (
+                (pad.location_x - drone_x_pos) ** 2 + (pad.location_y - drone_y_pos) ** 2
+            ) ** 0.5
 
         if not self.reached_waypoint:
             x_difference = self.waypoint_x - drone_x_pos
