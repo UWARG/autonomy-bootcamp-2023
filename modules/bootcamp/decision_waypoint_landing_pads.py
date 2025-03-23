@@ -68,38 +68,32 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         drone_x_pos = report.position.location_x
         drone_y_pos = report.position.location_y
-
-        def euclidean_dist(i: int) -> float:
-            pad = landing_pad_locations[i]
-            return (
-                (pad.location_x - drone_x_pos) ** 2 + (pad.location_y - drone_y_pos) ** 2
-            ) ** 0.5
-
+        x_difference = self.waypoint_x - drone_x_pos
+        y_difference = self.waypoint_y - drone_y_pos
+        distance_squared = x_difference ** 2 + y_difference ** 2
         if not self.reached_waypoint:
-            x_difference = self.waypoint_x - drone_x_pos
-            y_difference = self.waypoint_y - drone_y_pos
-            if (x_difference**2 + y_difference**2) ** 0.5 <= self.acceptance_radius:
+            if distance_squared <= self.acceptance_radius ** 2:
                 self.reached_waypoint = True
+                nearest_pad_index = 0
+                nearest_distance = (landing_pad_locations[0].location_x - drone_x_pos) ** 2 + (landing_pad_locations[0].location_y - drone_y_pos) ** 2
+
+                for i in range(1, len(landing_pad_locations)):
+                    current_distance = (landing_pad_locations[i].location_x - drone_x_pos) ** 2 + (landing_pad_locations[i].location_y - drone_y_pos) ** 2
+                    if current_distance < nearest_distance:
+                        nearest_pad_index = i
+                        nearest_distance = current_distance
+                self.nearest_pad_index = nearest_pad_index
             else:
                 command = commands.Command.create_set_relative_destination_command(
                     x_difference, y_difference
                 )
-        else:
-            nearest_pad_index = 0
-            nearest_distance = euclidean_dist(nearest_pad_index)
-
-            for i in range(1, len(landing_pad_locations)):
-                current_distance = euclidean_dist(i)
-                if current_distance < nearest_distance:
-                    nearest_pad_index = i
-                    nearest_distance = current_distance
-
-            nearest_pad = landing_pad_locations[nearest_pad_index]
+        if self.reached_waypoint:
+            nearest_pad = landing_pad_locations[self.nearest_pad_index]
             pad_x_diff = nearest_pad.location_x - drone_x_pos
             pad_y_diff = nearest_pad.location_y - drone_y_pos
-            pad_distance = (pad_x_diff**2 + pad_y_diff**2) ** 0.5
+            pad_distance_squared = pad_x_diff ** 2 + pad_y_diff ** 2
 
-            if pad_distance <= self.acceptance_radius:
+            if pad_distance_squared <= self.acceptance_radius ** 2:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
