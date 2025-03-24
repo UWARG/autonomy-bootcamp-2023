@@ -97,7 +97,7 @@ class DetectLandingPad:
         # * verbose
         predictions = self.__model.predict(
             source=image,
-            conf=0.5,
+            conf=0.7,
             device=self.__DEVICE,
             verbose=False,
         )
@@ -122,7 +122,7 @@ class DetectLandingPad:
         for i in range(0, boxes_cpu.shape[0]):
             # Create BoundingBox object and append to list
             coords = boxes_cpu[i]
-            confidence = prediction.boxes.conf[i].item()
+            prediction.boxes.conf[i].item()
             result, box = bounding_box.BoundingBox.create(coords)
             if result:
                 bounding_boxes.append(box)
