@@ -72,7 +72,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Calculate distance to waypoint
         dx = self.waypoint.location_x - current_pos.location_x
         dy = self.waypoint.location_y - current_pos.location_y
-        distance = (dx**2 + dy**2)**0.5
+        distance = (dx**2 + dy**2) ** 0.5
         # Set command accordingly
         if current_status in (drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED):
             return command

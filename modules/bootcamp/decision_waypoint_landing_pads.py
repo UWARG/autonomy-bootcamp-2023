@@ -81,7 +81,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # Calculate distance to landing pad
             dx = self.target_landing_pad.location_x - current_pos.location_x
             dy = self.target_landing_pad.location_y - current_pos.location_y
-            distance = (dx**2 + dy**2)**0.5
+            distance = (dx**2 + dy**2) ** 0.5
             # If we've arrived at the landing pad
             if distance <= self.acceptance_radius:
                 # If halted, land
@@ -101,18 +101,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # Calculate distance to waypoint
             dx = self.waypoint.location_x - current_pos.location_x
             dy = self.waypoint.location_y - current_pos.location_y
-            distance = (dx**2 + dy**2)**0.5
+            distance = (dx**2 + dy**2) ** 0.5
             # If we've arrived at the waypoint
             if distance <= self.acceptance_radius:
                 # Mark that we've reached the waypoint
                 self.waypoint_reached = True
                 # Find the closest landing pad
                 closest_pad = None
-                min_distance = float('inf')
+                min_distance = float("inf")
                 for pad in landing_pad_locations:
                     pad_dx = pad.location_x - current_pos.location_x
                     pad_dy = pad.location_y - current_pos.location_y
-                    pad_distance = (pad_dx**2 + pad_dy**2)**0.5
+                    pad_distance = (pad_dx**2 + pad_dy**2) ** 0.5
                     if pad_distance < min_distance:
                         min_distance = pad_distance
                         closest_pad = pad
