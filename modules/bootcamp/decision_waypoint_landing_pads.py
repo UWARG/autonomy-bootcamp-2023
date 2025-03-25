@@ -38,6 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # Flags to track status
         self.waypoint_reached = False
+        self.acceptance_radius_squared = self.acceptance_radius**2
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -77,13 +78,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     min_distance = distance_squared
                     closest_landing_pad = landing_pad
             self.waypoint = closest_landing_pad
-        
         dx = self.waypoint.location_x - report.position.location_x
         dy = self.waypoint.location_y - report.position.location_y
         distance_squared = dx**2 + dy**2
-        if (report.status in {drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED}):
+        if report.status in {drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED}:
             return command
-        if distance_squared >= self.acceptance_radius**2:
+        if distance_squared >= self.acceptance_radius_squared:
             command = commands.Command.create_set_relative_destination_command(dx, dy)
         else:
             if not self.waypoint_reached:

@@ -36,7 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+        self.acceptance_radius_squared = self.acceptance_radius**2
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -65,7 +65,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Get current position and status
         current_pos = report.position
         current_status = report.status
@@ -73,16 +72,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         dx = self.waypoint.location_x - current_pos.location_x
         dy = self.waypoint.location_y - current_pos.location_y
         distance_squared = dx**2 + dy**2
-
-        acceptance_radius_squared = self.acceptance_radius**2
         # Set command accordingly
         if current_status in (drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED):
             return command
-        if distance_squared >= acceptance_radius_squared:
+        if distance_squared >= self.acceptance_radius_squared:
             command = commands.Command.create_set_relative_destination_command(dx, dy)
         else:
             command = commands.Command.create_land_command()
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
