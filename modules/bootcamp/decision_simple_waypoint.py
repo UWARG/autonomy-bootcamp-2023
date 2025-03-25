@@ -73,8 +73,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         x_difference = self.waypoint_x - drone_x_pos
         y_difference = self.waypoint_y - drone_y_pos
-        Eucladian_dist=(x_difference**2+y_difference**2)**0.5
-        if (Eucladian_dist<self.acceptance_radius):
+        eucladian_dist = (x_difference**2 + y_difference**2) ** 0.5
+        if eucladian_dist < self.acceptance_radius:
             command = commands.Command.create_land_command()
         else:
             command = commands.Command.create_set_relative_destination_command(

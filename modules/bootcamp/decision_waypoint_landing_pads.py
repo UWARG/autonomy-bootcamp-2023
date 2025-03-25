@@ -32,7 +32,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
-
+        self.nearest_pad_index = None
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
@@ -70,15 +70,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         drone_y_pos = report.position.location_y
         x_difference = self.waypoint_x - drone_x_pos
         y_difference = self.waypoint_y - drone_y_pos
-        distance_squared = x_difference ** 2 + y_difference ** 2
+        distance_squared = x_difference**2 + y_difference**2
         if not self.reached_waypoint:
-            if distance_squared <= self.acceptance_radius ** 2:
+            if distance_squared <= self.acceptance_radius**2:
                 self.reached_waypoint = True
                 nearest_pad_index = 0
-                nearest_distance = (landing_pad_locations[0].location_x - drone_x_pos) ** 2 + (landing_pad_locations[0].location_y - drone_y_pos) ** 2
+                nearest_distance = (landing_pad_locations[0].location_x - drone_x_pos) ** 2 + (
+                    landing_pad_locations[0].location_y - drone_y_pos
+                ) ** 2
 
                 for i in range(1, len(landing_pad_locations)):
-                    current_distance = (landing_pad_locations[i].location_x - drone_x_pos) ** 2 + (landing_pad_locations[i].location_y - drone_y_pos) ** 2
+                    current_distance = (landing_pad_locations[i].location_x - drone_x_pos) ** 2 + (
+                        landing_pad_locations[i].location_y - drone_y_pos
+                    ) ** 2
                     if current_distance < nearest_distance:
                         nearest_pad_index = i
                         nearest_distance = current_distance
@@ -91,9 +95,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             nearest_pad = landing_pad_locations[self.nearest_pad_index]
             pad_x_diff = nearest_pad.location_x - drone_x_pos
             pad_y_diff = nearest_pad.location_y - drone_y_pos
-            pad_distance_squared = pad_x_diff ** 2 + pad_y_diff ** 2
+            pad_distance_squared = pad_x_diff**2 + pad_y_diff**2
 
-            if pad_distance_squared <= self.acceptance_radius ** 2:
+            if pad_distance_squared <= self.acceptance_radius**2:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_set_relative_destination_command(
