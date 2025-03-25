@@ -72,11 +72,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Calculate distance to waypoint
         dx = self.waypoint.location_x - current_pos.location_x
         dy = self.waypoint.location_y - current_pos.location_y
-        distance = (dx**2 + dy**2) ** 0.5
+        distance_squared = dx**2 + dy**2
+
+        acceptance_radius_squared = self.acceptance_radius**2
         # Set command accordingly
         if current_status in (drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED):
             return command
-        if distance >= self.acceptance_radius:
+        if distance_squared >= acceptance_radius_squared:
             command = commands.Command.create_set_relative_destination_command(dx, dy)
         else:
             command = commands.Command.create_land_command()

@@ -38,10 +38,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # Flags to track status
         self.waypoint_reached = False
-        self.landing_pad_selected = False
-        self.target_landing_pad = None
-        self.landing_initiated = False
-        self.has_moved = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -70,64 +66,30 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-        # If landing was already initiated, just continue with null commands
-        if self.landing_initiated:
-            return commands.Command.create_null_command()
-        # Get current position and status
-        current_pos = report.position
-        current_status = report.status
-        # If we've selected a landing pad, navigate to it
-        if self.landing_pad_selected:
-            # Calculate distance to landing pad
-            dx = self.target_landing_pad.location_x - current_pos.location_x
-            dy = self.target_landing_pad.location_y - current_pos.location_y
-            distance = (dx**2 + dy**2) ** 0.5
-            # If we've arrived at the landing pad
-            if distance <= self.acceptance_radius:
-                # If halted, land
-                if current_status == drone_status.DroneStatus.HALTED:
-                    self.landing_initiated = True
-                    return commands.Command.create_land_command()
-                # If moving, halt first
-                if current_status == drone_status.DroneStatus.MOVING:
-                    return commands.Command.create_halt_command()
-            # If we're not at the landing pad yet and are halted, move toward it
-            if current_status == drone_status.DroneStatus.HALTED:
-                return commands.Command.create_set_relative_destination_command(dx, dy)
-            # If still moving toward landing pad, continue
-            return commands.Command.create_null_command()
-        # If we haven't reached the waypoint yet
-        if not self.waypoint_reached:
-            # Calculate distance to waypoint
-            dx = self.waypoint.location_x - current_pos.location_x
-            dy = self.waypoint.location_y - current_pos.location_y
-            distance = (dx**2 + dy**2) ** 0.5
-            # If we've arrived at the waypoint
-            if distance <= self.acceptance_radius:
-                # Mark that we've reached the waypoint
+        if self.waypoint_reached:
+            closest_landing_pad = None
+            min_distance = float("inf")
+            for landing_pad in landing_pad_locations:
+                dx = report.position.location_x - landing_pad.location_x
+                dy = report.position.location_y - landing_pad.location_y
+                distance_squared = dx**2 + dy**2
+                if distance_squared < min_distance:
+                    min_distance = distance_squared
+                    closest_landing_pad = landing_pad
+            self.waypoint = closest_landing_pad
+        
+        dx = self.waypoint.location_x - report.position.location_x
+        dy = self.waypoint.location_y - report.position.location_y
+        distance_squared = dx**2 + dy**2
+        if (report.status in {drone_status.DroneStatus.MOVING, drone_status.DroneStatus.LANDED}):
+            return command
+        if distance_squared >= self.acceptance_radius**2:
+            command = commands.Command.create_set_relative_destination_command(dx, dy)
+        else:
+            if not self.waypoint_reached:
                 self.waypoint_reached = True
-                # Find the closest landing pad
-                closest_pad = None
-                min_distance = float("inf")
-                for pad in landing_pad_locations:
-                    pad_dx = pad.location_x - current_pos.location_x
-                    pad_dy = pad.location_y - current_pos.location_y
-                    pad_distance = (pad_dx**2 + pad_dy**2) ** 0.5
-                    if pad_distance < min_distance:
-                        min_distance = pad_distance
-                        closest_pad = pad
-                # Set the target landing pad
-                self.target_landing_pad = closest_pad
-                self.landing_pad_selected = True
-                # If we're moving, halt so we can then move to the landing pad
-                if current_status == drone_status.DroneStatus.MOVING:
-                    return commands.Command.create_halt_command()
-                # If already halted, we'll move to landing pad on next iteration
-                return commands.Command.create_null_command()
-            # If we're not at the waypoint yet and halted, move toward it
-            if current_status == drone_status.DroneStatus.HALTED:
-                self.has_moved = True
-                return commands.Command.create_set_relative_destination_command(dx, dy)
+            else:
+                command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
