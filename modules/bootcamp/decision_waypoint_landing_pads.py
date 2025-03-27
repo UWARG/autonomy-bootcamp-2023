@@ -64,11 +64,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         if self._phase == 0:
             distance_to_waypoint = self._distance(current_pos, self.waypoint)
-            if distance_to_waypoint <= self.acceptance_radius:
+            if distance_to_waypoint <= self.acceptance_radius**2:
                 self._phase = 1
                 self._has_set_destination = False
             else:
                 command = self._move_toward(report, self.waypoint)
+                self._has_set_destination = True
         elif self._phase == 1:
             if self._landing_pad_location is None:
                 if landing_pad_locations:
@@ -78,14 +79,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 else:
                     self._landing_pad_location = self.waypoint
             distance_to_pad = self._distance(current_pos, self._landing_pad_location)
-            if distance_to_pad <= self.acceptance_radius:
+            if distance_to_pad <= self.acceptance_radius**2:
                 self._phase = 2
                 self._has_set_destination = False
             else:
                 command = self._move_toward(report, self._landing_pad_location)
+                self._has_set_destination = True
         elif self._phase == 2:
             distance_to_pad = self._distance(current_pos, self._landing_pad_location)
-            if distance_to_pad > self.acceptance_radius:
+            if distance_to_pad > self.acceptance_radius**2:
                 self._phase = 1
             else:
                 if status == drone_status.DroneStatus.HALTED and not self._has_landed:
@@ -99,7 +101,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
     def _distance(self, loc1: location.Location, loc2: location.Location) -> float:
         dy = loc2.y - loc1.y
         dx = loc2.x - loc1.x
-        return (dx**2 + dy**2) ** 0.5
+        return dx**2 + dy**2
 
     def _find_closest_landing_pad(
         self, current_pos: location.Location, pads: "list[location.Location]"
