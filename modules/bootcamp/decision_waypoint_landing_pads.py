@@ -99,9 +99,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         return command
 
     def _distance(self, loc1: location.Location, loc2: location.Location) -> float:
-        dy = loc2.y - loc1.y
-        dx = loc2.x - loc1.x
+        dy = loc2.location_y - loc1.location_y
+        dx = loc2.location_x - loc1.location_x
         return dx**2 + dy**2
+
 
     def _find_closest_landing_pad(
         self, current_pos: location.Location, pads: "list[location.Location]"
@@ -121,8 +122,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if self._has_set_destination:
             return commands.Command.create_null_command()
         if report.status == drone_status.DroneStatus.HALTED:
-            dx = target.x - report.position.x
-            dy = target.y - report.position.y
+            dx = target.location_x - report.position.location_x
+            dy = target.location_y - report.position.location_y
             self._has_set_destination = True
-            return commands.Command.create_set_relative_dest_command(dx, dy)
+            return commands.Command.create_set_relative_destination_command(dx, dy)
         return commands.Command.create_null_command()
