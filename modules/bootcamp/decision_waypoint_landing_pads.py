@@ -103,7 +103,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         dx = loc2.location_x - loc1.location_x
         return dx**2 + dy**2
 
-
     def _find_closest_landing_pad(
         self, current_pos: location.Location, pads: "list[location.Location]"
     ) -> location.Location:
