@@ -124,8 +124,6 @@ class DetectLandingPad:
         #     result, box = ...
 
         for bounds in boxes_cpu:
-            bounds = np.asarray(bounds).reshape(4)
-
             success, box = bounding_box.BoundingBox.create(bounds)
             if success and box is not None:
                 bounding_boxes.append(box)
