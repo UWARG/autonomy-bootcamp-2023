@@ -30,18 +30,45 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         self.waypoint = waypoint
         print(f"Waypoint: {waypoint}")
-
         self.acceptance_radius = acceptance_radius
-
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Add your own
-
+        self.step = "START"
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def _distance(self, location1: location.Location, location2: location.Location) -> tuple:
+        """
+        Calculate the squared distance and differences between two locations.
+
+        :param location1: First location
+        :param location2: Second location
+        :return: Tuple containing (squared_distance, x_difference, y_difference)
+        """
+        x_difference = location2.location_x - location1.location_x
+        y_difference = location2.location_y - location1.location_y
+        return (
+            (x_difference * x_difference + y_difference * y_difference),
+            x_difference,
+            y_difference,
+        )
+
+    def _reached(
+        self, current_position: location.Location, target_position: location.Location
+    ) -> bool:
+        """
+        Check if the current position is within acceptance radius of the target.
+
+        :param current_position: Current drone position
+        :param target_position: Target position to check against
+        :return: True if within acceptance radius, False otherwise
+        """
+        return self._distance(current_position, target_position)[0] <= (
+            self.acceptance_radius * self.acceptance_radius
+        )
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -67,8 +94,53 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        current_position = report.position
+        min_distance = 28800
+        x_distance = 0
+        y_distance = 0
+        closest_pad = None
+        for pad in landing_pad_locations:
+            distance = self._distance(self.waypoint, pad)
+            if distance[0] < min_distance:
+                min_distance = distance[0]
+                x_distance = distance[1]
+                y_distance = distance[2]
+                closest_pad = pad
 
-        # Do something based on the report and the state of this class...
+        if (
+            (current_position.location_x == 0)
+            and (current_position.location_y == 0)
+            and (report.status == drone_status.DroneStatus.HALTED)
+            and (self.step == "START")
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+            self.step = "WAYPOINT"
+        elif (self.step == "WAYPOINT") and self._reached(current_position, self.waypoint):
+            command = commands.Command.create_halt_command()
+            self.step = "STOPPED_AT_WAYPOINT"
+        elif (
+            (self.step == "STOPPED_AT_WAYPOINT")
+            and self._reached(current_position, self.waypoint)
+            and (report.status == drone_status.DroneStatus.HALTED)
+        ):
+            command = commands.Command.create_set_relative_destination_command(
+                x_distance, y_distance
+            )
+            self.step = "AT_PAD"
+        elif (self.step == "AT_PAD") and self._reached(current_position, closest_pad):
+            command = commands.Command.create_halt_command()
+            self.step = "STOPPED_AT_PAD"
+        elif (
+            (self.step == "STOPPED_AT_PAD")
+            and self._reached(current_position, closest_pad)
+            and (report.status == drone_status.DroneStatus.HALTED)
+        ):
+            command = commands.Command.create_land_command()
+            self.step = "LANDED"
+        else:
+            command = commands.Command.create_null_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
