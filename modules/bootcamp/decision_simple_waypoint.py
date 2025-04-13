@@ -41,6 +41,36 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    def _distance(self, location1: location.Location, location2: location.Location) -> tuple:
+        """
+        Calculate the squared distance and differences between two locations.
+
+        :param location1: First location
+        :param location2: Second location
+        :return: Tuple containing (squared_distance, x_difference, y_difference)
+        """
+        x_difference = location2.location_x - location1.location_x
+        y_difference = location2.location_y - location1.location_y
+        return (
+            (x_difference * x_difference + y_difference * y_difference),
+            x_difference,
+            y_difference,
+        )
+
+    def _reached(
+        self, current_position: location.Location, target_position: location.Location
+    ) -> bool:
+        """
+        Check if the current position is within acceptance radius of the target.
+
+        :param current_position: Current drone position
+        :param target_position: Target position to check against
+        :return: True if within acceptance radius, False otherwise
+        """
+        return self._distance(current_position, target_position)[0] <= (
+            self.acceptance_radius * self.acceptance_radius
+        )
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -72,10 +102,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
-        elif (
-            (current_position.location_x == waypoint.location_x)
-            and (current_position.location_y == waypoint.location_y)
-            and (report.status != drone_status.DroneStatus.HALTED)
+        elif self._reached(current_position, waypoint) and (
+            report.status != drone_status.DroneStatus.HALTED
         ):
             command = commands.Command.create_halt_command()
 
