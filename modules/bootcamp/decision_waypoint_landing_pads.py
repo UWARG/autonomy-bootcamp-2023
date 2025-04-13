@@ -95,7 +95,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
         current_position = report.position
-        min_distance = 28800
+        min_distance = float("inf")
         x_distance = 0
         y_distance = 0
         closest_pad = None
