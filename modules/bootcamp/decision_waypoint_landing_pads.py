@@ -107,12 +107,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 y_distance = distance[2]
                 closest_pad = pad
 
-        if (
-            (current_position.location_x == 0)
-            and (current_position.location_y == 0)
-            and (report.status == drone_status.DroneStatus.HALTED)
-            and (self.step == "START")
-        ):
+        if (report.status == drone_status.DroneStatus.HALTED) and (self.step == "START"):
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
             )
