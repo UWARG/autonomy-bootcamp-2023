@@ -36,13 +36,60 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Add your own
-
+        # Pre compute squared acceptance radius
+        self.acceptance_radius_sq = self.acceptance_radius**2
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
+    @staticmethod
+    def _validate_point(point_loc: location.Location, region:list = [[-60, -60], [60, 60]]):
+        """
+        Validates if a given location lies within a fixed region
+        """
+        x_min, y_min = region[0]
+        x_max, y_max = region[1]
+        x, y = point_loc.location_x, point_loc.location_y
+        
+        valid_x = x >= x_min and x <= x_max
+        valid_y = y >= y_min and y <= y_max 
+        
+        return valid_x and valid_y
+    
+    @staticmethod
+    def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location):
+        """
+        Compute the coordinates in x and y to move relative from cur_loc to dest_loc
+        """
+        cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
+        dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
+
+        rel_x = dest_x - cur_x
+        rel_y = dest_y - cur_y
+
+        return (rel_x, rel_y)
+
+    def _radius_check(self, cur_loc: location.Location, dest_loc: location.Location):
+        """
+        Determine if the current location is within the acceptable radius of the destination location
+
+        #TODO: Figure out documentation style
+
+        cur_loc: Location object of current location
+        deet_loc: Location object of destination location
+
+        retuns: True if the current location is in the acceptable region of the destination, False otherwise
+        """
+        cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
+        dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
+        # Compute compontents of radius for x and y seperately for clarity
+        relative_rad_x = (cur_x - dest_x)**2
+        relative_rad_y = (cur_y - dest_y)**2
+        relative_rad = relative_rad_x + relative_rad_y
+        
+        # Compare the squared radius between the cur_loc and dest_loc and squared acceptable radius
+        return relative_rad <= self.acceptance_radius_sq
+    
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -69,65 +116,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         if report.status == drone_status.DroneStatus.HALTED:
-            #Things to check for a halted drone:
-            # Does it have a valid destination
-            # If no, set destanation and movemenet
-            #
-            # If yes, 
-            #   - Check if in acceptable radius of destination
-            #   - If yes, land
-            #   - Otherwise, restart movement to destination   
-            #
-            
-            pass
-            
+            # Check if drone is in acceptable radius of destination
+            within_radius = self._radius_check(report.position, self.waypoint)
+            if within_radius:
+                # If within radius, send land command
+                command = commands.Command.create_land_command()
+            else:
+                # If not in acceptable radius, initate steps to move to valid destination
+                # Move only if destination is valid
+                valid_dest = self._validate_point(self.waypoint)
+                if valid_dest:
+                    # Compute relative distance to travel and provide move command 
+                    rel_cords = self._compute_relative_cord(report.position, self.waypoint)                   
+                    command = commands.Command.create_set_relative_destination_command(*rel_cords)
+
         elif report.status == drone_status.DroneStatus.MOVING:
             # Check if drone is proximity of destination
-            # IF no,
-            # Confirm that the drone is moving in the correct direction: Takes constant time to do
-
-            
-            pass
-        else:
-            # Landed case
-
-
-        # CHeck if the drone has a valid destination
-        # If not, set to waypoint in init command
-        # Set global destination to that landing pad cords
-
-        # Create a new function to calculate the direction to the desired location
-        # If the drone is already moving to that position, then allow it to continue
-        
-        # If drone is halted check that it is in the acceptable radius of the waypoint
-        # Use euclidian distance to check that it is the case
-
-        # Land once in the correct position
+            within_radius = self._radius_check(report.position, self.waypoint)
+            if within_radius:
+                command = commands.Command.create_land_command()
     
-
-
-
-        # So we have a report to play around wiht and locations
-
-        # Do something based on the report and the state of this class...
-
-        # valid statuses:
-        # - Halted
-        # - Moving
-        # - Landed
-
-        # - Report contains position and global destination
-        # - For halted and landed drones, position and global dest are equal
-
-        # Four actions
-
-        # - Null: default, do nothing
-        # - set relative dest: move drone to distance RELATIVE to current pos
-        #       - Note: requires drone to be halted to use
-
-        # - Halt: Makes drone stop immediately at current position
-        # - Land: Lands drone at current position and ends simulation ( requires drone to be halted)
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
