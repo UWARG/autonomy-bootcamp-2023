@@ -69,7 +69,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def get_ds(p1: location.Location, p2: location.Location):
+        def get_ds(p1: location.Location, p2: location.Location) -> float:
             p1x = p1.location_x
             p1y = p1.location_y
             p2x = p2.location_x
@@ -79,7 +79,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             return ds
 
-        def if_reach(des: location.Location, ob: location.Location):
+        def if_reach(des: location.Location, ob: location.Location) -> bool:
             dx = des.location_x
             dy = des.location_y
             ox = ob.location_x
