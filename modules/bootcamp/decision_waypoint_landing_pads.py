@@ -47,56 +47,70 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location) -> tuple:
+    def _compute_relative_cord(current_location: location.Location, destination_location: location.Location) -> tuple:
         """
-        Compute the coordinates in x and y to move relative from cur_loc to dest_loc
+        Compute the coordinates in x and y to move relative from current_location to destination_location
         """
-        cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
-        dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
+        current_x, current_y = current_location.location_x, current_location.location_y
+        destination_x, destination_x = destination_location.location_x, destination_location.location_y
 
-        rel_x = dest_x - cur_x
-        rel_y = dest_y - cur_y
+        rel_x = destination_x - current_x
+        rel_y = destination_x - current_y
 
         return (rel_x, rel_y)
 
-    def _radius_check(self, cur_loc: location.Location, dest_loc: location.Location) -> bool:
+    def _radius_check(self, current_location: location.Location, destination_location: location.Location) -> bool:
         """
         Determine if the current location is within the acceptable radius of the destination location
 
         #TODO: Figure out documentation style
 
-        cur_loc: Location object of current location
+        current_location: Location object of current location
         deet_loc: Location object of destination location
 
         retuns: True if the current location is in the acceptable region of the destination, False otherwise
         """
-        cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
-        dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
+        current_x, current_y = current_location.location_x, current_location.location_y
+        destination_x, destination_x = destination_location.location_x, destination_location.location_y
         # Compute compontents of radius for x and y seperately for clarity
-        relative_rad_x = (cur_x - dest_x) ** 2
-        relative_rad_y = (cur_y - dest_y) ** 2
-        relative_rad = relative_rad_x + relative_rad_y
+        relative_radius_x = (current_x - destination_x) ** 2
+        relative_radius_y = (current_y - destination_x) ** 2
+        relative_radius = relative_radius_x + relative_radius_y
 
-        # Compare the squared radius between the cur_loc and dest_loc and squared acceptable radius
-        return relative_rad <= self.acceptance_radius_sq
+        # Compare the squared radius between the current_location and destination_location and squared acceptable radius
+        return relative_radius <= self.acceptance_radius_sq
 
     @staticmethod
-    def _l2_norm_sq(cur_loc: location.Location, dest_loc: location.Location) -> float:
+    def _l2_norm_squared(current_location: location.Location, destination_location: location.Location) -> float:
         """
         Compute the squared L2 norm between the current location and destination location
         """
-        cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
-        dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
+        current_x, current_y = current_location.location_x, current_location.location_y
+        destination_x, destination_x = destination_location.location_x, destination_location.location_y
 
-        return (cur_x - dest_x) ** 2 + (cur_y - dest_y) ** 2
+        return (current_x - destination_x) ** 2 + (current_y - destination_x) ** 2
 
-    def _create_move_cmnd(self, cur_loc: location.Location, dest_loc: location.Location):
+    def _create_move_cmnd(self, current_location: location.Location, destination_location: location.Location):
         """
         Helper function to create movement command
         """
-        movement_cords = self._compute_relative_cord(cur_loc, dest_loc)
+        movement_cords = self._compute_relative_cord(current_location, destination_location)
 
         return commands.Command.create_set_relative_destination_command(*movement_cords)
+
+    def _get_min_location(
+        self, current_location: location.Location, list_locations: list[location.Location]
+    ) -> location.Location:
+        """
+        Get the location of the closest landing pad to the current location
+        """
+        # Compute squared l2 norm of from current location to all other locations
+        distances = [self._l2_norm_squared(current_location, loc) for loc in list_locations]
+
+        # Get the index of the minimum distance
+        min_id = distances.index(min(distances))
+        # Return the min location
+        return list_locations[min_id]
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -129,16 +143,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 # If it is in the sutiable radius, compute the distances to the
                 if within_radius_waypoint:
                     self.traveled_to_waypoint = True
-                    # Compute squared l2 norm between waypoint and landing pads
-                    # We used square l2 as a common metric to avoid using sqrt
-                    distances = [
-                        self._l2_norm_sq(self.waypoint, pad) for pad in landing_pad_locations
-                    ]
-                    print(f"Computed distanced: {distances}")
-                    # Get the index of the minimum distance
-                    min_id = distances.index(min(distances))
-                    self.landing_pad = landing_pad_locations[min_id]
-                    print(f"Closest landing pad: {self.landing_pad}")
+                    # Get closest landing pad to waypoint
+                    self.landing_pad = self._get_min_location(self.waypoint, landing_pad_locations)
                     # Move to closest landing pad
                     command = self._create_move_cmnd(report.position, self.landing_pad)
                 else:
