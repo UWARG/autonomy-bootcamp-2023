@@ -45,9 +45,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-    
+
     @staticmethod
-    def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location):
+    def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location) -> tuple:
         """
         Compute the coordinates in x and y to move relative from cur_loc to dest_loc
         """
@@ -59,7 +59,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return (rel_x, rel_y)
 
-    def _radius_check(self, cur_loc: location.Location, dest_loc: location.Location):
+    def _radius_check(self, cur_loc: location.Location, dest_loc: location.Location) -> bool:
         """
         Determine if the current location is within the acceptable radius of the destination location
 
@@ -73,29 +73,29 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
         dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
         # Compute compontents of radius for x and y seperately for clarity
-        relative_rad_x = (cur_x - dest_x)**2
-        relative_rad_y = (cur_y - dest_y)**2
+        relative_rad_x = (cur_x - dest_x) ** 2
+        relative_rad_y = (cur_y - dest_y) ** 2
         relative_rad = relative_rad_x + relative_rad_y
-        
+
         # Compare the squared radius between the cur_loc and dest_loc and squared acceptable radius
         return relative_rad <= self.acceptance_radius_sq
-    
+
     @staticmethod
-    def _l2_norm_sq(cur_loc: location.Location, dest_loc: location.Location):
+    def _l2_norm_sq(cur_loc: location.Location, dest_loc: location.Location) -> float:
         """
         Compute the squared L2 norm between the current location and destination location
         """
         cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
         dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
 
-        return (cur_x - dest_x)**2 + (cur_y - dest_y)**2
-    
+        return (cur_x - dest_x) ** 2 + (cur_y - dest_y) ** 2
+
     def _create_move_cmnd(self, cur_loc: location.Location, dest_loc: location.Location):
         """
-        Helper function to create movement command 
+        Helper function to create movement command
         """
         movement_cords = self._compute_relative_cord(cur_loc, dest_loc)
-        
+
         return commands.Command.create_set_relative_destination_command(*movement_cords)
 
     def run(
@@ -126,12 +126,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             if not self.traveled_to_waypoint:
                 # Check if the way point is actually in the acceptable radius first
                 within_radius_waypoint = self._radius_check(report.position, self.waypoint)
-                # If it is in the sutiable radius, compute the distances to the 
+                # If it is in the sutiable radius, compute the distances to the
                 if within_radius_waypoint:
                     self.traveled_to_waypoint = True
                     # Compute squared l2 norm between waypoint and landing pads
                     # We used square l2 as a common metric to avoid using sqrt
-                    distances = [self._l2_norm_sq(self.waypoint, pad) for pad in landing_pad_locations]
+                    distances = [
+                        self._l2_norm_sq(self.waypoint, pad) for pad in landing_pad_locations
+                    ]
                     print(f"Computed distanced: {distances}")
                     # Get the index of the minimum distance
                     min_id = distances.index(min(distances))
@@ -147,7 +149,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             else:
                 # We are now checking if we are in suitable distance of the landing pad to adjust for conditions
                 within_radius_landing = self._radius_check(report.position, self.landing_pad)
-                
+
                 if within_radius_landing:
                     command = commands.Command.create_land_command()
                 else:

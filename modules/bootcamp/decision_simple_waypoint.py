@@ -43,21 +43,23 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def _validate_point(point_loc: location.Location, region:list = [[-60, -60], [60, 60]]):
+    def _validate_point(
+        point_loc: location.Location, region: list = ((-60, -60), (60, 60))
+    ) -> bool:
         """
         Validates if a given location lies within a fixed region
         """
         x_min, y_min = region[0]
         x_max, y_max = region[1]
         x, y = point_loc.location_x, point_loc.location_y
-        
-        valid_x = x >= x_min and x <= x_max
-        valid_y = y >= y_min and y <= y_max 
-        
+
+        valid_x = x_min <= x <= x_max
+        valid_y = y_min <= y <= y_max
+
         return valid_x and valid_y
-    
+
     @staticmethod
-    def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location):
+    def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location) -> tuple:
         """
         Compute the coordinates in x and y to move relative from cur_loc to dest_loc
         """
@@ -69,7 +71,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         return (rel_x, rel_y)
 
-    def _radius_check(self, cur_loc: location.Location, dest_loc: location.Location):
+    def _radius_check(self, cur_loc: location.Location, dest_loc: location.Location) -> bool:
         """
         Determine if the current location is within the acceptable radius of the destination location
 
@@ -83,13 +85,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
         dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
         # Compute compontents of radius for x and y seperately for clarity
-        relative_rad_x = (cur_x - dest_x)**2
-        relative_rad_y = (cur_y - dest_y)**2
+        relative_rad_x = (cur_x - dest_x) ** 2
+        relative_rad_y = (cur_y - dest_y) ** 2
         relative_rad = relative_rad_x + relative_rad_y
-        
+
         # Compare the squared radius between the cur_loc and dest_loc and squared acceptable radius
         return relative_rad <= self.acceptance_radius_sq
-    
+
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -126,8 +128,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 # Move only if destination is valid
                 valid_dest = self._validate_point(self.waypoint)
                 if valid_dest:
-                    # Compute relative distance to travel and provide move command 
-                    rel_cords = self._compute_relative_cord(report.position, self.waypoint)                   
+                    # Compute relative distance to travel and provide move command
+                    rel_cords = self._compute_relative_cord(report.position, self.waypoint)
                     command = commands.Command.create_set_relative_destination_command(*rel_cords)
 
         elif report.status == drone_status.DroneStatus.MOVING:
@@ -135,7 +137,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             within_radius = self._radius_check(report.position, self.waypoint)
             if within_radius:
                 command = commands.Command.create_land_command()
-    
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
