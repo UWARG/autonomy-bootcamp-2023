@@ -75,7 +75,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             p2x = p2.location_x
             p2y = p2.location_y
 
-            ds = (p1x-p2x)**2 + (p1y-p2y)**2
+            ds = (p1x - p2x) ** 2 + (p1y - p2y) ** 2
 
             return ds
 
@@ -89,14 +89,17 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 return True
             return False
 
-        if (report.status == drone_status.DroneStatus.HALTED
-            and self.stage == "START"):
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
+        if report.status == drone_status.DroneStatus.HALTED and self.stage == "START":
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
             self.stage = "TOWAYPOINT"
 
-        elif (report.status == drone_status.DroneStatus.HALTED
-              and self.stage == "TOWAYPOINT"
-              and if_reach(self.waypoint, report.position)):
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and self.stage == "TOWAYPOINT"
+            and if_reach(self.waypoint, report.position)
+        ):
             min_distance = 99999999999999999999999999
             min_landing_pad = None
             for landing_pad in landing_pad_locations:
@@ -114,12 +117,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             print(f"2{self.target}")
             relative_x = self.target.location_x - report.position.location_x
             relative_y = self.target.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            command = commands.Command.create_set_relative_destination_command(
+                relative_x, relative_y
+            )
             self.stage = "TODESTINATION"
 
-        elif (report.status == drone_status.DroneStatus.HALTED
-              and if_reach(report.destination, report.position)
-              and self.stage == "TODESTINATION"):
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and if_reach(report.destination, report.position)
+            and self.stage == "TODESTINATION"
+        ):
             command = commands.Command.create_land_command()
             self.stage = "LANDED"
 
