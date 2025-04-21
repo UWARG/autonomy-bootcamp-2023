@@ -50,6 +50,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ]
         self.has_sent_landing_command = False
 
+    def if_reach(
+        self, des: location.Location, ob: location.Location, acceptance_radius: float
+    ) -> bool:
+        """
+        Check if the object is within the acceptance radius of the destination.
+        """
+        dx = des.location_x
+        dy = des.location_y
+        ox = ob.location_x
+        oy = ob.location_y
+
+        if ((dx - ox) ** 2 <= acceptance_radius**2) and ((dy - oy) ** 2 <= acceptance_radius**2):
+            return True
+        return False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -82,10 +97,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         if report.status == drone_status.DroneStatus.HALTED and self.command_index < 1:
-            command = self.commands[self.command_index]
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x,
+                self.waypoint.location_y,
+            )
             self.command_index += 1
 
-        elif report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+        elif (
+            report.status == drone_status.DroneStatus.HALTED
+            and not self.has_sent_landing_command
+            and self.if_reach(report.position, self.waypoint, self.acceptance_radius)
+        ):
             command = commands.Command.create_land_command()
             self.has_sent_landing_command = True
 
