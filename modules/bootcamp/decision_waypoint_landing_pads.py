@@ -117,12 +117,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     min_landing_pad = landing_pad
             self.target = min_landing_pad
             self.stage = "DETECTED"
-            print(f"1{report.position}")
-            print(f"1{self.target}")
 
         elif self.stage == "DETECTED":
-            print(f"2{report.position}")
-            print(f"2{self.target}")
             relative_x = self.target.location_x - report.position.location_x
             relative_y = self.target.location_y - report.position.location_y
             command = commands.Command.create_set_relative_destination_command(

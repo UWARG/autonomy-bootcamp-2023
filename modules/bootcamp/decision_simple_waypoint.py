@@ -41,13 +41,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.command_index = 0
-        self.commands = [
-            commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x,
-                self.waypoint.location_y,
-            ),
-        ]
         self.has_sent_landing_command = False
 
     def if_reach(
