@@ -41,6 +41,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.target = None
 
     def get_ds(self, p1: location.Location, p2: location.Location) -> float:
+        """
+        Get the squre of distance between two locations.
+        """
         p1x = p1.location_x
         p1y = p1.location_y
         p2x = p2.location_x
@@ -50,13 +53,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         return ds
 
-    def if_reach(self, des: location.Location, ob: location.Location, acceptance_radius: float) -> bool:
+    def if_reach(
+        self, des: location.Location, ob: location.Location, acceptance_radius: float
+    ) -> bool:
+        """
+        Check if the object is within the acceptance radius of the destination.
+        """
         dx = des.location_x
         dy = des.location_y
         ox = ob.location_x
         oy = ob.location_y
 
-        if ((dx - ox)**2 <= acceptance_radius**2) and ((dy - oy)**2 <= acceptance_radius**2):
+        if ((dx - ox) ** 2 <= acceptance_radius**2) and ((dy - oy) ** 2 <= acceptance_radius**2):
             return True
         return False
 
