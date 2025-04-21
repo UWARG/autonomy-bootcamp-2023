@@ -40,6 +40,26 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.stage = "START"
         self.target = None
 
+    def get_ds(self, p1: location.Location, p2: location.Location) -> float:
+        p1x = p1.location_x
+        p1y = p1.location_y
+        p2x = p2.location_x
+        p2y = p2.location_y
+
+        ds = (p1x - p2x) ** 2 + (p1y - p2y) ** 2
+
+        return ds
+
+    def if_reach(self, des: location.Location, ob: location.Location, acceptance_radius: float) -> bool:
+        dx = des.location_x
+        dy = des.location_y
+        ox = ob.location_x
+        oy = ob.location_y
+
+        if ((dx - ox)**2 <= acceptance_radius**2) and ((dy - oy)**2 <= acceptance_radius**2):
+            return True
+        return False
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -69,26 +89,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def get_ds(p1: location.Location, p2: location.Location) -> float:
-            p1x = p1.location_x
-            p1y = p1.location_y
-            p2x = p2.location_x
-            p2y = p2.location_y
-
-            ds = (p1x - p2x) ** 2 + (p1y - p2y) ** 2
-
-            return ds
-
-        def if_reach(des: location.Location, ob: location.Location) -> bool:
-            dx = des.location_x
-            dy = des.location_y
-            ox = ob.location_x
-            oy = ob.location_y
-
-            if dx == ox and dy == oy:
-                return True
-            return False
-
         if report.status == drone_status.DroneStatus.HALTED and self.stage == "START":
             command = commands.Command.create_set_relative_destination_command(
                 self.waypoint.location_x, self.waypoint.location_y
@@ -98,12 +98,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif (
             report.status == drone_status.DroneStatus.HALTED
             and self.stage == "TOWAYPOINT"
-            and if_reach(self.waypoint, report.position)
+            and self.if_reach(self.waypoint, report.position, self.acceptance_radius)
         ):
             min_distance = float("inf")
             min_landing_pad = None
             for landing_pad in landing_pad_locations:
-                distance = get_ds(landing_pad, self.waypoint)
+                distance = self.get_ds(landing_pad, self.waypoint)
                 if distance < min_distance:
                     min_distance = distance
                     min_landing_pad = landing_pad
@@ -124,7 +124,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif (
             report.status == drone_status.DroneStatus.HALTED
-            and if_reach(report.destination, report.position)
+            and self.if_reach(report.destination, report.position, self.acceptance_radius)
             and self.stage == "TODESTINATION"
         ):
             command = commands.Command.create_land_command()
