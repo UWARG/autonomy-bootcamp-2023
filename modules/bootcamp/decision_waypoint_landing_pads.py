@@ -100,7 +100,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             and self.stage == "TOWAYPOINT"
             and if_reach(self.waypoint, report.position)
         ):
-            min_distance = 99999999999999999999999999
+            min_distance = float("inf")
             min_landing_pad = None
             for landing_pad in landing_pad_locations:
                 distance = get_ds(landing_pad, self.waypoint)
