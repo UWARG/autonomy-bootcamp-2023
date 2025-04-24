@@ -7,7 +7,7 @@ Detects landing pads.
 import pathlib
 
 import numpy as np
-import torch # pylint: disable=unused-import
+import torch  # pylint: disable=unused-import
 import ultralytics
 
 from .. import bounding_box
