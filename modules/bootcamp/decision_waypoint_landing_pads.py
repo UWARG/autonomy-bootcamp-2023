@@ -147,8 +147,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         # Compute squared l2 norm of from current location to all other locations
         distances = [self._l2_norm_squared(current_location, loc) for loc in list_locations]
-        print(f"Locations: {list_locations}")
-        print(f"distances:{distances}")
 
         # Get the index of the minimum distance
         min_id = distances.index(min(distances))
@@ -187,7 +185,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 if within_radius_waypoint:
                     self.traveled_to_waypoint = True
                     # Get closest landing pad to waypoint
-                    # print(landing_pad_locations)
                     self.landing_pad = self._get_min_location(self.waypoint, landing_pad_locations)
                     # Move to closest landing pad
                     command = self._generate_move_command(report.position, self.landing_pad)
