@@ -44,14 +44,20 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
     @staticmethod
     def _validate_point(
-        point_loc: location.Location, region: list = ((-60, -60), (60, 60))
+        point_location: location.Location, region: list = ((-60, -60), (60, 60))
     ) -> bool:
         """
         Validates if a given location lies within a fixed region
+
+        Args:
+        point_location: Location object of a given point
+        region: Tuple of two co-ordinate Tuples consisting of the bottom left and top right corner of a given square
+
+        Returns: True if the point lies in the given region, False otherwise
         """
         x_min, y_min = region[0]
         x_max, y_max = region[1]
-        x, y = point_loc.location_x, point_loc.location_y
+        x, y = point_location.location_x, point_location.location_y
 
         valid_x = x_min <= x <= x_max
         valid_y = y_min <= y <= y_max
@@ -61,7 +67,13 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
     @staticmethod
     def _compute_relative_cord(cur_loc: location.Location, dest_loc: location.Location) -> tuple:
         """
-        Compute the coordinates in x and y to move relative from cur_loc to dest_loc
+        Compute the coordinates in x and y to move relative from current_location to destination_location
+
+        Args:
+        current_location: Location object of drone's current location
+        destination_location: Location object of desired destination
+
+        Returns: Tuple of relative (X, Y) co-ordinates from current location to destination location
         """
         cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
         dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
@@ -75,12 +87,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         Determine if the current location is within the acceptable radius of the destination location
 
-        #TODO: Figure out documentation style
-
-        cur_loc: Location object of current location
+        Args:
+        current_location: Location object of current location
         deet_loc: Location object of destination location
 
-        retuns: True if the current location is in the acceptable region of the destination, False otherwise
+        Retuns: True if the current location is in the acceptable region of the destination, False otherwise
         """
         cur_x, cur_y = cur_loc.location_x, cur_loc.location_y
         dest_x, dest_y = dest_loc.location_x, dest_loc.location_y
@@ -136,7 +147,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             # Check if drone is proximity of destination
             within_radius = self._radius_check(report.position, self.waypoint)
             if within_radius:
-                command = commands.Command.create_land_command()
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
