@@ -123,8 +123,8 @@ class DetectLandingPad:
         # Iterate over all rows of boxes
         for row in boxes_cpu:
             # Create  box object for each xyxy
-            box = bounding_box.BoundingBox.create(row)[1]
-            if box is not None:
+            valid_box, box = bounding_box.BoundingBox.create(row)
+            if valid_box:
                 bounding_boxes.append(box)
 
         return bounding_boxes, image_annotated
