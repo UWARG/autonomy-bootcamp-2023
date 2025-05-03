@@ -71,32 +71,34 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         position = report.position
         status = report.status
-        
+
         dx = self.waypoint.location_x - position.location_x
         dy = self.waypoint.location_y - position.location_y
         distance_to_waypoint_squared = (dx**2) + (dy**2)
-        
+
         if not self.has_reached_waypoint:
-            if distance_to_waypoint_squared <= self.acceptance_radius ** 2:
+            if distance_to_waypoint_squared <= self.acceptance_radius**2:
                 self.has_reached_waypoint = True
-                min_distance_squared = float('inf')
+                min_distance_squared = float("inf")
                 for pad in landing_pad_locations:
-                    distance_squared = (pad.location_x - position.location_x) ** 2 + (pad.location_y - position.location_y) ** 2
+                    distance_squared = (pad.location_x - position.location_x) ** 2 + (
+                        pad.location_y - position.location_y
+                    ) ** 2
                     if distance_squared < min_distance_squared:
                         min_distance_squared = distance_squared
                         self.closest_landing_pad = pad
             elif status == drone_status.DroneStatus.HALTED:
-                    command = commands.Command.create_set_relative_destination_command(dx, dy)
+                command = commands.Command.create_set_relative_destination_command(dx, dy)
         elif self.closest_landing_pad:
             pad_dx = self.closest_landing_pad.location_x - position.location_x
             pad_dy = self.closest_landing_pad.location_y - position.location_y
             distance_to_pad_squared = (pad_dx**2) + (pad_dy**2)
-            
-            if distance_to_pad_squared <= self.acceptance_radius ** 2:
+
+            if distance_to_pad_squared <= self.acceptance_radius**2:
                 if status == drone_status.DroneStatus.HALTED:
                     command = commands.Command.create_land_command()
             elif status == drone_status.DroneStatus.HALTED:
-                    command = commands.Command.create_set_relative_destination_command(pad_dx, pad_dy)
+                command = commands.Command.create_set_relative_destination_command(pad_dx, pad_dy)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

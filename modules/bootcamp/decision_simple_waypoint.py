@@ -75,7 +75,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         dy = self.waypoint.location_y - position.location_y
         distance_squared = (dx**2) + (dy**2)
 
-        if distance_squared <= self.acceptance_radius ** 2:
+        if distance_squared <= self.acceptance_radius**2:
             self.has_reached_waypoint = True
             command = commands.Command.create_halt_command()
 
