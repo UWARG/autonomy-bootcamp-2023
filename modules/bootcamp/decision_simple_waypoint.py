@@ -37,8 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -68,7 +66,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        def calc_sqr_dist(loc1: location.Location, loc2: location.Location) -> float:
+            return (loc1.location_x - loc2.location_x) ** 2 + (
+                loc1.location_y - loc2.location_y
+            ) ** 2
+
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.acceptance_radius**2 >= calc_sqr_dist(self.waypoint, report.position):
+                command = command.create_land_command()
+            else:
+                command = command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y,
+                )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
