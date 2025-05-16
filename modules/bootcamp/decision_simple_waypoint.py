@@ -69,7 +69,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         dx = self.waypoint.location_x - report.position.location_x
         dy = self.waypoint.location_y - report.position.location_y
-        dist_from_accept = (dx * dx + dy * dy) ** (1.0 / 2.0) - self.acceptance_radius
+        dist_from_accept = (dx * dx + dy * dy) - self.acceptance_radius
         # Do something based on the report and the state of this class...
         if report.status.name == "HALTED":
             if dist_from_accept > 0:
