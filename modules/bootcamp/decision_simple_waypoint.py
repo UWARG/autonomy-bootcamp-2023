@@ -4,6 +4,7 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
+from numpy import sqrt
 from .. import commands
 from .. import drone_report
 
@@ -37,7 +38,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.settling_threshold = 10
+        self.cycles_at_target = 0  # counts loops passed when drone is within accepted radius
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,10 +70,34 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.is_settled(report.position, report.destination):
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x, self.waypoint.location_y
+                )
+            else:
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
         return command
+
+    def is_settled(self, position: location.Location, target: location.Location) -> bool:
+        """
+        returns if position has been within target for certain amount of loops
+        """
+        distance = sqrt(
+            (target.location_x - position.location_x) ** 2
+            + (target.location_y - position.location_y) ** 2
+        )
+
+        if distance < self.acceptance_radius:
+            if self.cycles_at_target < self.settling_threshold:
+                self.cycles_at_target += 1
+                return False
+            return True
+
+        self.cycles_at_target = 0
+        return False
