@@ -92,10 +92,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif not self.action_status[1]:
             waypoint_dx = self.waypoint.location_x - report.position.location_x
             waypoint_dy = self.waypoint.location_y - report.position.location_y
-            dist_from_accept = (
-                waypoint_dx * waypoint_dx + waypoint_dy * waypoint_dy
-            ) - self.acceptance_radius
-            if dist_from_accept <= 0:
+            dist_from_accept = waypoint_dx * waypoint_dx + waypoint_dy * waypoint_dy
+            if dist_from_accept <= self.acceptance_radius * self.acceptance_radius:
                 self.action_status[1] = True
         elif (
             not self.action_status[2]
@@ -115,12 +113,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif not self.action_status[3]:
             landing_dx = self.closest_landing_x - report.position.location_x
             landing_dy = self.closest_landing_y - report.position.location_y
-            dist_from_landing = (
-                landing_dx * landing_dx + landing_dy * landing_dy
-            ) - self.acceptance_radius
-            if dist_from_landing <= 0:
+            dist_from_landing = landing_dx * landing_dx + landing_dy * landing_dy
+            if dist_from_landing <= self.acceptance_radius * self.acceptance_radius:
                 self.action_status[3] = True
-        elif report.status.name == "HALTED":
+        elif report.status.name == "HALTED": #Once drone has visited all landmarks, send command to land
             command = commands.Command.create_land_command()
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
