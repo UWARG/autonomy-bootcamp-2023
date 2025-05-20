@@ -43,7 +43,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def calculate_dist(self, position: location.Location, dest: location.Location):
+    def calculate_dist(self, position: location.Location, dest: location.Location) -> float:
         """
         Calculates if in acceptance radius
         """

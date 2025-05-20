@@ -44,7 +44,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def in_range(self, starting: location.Location, ending: location.Location):
+    def in_range(self, starting: location.Location, ending: location.Location) -> float:
         """
         Calculates if in acceptance radius
         """
