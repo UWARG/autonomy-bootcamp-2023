@@ -36,13 +36,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+    
+        self.is_at_waypoint = False
+        self.landed = False
 
-        # Add your own
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
+    def in_range(self, starting: location.Location, ending: location.Location):
+        return (ending.location_x-starting.location_x)**2 + (ending.location_y - starting.location_y)**2
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
     ) -> commands.Command:
@@ -67,8 +70,17 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        if not self.is_at_waypoint:
+            if self.in_range(report.position, self.waypoint) < self.acceptance_radius**2:
+                command = commands.Command.create_halt_command()
+                self.is_at_waypoint = True
+        
+            else:
+                command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x-report.position.location_x, self.waypoint.location_y-report.position.location_y)
 
-        # Do something based on the report and the state of this class...
+        elif self.in_range(report.position, self.waypoint) < self.acceptance_radius**2:
+            command =commands.Command.create_land_command()
+            self.landed = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
