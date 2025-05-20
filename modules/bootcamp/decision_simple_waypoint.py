@@ -4,7 +4,6 @@ BOOTCAMPERS TO COMPLETE.
 Travel to designated waypoint.
 """
 
-from numpy import sqrt
 from .. import commands
 from .. import drone_report
 
@@ -88,12 +87,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         """
         returns if position has been within target for certain amount of loops
         """
-        distance = sqrt(
-            (target.location_x - position.location_x) ** 2
-            + (target.location_y - position.location_y) ** 2
-        )
+        distance_square = (target.location_x - position.location_x) ** 2 + (
+            target.location_y - position.location_y
+        ) ** 2
 
-        if distance < self.acceptance_radius:
+        if distance_square < self.acceptance_radius**2:
             if self.cycles_at_target < self.settling_threshold:
                 self.cycles_at_target += 1
                 return False
