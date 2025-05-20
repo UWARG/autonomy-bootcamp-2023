@@ -104,7 +104,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot()
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -118,9 +118,9 @@ class DetectLandingPad:
         bounding_boxes = []
 
         for box in boxes_cpu:
-            bound_box = bounding_box.BoundingBox.create(box)
-            if bound_box[0] is not False:
-                bounding_boxes.append(bound_box[1])
+            valid_box, bound_box = bounding_box.BoundingBox.create(box)
+            if valid_box is not False:
+                bounding_boxes.append(bound_box)
 
         # Hint: .shape gets the dimensions of the numpy array
         # for i in range(0, ...):
