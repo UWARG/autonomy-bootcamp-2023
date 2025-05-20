@@ -36,8 +36,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.cycles_at_target = 0  # counts loops passed when drone is within accepted radius
-        self.at_target_cycles = 5
+        self.at_target_cycles = 0  # counts loops passed when drone is within accepted radius
+        self.at_target_threshold = 5
 
         self.command_index = 0  # tracks which step of the sequence the drone is at
 
@@ -107,13 +107,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         distance = self.get_squared_distance(position, target)
         if distance < self.acceptance_radius**2:
-            if self.cycles_at_target < self.at_target_cycles:
-                self.cycles_at_target += 1
+            if self.at_target_cycles < self.at_target_threshold:
+                self.at_target_cycles += 1
                 return False
 
             return True
 
-        self.cycles_at_target = 0
+        self.at_target_cycles = 0
         return False
 
     def get_squared_distance(self, position: location.Location, target: location.Location) -> float:

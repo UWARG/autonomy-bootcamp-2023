@@ -37,8 +37,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        self.settling_threshold = 10
-        self.cycles_at_target = 0  # counts loops passed when drone is within accepted radius
+        self.is_settled_threshold = 10
+        self.is_settled_cycles = 0  # counts loops passed when drone is within accepted radius
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -92,10 +92,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         ) ** 2
 
         if distance_square < self.acceptance_radius**2:
-            if self.cycles_at_target < self.settling_threshold:
-                self.cycles_at_target += 1
+            if self.is_settled_cycles < self.is_settled_threshold:
+                self.is_settled_cycles += 1
                 return False
             return True
 
-        self.cycles_at_target = 0
+        self.is_settled_cycles = 0
         return False
