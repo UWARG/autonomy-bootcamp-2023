@@ -73,8 +73,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:
             match self.command_index:
                 case 0:
-                    if self.at_target(report.position, report.destination):
+                    if self.at_target(report.position, self.waypoint):
                         self.command_index += 1
+                        self.at_target_cycles = 0
                     else:
                         command = commands.Command.create_set_relative_destination_command(
                             self.waypoint.location_x - report.position.location_x,
@@ -82,15 +83,18 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         )
 
                 case 1:
-                    closest_location = self.get_closest_pad(landing_pad_locations, report.position)
-
-                    command = commands.Command.create_set_relative_destination_command(
-                        closest_location.location_x - report.position.location_x,
-                        closest_location.location_y - report.position.location_y,
-                    )
-
                     if self.at_target(report.position, report.destination):
                         self.command_index += 1
+                        self.at_target_cycles = 0
+                    else:
+                        closest_location = self.get_closest_pad(
+                            landing_pad_locations, report.position
+                        )
+
+                        command = commands.Command.create_set_relative_destination_command(
+                            closest_location.location_x - report.position.location_x,
+                            closest_location.location_y - report.position.location_y,
+                        )
 
                 case 2:
                     command = commands.Command.create_land_command()
