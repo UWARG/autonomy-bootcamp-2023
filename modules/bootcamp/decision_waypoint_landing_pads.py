@@ -38,22 +38,15 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-        self.acceptance_radius = acceptance_radius
-        self.distance_y = 0
-        self.distance_x = 0
         self.distance = 0
         self.reached_destination = False
-        self.nearest_pad_x = 0
-        self.nearest_pad_y = 0
-        self.pad_distance = 0
-        self.closest_distance = float('inf')
+        self.closest_distance = float("inf")
         self.index = 0
-        self.at_pad = False
-        self.at_origin = True
-        self.distance_destination = ""
-        self.distance_calculate = 0
-        self.x =0
-        self.y = 0
+        self.location = {
+            "reached_destination": False,
+            "at_pad": False,
+            "at_origin": True,
+        }
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -83,62 +76,70 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        #find the distance from the way point to the 
-        def distance():
+        # find the distance from the way point to the
+        def distance() -> int:
             size = len(landing_pad_locations)
             for i in range(size):
                 pad_x = landing_pad_locations[i].location_x
                 pad_y = landing_pad_locations[i].location_y
 
-                self.nearest_pad_x = self.waypoint.location_x - pad_x
-                self.nearest_pad_y = self.waypoint.location_y - pad_y
-                self.pad_distance = (self.nearest_pad_x**2 + self.nearest_pad_y**2)**0.5
+                nearest_pad_x = self.waypoint.location_x - pad_x
+                nearest_pad_y = self.waypoint.location_y - pad_y
+                pad_distance = (nearest_pad_x**2 + nearest_pad_y**2) ** 0.5
 
-                if(self.pad_distance < self.closest_distance):
+                if pad_distance < self.closest_distance:
                     self.index = i
-                    self.closest_distance = self.pad_distance
+                    self.closest_distance = pad_distance
 
             return self.index
-        
 
         # Do something based on the report and the state of this class...
 
-        def distance_from_location():
-            if self.reached_destination == False:
-                self.distance_destination = self.waypoint
+        def distance_from_location() -> int:
+            if not self.location["reached_destination"]:
+                distance_destination = self.waypoint
             else:
-                self.distance_destination = landing_pad_locations[self.index]
-            self.distance_x = report.position.location_x - self.distance_destination.location_x
-            self.distance_y = report.position.location_y - self.distance_destination.location_y
-            self.distance_calculate = ((self.distance_x)**2 + (self.distance_y)**2)**0.5
+                distance_destination = landing_pad_locations[self.index]
+            distance_x = report.position.location_x - distance_destination.location_x
+            distance_y = report.position.location_y - distance_destination.location_y
+            distance_calculate = ((distance_x) ** 2 + (distance_y) ** 2) ** 0.5
 
-            return self.distance_calculate
-        
+            return distance_calculate
+
         self.distance = distance_from_location()
-    
 
-        #check if the drone is at the waypoint
-        if(self.at_pad and self.reached_destination):
+        # check if the drone is at the waypoint
+        if (
+            self.distance < self.acceptance_radius
+            and self.location["reached_destination"]
+            and not self.location["at_pad"]
+        ):
+            self.location["at_pad"] = True
+            command = commands.Command.create_halt_command()
+        elif self.location["at_pad"] and self.location["reached_destination"]:
             command = commands.Command.create_land_command()
-        #check if the drone is at the origin
-        elif(self.at_origin):
-            self.at_origin = False
-            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
-        #check if at the waypoint
-        elif(self.distance<self.acceptance_radius and not self.reached_destination and not self.at_pad):
-            self.reached_destination = True
+        # check if the drone is at the origin
+        elif self.location["at_origin"]:
+            self.location["at_origin"] = False
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+        # check if at the waypoint
+        elif (
+            self.distance < self.acceptance_radius
+            and not self.location["reached_destination"]
+            and not self.location["at_pad"]
+        ):
+            self.location["reached_destination"] = True
             command = commands.Command.create_halt_command()
-        elif(self.distance<self.acceptance_radius and self.reached_destination and not self.at_pad):
-            self.at_pad =True
-            command = commands.Command.create_halt_command()
-        #check if drone is at way point and move to pad
-        elif(self.reached_destination and not self.at_pad):
+        # check if drone is at way point and move to pad
+        elif self.location["reached_destination"] and not self.location["at_pad"]:
             self.index = distance()
-            self.x = landing_pad_locations[self.index].location_x - report.position.location_x
-            self.y = landing_pad_locations[self.index].location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(self.x, self.y)
-        #check if the drone is at the waypoint and halted, move to pad
-           
+            command = commands.Command.create_set_relative_destination_command(
+                landing_pad_locations[self.index].location_x - report.position.location_x,
+                landing_pad_locations[self.index].location_y - report.position.location_y,
+            )
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
