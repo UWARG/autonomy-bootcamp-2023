@@ -31,13 +31,18 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         self.waypoint = waypoint
         print(f"Waypoint: {waypoint}")
 
-        self.acceptance_radius = acceptance_radius
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Add your own
+        self.acceptance_radius = acceptance_radius
+        self.distance_y = 0
+        self.distance_x = 0
+        self.distance = 0
+        self.reached_destination = False
+        status = drone_status
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -64,11 +69,34 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Default command
         command = commands.Command.create_null_command()
 
+
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
         # Do something based on the report and the state of this class...
+
+        
+        self.distance_x = report.position.location_x - self.waypoint.location_x
+        self.distance_y = report.position.location_y - self.waypoint.location_y
+        self.distance = ((self.distance_x)**2 + (self.distance_y)**2)**0.5
+        #self.reached_destination = False
+        
+        # halt the drone when the destination is reached
+        if (self.distance < self.acceptance_radius):
+            if(drone_status.DroneStatus.HALTED):
+                command = commands.Command.create_land_command()
+            else:
+                command = commands.Command.create_halt_command()
+                self.reached_destination = True
+
+        #land the drone and sit there
+        elif self.reached_destination and drone_status == drone_status.DroneStatus.LANDED:
+            command = commands.Command.create_null_command()
+
+        #check if drone is at origin and move to waypoint
+        elif (self.reached_destination == False and (report.position.location_x == 0 and report.position.location_y == 0)):
+            command = commands.Command.create_set_relative_destination_command(self.waypoint.location_x, self.waypoint.location_y)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
