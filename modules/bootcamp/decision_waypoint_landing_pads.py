@@ -85,9 +85,9 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
                 nearest_pad_x = self.waypoint.location_x - pad_x
                 nearest_pad_y = self.waypoint.location_y - pad_y
-                pad_distance = (nearest_pad_x**2 + nearest_pad_y**2) ** 0.5
+                pad_distance = nearest_pad_x**2 + nearest_pad_y**2
 
-                if pad_distance < self.closest_distance:
+                if pad_distance < self.closest_distance**2:
                     self.index = i
                     self.closest_distance = pad_distance
 
@@ -96,35 +96,37 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         def distance_from_location() -> int:
+
+            # check at which point of the process drone is in and calculate distance accodringly
             if not self.location["reached_destination"]:
                 distance_destination = self.waypoint
             else:
                 distance_destination = landing_pad_locations[self.index]
             distance_x = report.position.location_x - distance_destination.location_x
             distance_y = report.position.location_y - distance_destination.location_y
-            distance_calculate = ((distance_x) ** 2 + (distance_y) ** 2) ** 0.5
+            distance_calculate = (distance_x) ** 2 + (distance_y) ** 2
 
             return distance_calculate
 
         self.distance = distance_from_location()
 
-        # check if the drone is at the waypoint
-        if (
-            self.distance < self.acceptance_radius
+        # check if drone is at origin and move drone
+        if self.location["at_origin"]:
+            self.location["at_origin"] = False
+            command = commands.Command.create_set_relative_destination_command(
+                self.waypoint.location_x, self.waypoint.location_y
+            )
+
+        # check if the drone is at the pad and halt drone
+        elif (
+            self.distance < (self.acceptance_radius**2)
             and self.location["reached_destination"]
             and not self.location["at_pad"]
         ):
             self.location["at_pad"] = True
             command = commands.Command.create_halt_command()
-        elif self.location["at_pad"] and self.location["reached_destination"]:
-            command = commands.Command.create_land_command()
-        # check if the drone is at the origin
-        elif self.location["at_origin"]:
-            self.location["at_origin"] = False
-            command = commands.Command.create_set_relative_destination_command(
-                self.waypoint.location_x, self.waypoint.location_y
-            )
-        # check if at the waypoint
+
+        # check if at the waypoint and move drone
         elif (
             self.distance < self.acceptance_radius
             and not self.location["reached_destination"]
@@ -132,6 +134,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         ):
             self.location["reached_destination"] = True
             command = commands.Command.create_halt_command()
+
         # check if drone is at way point and move to pad
         elif self.location["reached_destination"] and not self.location["at_pad"]:
             self.index = distance()
@@ -139,6 +142,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 landing_pad_locations[self.index].location_x - report.position.location_x,
                 landing_pad_locations[self.index].location_y - report.position.location_y,
             )
+
+        # land the drone
+        elif self.location["at_pad"] and self.location["reached_destination"]:
+            command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

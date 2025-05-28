@@ -75,21 +75,16 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         self.distance_x = report.position.location_x - self.waypoint.location_x
         self.distance_y = report.position.location_y - self.waypoint.location_y
-        self.distance = ((self.distance_x) ** 2 + (self.distance_y) ** 2) ** 0.5
+        self.distance = (self.distance_x) ** 2 + (self.distance_y) ** 2
         # self.reached_destination = False
 
         # halt the drone when the destination is reached
-        if self.distance < self.acceptance_radius:
+        if self.distance < (self.acceptance_radius**2):
             if drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_halt_command()
                 self.reached_destination = True
-
-        # land the drone and sit there
-        elif self.reached_destination and drone_status == drone_status.DroneStatus.LANDED:
-            command = commands.Command.create_null_command()
-
         # check if drone is at origin and move to waypoint
         elif not self.reached_destination and (
             report.position.location_x == 0 and report.position.location_y == 0
