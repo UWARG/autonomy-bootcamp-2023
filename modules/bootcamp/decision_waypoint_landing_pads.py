@@ -118,16 +118,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             )
 
         # check if the drone is at the pad and halt drone
-        elif (
-            self.distance < (self.acceptance_radius**2)
-            and not self.location["at_pad"]
-        ):
+        elif self.distance < (self.acceptance_radius**2) and not self.location["at_pad"]:
             command = commands.Command.create_halt_command()
-            if (self.location["reached_destination"]):
+            if self.location["reached_destination"]:
                 self.location["at_pad"] = True
-            elif(not self.location["reached_destination"]):
+            elif not self.location["reached_destination"]:
                 self.location["reached_destination"] = True
-                
+
         # check if drone is at way point and move to pad
         elif self.location["reached_destination"] and not self.location["at_pad"]:
             self.index = distance()
