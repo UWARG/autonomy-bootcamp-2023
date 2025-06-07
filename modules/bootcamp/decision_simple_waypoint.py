@@ -89,7 +89,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         elif self.in_range(report.position, self.waypoint) < self.acceptance_radius**2:
             command = commands.Command.create_land_command()
-            self.landed = True
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

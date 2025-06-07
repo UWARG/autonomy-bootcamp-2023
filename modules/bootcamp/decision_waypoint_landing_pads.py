@@ -95,7 +95,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         elif self.calculate_dist(report.position, self.nearest_landing) < self.acceptance_radius**2:
             command = commands.Command.create_land_command()
-            self.landed = True
 
         else:
             command = commands.Command.create_set_relative_destination_command(
