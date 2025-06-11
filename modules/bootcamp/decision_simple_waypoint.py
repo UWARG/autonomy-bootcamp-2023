@@ -8,15 +8,12 @@ from .. import commands
 from .. import drone_report
 
 # Disable for bootcamp use
-# pylint: disable-next=unused-import
 from .. import drone_status
 from .. import location
 from ..private.decision import base_decision
 
 
 # Disable for bootcamp use
-# No enable
-# pylint: disable=duplicate-code,unused-argument
 
 
 class DecisionSimpleWaypoint(base_decision.BaseDecision):
@@ -68,7 +65,29 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        def reached_target(current_position: location.Location, target: location.Location) -> bool:
+            return bool(
+                (target.location_x - current_position.location_x) ** 2
+                + (target.location_y - current_position.location_y) ** 2
+                <= self.acceptance_radius**2
+            )
+
+        if (
+            reached_target(report.position, self.waypoint)
+            and report.status == drone_status.DroneStatus.MOVING
+        ):
+            command = commands.Command.create_halt_command()
+        elif (
+            reached_target(report.position, self.waypoint)
+            and report.status == drone_status.DroneStatus.HALTED
+        ):
+            command = commands.Command.create_land_command()
+        else:
+            relative_x = self.waypoint.location_x - report.position.location_x
+            relative_y = self.waypoint.location_y - report.position.location_y
+            command = commands.Command.create_set_relative_destination_command(
+                relative_x, relative_y
+            )
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
