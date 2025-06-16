@@ -37,21 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-    @staticmethod
-    def distance_sqr(position: location.Location, destination: location.Location) -> float:
-        pos_x = position.location_x
-        pos_y = position.location_y
-        des_x = destination.location_x
-        des_y = destination.location_y
-
-        return ((pos_x - des_x) ** 2 + (pos_y - des_y) ** 2)
-
-    @staticmethod
-    def in_radius(position: location.Location, destination: location.Location, radius: float) -> bool:
-        distance = DecisionSimpleWaypoint.distance_sqr(position, destination)
-
-        return distance < radius ** 2
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -80,20 +65,35 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        def distance_sqr(position: location.Location, destination: location.Location) -> float:
+            pos_x = position.location_x
+            pos_y = position.location_y
+            des_x = destination.location_x
+            des_y = destination.location_y
+
+            return (pos_x - des_x) ** 2 + (pos_y - des_y) ** 2
+
+        def in_radius(
+            position: location.Location, destination: location.Location, radius: float
+        ) -> bool:
+            distance = distance_sqr(position, destination)
+            return distance < radius**2
+
         waypoint = self.waypoint
         position = report.position
         radius = self.acceptance_radius
 
-        if(self.in_radius(position,waypoint,radius)):
-            if(report.status == drone_status.DroneStatus.HALTED):
+        if in_radius(position, waypoint, radius):
+            if report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_halt_command()
-            
         else:
             relative_x = waypoint.location_x - position.location_x
             relative_y = waypoint.location_y - position.location_y
-            command = commands.Command.create_set_relative_destination_command(relative_x, relative_y)
+            command = commands.Command.create_set_relative_destination_command(
+                relative_x, relative_y
+            )
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
