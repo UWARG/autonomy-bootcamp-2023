@@ -37,7 +37,41 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.reached_waypoint = False
+
+    @staticmethod
+    def distance_sqr(position: location.Location, destination: location.Location) -> float:
+        pos_x = position.location_x
+        pos_y = position.location_y
+        des_x = destination.location_x
+        des_y = destination.location_y
+
+        return ((pos_x - des_x) ** 2 + (pos_y - des_y) ** 2)
+
+    @staticmethod
+    def in_radius(position: location.Location, destination: location.Location, radius: float) -> bool:
+        distance = DecisionWaypointLandingPads.distance_sqr(position, destination)
+
+        return distance < radius ** 2
+    
+    @staticmethod
+    def closest_landing_pad(landing_pad_locations: "list[location.Location]", waypoint: location.Location) -> location.Location:
+
+        closest_lp = None
+        min_distance = float("inf")
+
+        for lp in landing_pad_locations:
+            distance = DecisionWaypointLandingPads.distance_sqr(lp, waypoint)
+            if distance < min_distance:
+                min_distance = distance
+                closest_lp = lp
+        return closest_lp
+    
+    @staticmethod
+    def get_relative(position: location.Location, destination: location.Location) -> "tuple[float,float]":
+        dx = destination.location_x - position.location_x
+        dy = destination.location_y - position.location_y
+        return dx,dy
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +102,33 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        waypoint = self.waypoint
+        position = report.position
+        radius = self.acceptance_radius
+
+        if self.reached_waypoint == False:
+            if(self.in_radius(position,waypoint,radius)):
+                self.reached_waypoint = True
+                command = commands.Command.create_halt_command()
+                
+            else:
+                relative_dis = self.get_relative(position,waypoint)
+                dx = relative_dis[0]
+                dy = relative_dis[1]
+                command = commands.Command.create_set_relative_destination_command(dx, dy)
+
+        else:
+            closest_lp = self.closest_landing_pad(landing_pad_locations,waypoint)
+            if(self.in_radius(position,closest_lp,radius)):
+                if(report.status == drone_status.DroneStatus.HALTED):
+                    command = commands.Command.create_land_command()
+                else:
+                    command = commands.Command.create_halt_command()
+            else:
+                relative_dis = self.get_relative(position,closest_lp)
+                dx = relative_dis[0]
+                dy = relative_dis[1]
+                command = commands.Command.create_set_relative_destination_command(dx, dy)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

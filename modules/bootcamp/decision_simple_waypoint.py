@@ -38,19 +38,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
     @staticmethod
-    def in_radius(position: location.Location, destination: location.Location, radius: float) -> bool:
+    def distance_sqr(position: location.Location, destination: location.Location) -> float:
         pos_x = position.location_x
         pos_y = position.location_y
         des_x = destination.location_x
         des_y = destination.location_y
 
-        diff = ((pos_x - des_x) ** 2 + (pos_y - des_y) ** 2) ** 0.5
+        return ((pos_x - des_x) ** 2 + (pos_y - des_y) ** 2)
 
-        if(diff<radius):
-            return True
-        
-        else:
-            return False
+    @staticmethod
+    def in_radius(position: location.Location, destination: location.Location, radius: float) -> bool:
+        distance = DecisionSimpleWaypoint.distance_sqr(position, destination)
+
+        return distance < radius ** 2
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
