@@ -35,7 +35,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         self.reached_waypoint = False
-        self.target_landing_pad = location.Location(9999, 9999)
+        self.target_landing_pad = location.Location(0, 0)
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
