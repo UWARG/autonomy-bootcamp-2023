@@ -96,38 +96,28 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_lp = lp
             return closest_lp
 
-        def get_relative(
-            position: location.Location, destination: location.Location
-        ) -> "tuple[float,float]":
-            dx = destination.location_x - position.location_x
-            dy = destination.location_y - position.location_y
-            return dx, dy
 
-        waypoint = self.waypoint
         position = report.position
-        radius = self.acceptance_radius
 
         if self.reached_waypoint is False:
-            if in_radius(position, waypoint, radius):
+            if in_radius(position, self.waypoint, self.acceptance_radius):
                 self.reached_waypoint = True
                 command = commands.Command.create_halt_command()
             else:
-                relative_dis = get_relative(position, waypoint)
-                dx = relative_dis[0]
-                dy = relative_dis[1]
+                dx = self.waypoint.location_x - position.location_x
+                dy = self.waypoint.location_y - position.location_y
                 command = commands.Command.create_set_relative_destination_command(dx, dy)
 
         else:
-            closest_lp = closest_landing_pad(landing_pad_locations, waypoint)
-            if in_radius(position, closest_lp, radius):
+            closest_lp = closest_landing_pad(landing_pad_locations, self.waypoint)
+            if in_radius(position, closest_lp, self.acceptance_radius):
                 if report.status == drone_status.DroneStatus.HALTED:
                     command = commands.Command.create_land_command()
                 else:
                     command = commands.Command.create_halt_command()
             else:
-                relative_dis = get_relative(position, closest_lp)
-                dx = relative_dis[0]
-                dy = relative_dis[1]
+                dx = closest_lp.location_x - position.location_x
+                dy = closest_lp.location_y - position.location_y
                 command = commands.Command.create_set_relative_destination_command(dx, dy)
 
         # ============

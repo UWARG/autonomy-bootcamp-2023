@@ -37,7 +37,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -82,11 +81,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             distance = distance_sqr(position, destination)
             return distance < radius**2
 
-        waypoint = self.waypoint
         position = report.position
-        radius = self.acceptance_radius
 
-        if in_radius(position, waypoint, radius):
+        if in_radius(position, self.waypoint, self.acceptance_radius):
             if report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
             else:
