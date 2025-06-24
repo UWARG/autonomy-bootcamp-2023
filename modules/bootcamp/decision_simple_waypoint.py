@@ -79,7 +79,6 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             distance = distance_sqr(position, destination)
             return distance < radius**2
 
-
         if in_radius(report.position, self.waypoint, self.acceptance_radius):
             if report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
