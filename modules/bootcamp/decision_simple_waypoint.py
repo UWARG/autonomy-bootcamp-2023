@@ -88,8 +88,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             else:
                 command = commands.Command.create_halt_command()
         else:
-            relative_x = waypoint.location_x - position.location_x
-            relative_y = waypoint.location_y - position.location_y
+            relative_x = self.waypoint.location_x - position.location_x
+            relative_y = self.waypoint.location_y - position.location_y
             command = commands.Command.create_set_relative_destination_command(
                 relative_x, relative_y
             )
