@@ -96,7 +96,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     closest_lp = lp
             return closest_lp
 
-
         position = report.position
 
         if self.reached_waypoint is False:
