@@ -67,40 +67,31 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def squared_distance(loc1: location.Location, loc2: location.Location) -> float:
-            return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2
-
-
-        def is_within_radius(loc1: location.Location, loc2: location.Location, radius: float) -> bool:
-            return squared_distance(loc1, loc2) < radius ** 2
-
-
-        def find_closest_pad(
-            pads: list[location.Location], target: location.Location
-        ) -> location.Location:
-            return min(pads, key=lambda pad: squared_distance(pad, target))
-
-
         if not self.reached_waypoint:
-            if is_within_radius(report.position, self.waypoint, self.acceptance_radius):
+            dx = self.waypoint.location_x - report.position.location_x
+            dy = self.waypoint.location_y - report.position.location_y
+            squared_distance_to_waypoint = dx**2 + dy**2
+            if squared_distance_to_waypoint < self.acceptance_radius**2:
                 self.reached_waypoint = True
                 command = commands.Command.create_halt_command()
             else:
-                dx = self.waypoint.location_x - report.position.location_x
-                dy = self.waypoint.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(dx, dy)
         else:
-            closest_pad = find_closest_pad(landing_pad_locations, self.waypoint)
-            if is_within_radius(report.position, closest_pad, self.acceptance_radius):
+            closest_pad = min(
+                landing_pad_locations,
+                key=lambda pad: (pad.location_x - self.waypoint.location_x) ** 2
+                + (pad.location_y - self.waypoint.location_y) ** 2,
+            )
+            dx = closest_pad.location_x - report.position.location_x
+            dy = closest_pad.location_y - report.position.location_y
+            squared_distance_to_pad = dx**2 + dy**2
+            if squared_distance_to_pad < self.acceptance_radius**2:
                 if report.status == drone_status.DroneStatus.HALTED:
                     command = commands.Command.create_land_command()
                 else:
                     command = commands.Command.create_halt_command()
             else:
-                dx = closest_pad.location_x - report.position.location_x
-                dy = closest_pad.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(dx, dy)
-
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
