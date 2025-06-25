@@ -81,7 +81,6 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return min(pads, key=lambda pad: squared_distance(pad, target))
 
 
-
         if not self.reached_waypoint:
             if is_within_radius(report.position, self.waypoint, self.acceptance_radius):
                 self.reached_waypoint = True

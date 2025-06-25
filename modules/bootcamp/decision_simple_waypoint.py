@@ -66,12 +66,14 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         def squared_distance(loc1: location.Location, loc2: location.Location) -> float:
-            return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2
+            return (loc1.location_x - loc2.location_x) ** 2 + (
+                loc1.location_y - loc2.location_y
+            ) ** 2
 
-
-        def is_within_radius(loc1: location.Location, loc2: location.Location, radius: float) -> bool:
-            return squared_distance(loc1, loc2) < radius ** 2
-
+        def is_within_radius(
+            loc1: location.Location, loc2: location.Location, radius: float
+        ) -> bool:
+            return squared_distance(loc1, loc2) < radius**2
 
         if is_within_radius(report.position, self.waypoint, self.acceptance_radius):
             if report.status == drone_status.DroneStatus.HALTED:
