@@ -65,31 +65,24 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def distance_sqr(position: location.Location, destination: location.Location) -> float:
-            pos_x = position.location_x
-            pos_y = position.location_y
-            des_x = destination.location_x
-            des_y = destination.location_y
+        def squared_distance(loc1: location.Location, loc2: location.Location) -> float:
+            return (loc1.location_x - loc2.location_x) ** 2 + (loc1.location_y - loc2.location_y) ** 2
 
-            return (pos_x - des_x) ** 2 + (pos_y - des_y) ** 2
 
-        def in_radius(
-            position: location.Location, destination: location.Location, radius: float
-        ) -> bool:
-            distance = distance_sqr(position, destination)
-            return distance < radius**2
+        def is_within_radius(loc1: location.Location, loc2: location.Location, radius: float) -> bool:
+            return squared_distance(loc1, loc2) < radius ** 2
 
-        if in_radius(report.position, self.waypoint, self.acceptance_radius):
+
+        if is_within_radius(report.position, self.waypoint, self.acceptance_radius):
             if report.status == drone_status.DroneStatus.HALTED:
                 command = commands.Command.create_land_command()
             else:
                 command = commands.Command.create_halt_command()
         else:
-            relative_x = self.waypoint.location_x - report.position.location_x
-            relative_y = self.waypoint.location_y - report.position.location_y
-            command = commands.Command.create_set_relative_destination_command(
-                relative_x, relative_y
-            )
+            dx = self.waypoint.location_x - report.position.location_x
+            dy = self.waypoint.location_y - report.position.location_y
+            command = commands.Command.create_set_relative_destination_command(dx, dy)
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
