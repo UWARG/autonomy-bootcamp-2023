@@ -89,7 +89,6 @@ class DetectLandingPad:
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-    
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -119,7 +118,7 @@ class DetectLandingPad:
         # move the copy into CPU space,
         # and convert to a numpy array
         boxes_np = boxes_xyxy.detach().cpu().numpy()
-        
+
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for box_coords in boxes_np:

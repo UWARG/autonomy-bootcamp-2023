@@ -64,7 +64,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         Find the closest landing pad to the target location.
         """
         closest_pad = None
-        min_distance_squared = float('inf')
+        min_distance_squared = float("inf")
 
         for landing_pad in landing_pad_locations:
             distance_squared = self.calculate_distance_squared(target_location, landing_pad)
@@ -102,8 +102,10 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:
             # Phase 1: Move to waypoint if not reached yet
             if not self.has_reached_waypoint:
-                distance_to_waypoint_squared = self.calculate_distance_squared(current_position, self.waypoint)
-                
+                distance_to_waypoint_squared = self.calculate_distance_squared(
+                    current_position, self.waypoint
+                )
+
                 if distance_to_waypoint_squared <= acceptance_radius_squared:
                     # We've reached the waypoint, now find closest landing pad
                     self.has_reached_waypoint = True
@@ -111,7 +113,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                         self.waypoint, landing_pad_locations
                     )
                     print(f"Reached waypoint, closest landing pad: {self.closest_landing_pad}")
-                elif not self.has_moved_to_waypoint:
+                if not self.has_moved_to_waypoint:
                     # Move to waypoint
                     dx = self.waypoint.location_x - current_position.location_x
                     dy = self.waypoint.location_y - current_position.location_y
@@ -123,11 +125,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 distance_to_landing_pad_squared = self.calculate_distance_squared(
                     current_position, self.closest_landing_pad
                 )
-                
+
                 if distance_to_landing_pad_squared <= acceptance_radius_squared:
                     # We're at the landing pad, land the drone
                     return commands.Command.create_land_command()
-                elif not self.has_moved_to_landing_pad:
+                if not self.has_moved_to_landing_pad:
                     # Move to landing pad
                     dx = self.closest_landing_pad.location_x - current_position.location_x
                     dy = self.closest_landing_pad.location_y - current_position.location_y
