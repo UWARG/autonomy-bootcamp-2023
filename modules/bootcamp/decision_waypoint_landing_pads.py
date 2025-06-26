@@ -37,7 +37,13 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.waypoint = waypoint
+        self.acceptance_radius = acceptance_radius
+        self.sent_to_waypoint = False
+        self.sent_to_pad = False
+        self.landed = False
+        self.closest_pad = None
+        print(f"Waypoint: {waypoint}")
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -68,7 +74,57 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Do something based on the report and the state of this class...
+        current = report.position
+
+        def distance_squared(a: location.Location, b: location.Location):
+            return (a.location_x - b.location_x)**2 + (a.location_y - b.location_y)**2
+
+        # if landed
+        if report.status == drone_status.DroneStatus.LANDED:
+            return command
+
+        # If halted
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.sent_to_waypoint:
+                dist_to_waypoint = distance_squared(current, self.waypoint)**0.5
+                if dist_to_waypoint <= self.acceptance_radius:
+                    # reached waypoint
+                    min_dist = float("inf")
+                    for pad in landing_pad_locations:
+                        dist = distance_squared(current, pad)
+                        if dist < min_dist:
+                            min_dist = dist
+                            self.closest_pad = pad
+                    self.sent_to_waypoint = True
+                else:
+                    # Move to waypoint
+                    rel_x = self.waypoint.location_x - current.location_x
+                    rel_y = self.waypoint.location_y - current.location_y
+                    new_x = current.location_x + rel_x
+                    new_y = current.location_y + rel_y
+                    if -60 <= new_x <= 60 and -60 <= new_y <= 60:
+                        command = commands.Command.create_set_relative_destination_command(rel_x, rel_y)
+
+            elif not self.sent_to_pad:
+                dist_to_pad = distance_squared(current, self.closest_pad)**0.5
+                if dist_to_pad <= self.acceptance_radius:
+                    command = commands.Command.create_land_command()
+                    self.sent_to_pad = True
+                    self.landed = True
+                else:
+                    rel_x = self.closest_pad.location_x - current.location_x
+                    rel_y = self.closest_pad.location_y - current.location_y
+                    new_x = current.location_x + rel_x
+                    new_y = current.location_y + rel_y
+                    if -60 <= new_x <= 60 and -60 <= new_y <= 60:
+                        command = commands.Command.create_set_relative_destination_command(rel_x, rel_y)
+
+        # If drone is moving and reached target
+        elif report.status == drone_status.DroneStatus.MOVING:
+            target = self.closest_pad if self.sent_to_waypoint else self.waypoint
+            dist = distance_squared(current, target)**0.5
+            if dist <= self.acceptance_radius:
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑

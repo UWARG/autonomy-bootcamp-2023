@@ -99,7 +99,7 @@ class DetectLandingPad:
         # * verbose
         predictions = self.__model.predict(
         source=image,
-        conf=0.7,  # As hinted
+        conf=0.7,  # hint
         device=self.__DEVICE,
         verbose=False
     )
