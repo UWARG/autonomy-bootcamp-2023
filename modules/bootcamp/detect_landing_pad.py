@@ -89,6 +89,7 @@ class DetectLandingPad:
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
+    
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -109,7 +110,7 @@ class DetectLandingPad:
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = prediction.plot()
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
         boxes_xyxy = prediction.boxes.xyxy
@@ -118,13 +119,11 @@ class DetectLandingPad:
         # move the copy into CPU space,
         # and convert to a numpy array
         boxes_np = boxes_xyxy.detach().cpu().numpy()
+        
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
         for box_coords in boxes_np:
-            x1, y1, x2, y2 = box_coords
-            bounds = np.array([x1, y1, x2, y2])
-
-            success, box = bounding_box.BoundingBox.create(bounds)
+            success, box = bounding_box.BoundingBox.create(box_coords)
             if success:
                 bounding_boxes.append(box)
 
