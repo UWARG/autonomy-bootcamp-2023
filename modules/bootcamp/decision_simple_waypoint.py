@@ -42,8 +42,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-    
-    def run(self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]") -> commands.Command:
+
+    def run(
+        self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
+    ) -> commands.Command:
         """
         Make the drone fly to the waypoint.
 
@@ -67,10 +69,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         current = report.position
-        
+
         # distance calculation
-        distance = ((self.waypoint.location_x - current.location_x)**2 + 
-                   (self.waypoint.location_y - current.location_y)**2)**0.5
+        distance = (
+            (self.waypoint.location_x - current.location_x) ** 2
+            + (self.waypoint.location_y - current.location_y) ** 2
+        ) ** 0.5
 
         # landed state
         if report.status == drone_status.DroneStatus.LANDED:
@@ -83,7 +87,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             elif not self.sent_initial_command:  # only send move command once
                 rel_x = self.waypoint.location_x - current.location_x
                 rel_y = self.waypoint.location_y - current.location_y
-                
+
                 # Boundary check
                 new_x = current.location_x + rel_x
                 new_y = current.location_y + rel_y
