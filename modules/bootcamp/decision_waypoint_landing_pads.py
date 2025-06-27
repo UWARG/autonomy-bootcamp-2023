@@ -76,7 +76,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         current = report.position
 
-        def distance_squared(a: location.Location, b: location.Location):
+        def distance_squared(a: location.Location, b: location.Location) -> float:
             return (a.location_x - b.location_x) ** 2 + (a.location_y - b.location_y) ** 2
 
         # if landed
