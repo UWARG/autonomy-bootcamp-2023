@@ -130,7 +130,7 @@ class DetectLandingPad:
         #     # Create BoundingBox object and append to list
         #     result, box = ...
 
-        return [], image_annotated
+        # return [], image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
