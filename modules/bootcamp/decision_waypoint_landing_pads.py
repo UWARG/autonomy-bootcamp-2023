@@ -100,43 +100,38 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         acceptance_radius_squared = self.acceptance_radius * self.acceptance_radius
 
         if report.status == drone_status.DroneStatus.HALTED:
-            # Phase 1: Move to waypoint if not reached yet
             if not self.has_reached_waypoint:
                 distance_to_waypoint_squared = self.calculate_distance_squared(
                     current_position, self.waypoint
                 )
 
                 if distance_to_waypoint_squared <= acceptance_radius_squared:
-                    # We've reached the waypoint, now find closest landing pad
+
                     self.has_reached_waypoint = True
                     self.closest_landing_pad = self.find_closest_landing_pad(
                         self.waypoint, landing_pad_locations
                     )
                     print(f"Reached waypoint, closest landing pad: {self.closest_landing_pad}")
                 if not self.has_moved_to_waypoint:
-                    # Move to waypoint
+
                     dx = self.waypoint.location_x - current_position.location_x
                     dy = self.waypoint.location_y - current_position.location_y
                     self.has_moved_to_waypoint = True
                     return commands.Command.create_set_relative_destination_command(dx, dy)
 
-            # Phase 2: Move to landing pad and land (after reaching waypoint)
             if self.has_reached_waypoint and self.closest_landing_pad is not None:
                 distance_to_landing_pad_squared = self.calculate_distance_squared(
                     current_position, self.closest_landing_pad
                 )
 
                 if distance_to_landing_pad_squared <= acceptance_radius_squared:
-                    # We're at the landing pad, land the drone
                     return commands.Command.create_land_command()
                 if not self.has_moved_to_landing_pad:
-                    # Move to landing pad
                     dx = self.closest_landing_pad.location_x - current_position.location_x
                     dy = self.closest_landing_pad.location_y - current_position.location_y
                     self.has_moved_to_landing_pad = True
                     return commands.Command.create_set_relative_destination_command(dx, dy)
 
-        # Return null command to advance the simulator
         return commands.Command.create_null_command()
 
         # ============

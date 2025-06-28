@@ -64,12 +64,12 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         current_position = report.position
+        acceptance_radius_squared = self.acceptance_radius * self.acceptance_radius
 
         # Calculate squared distance to waypoint (avoiding expensive sqrt)
         dx = self.waypoint.location_x - current_position.location_x
         dy = self.waypoint.location_y - current_position.location_y
         distance_squared = dx * dx + dy * dy
-        acceptance_radius_squared = self.acceptance_radius * self.acceptance_radius
 
         if report.status == drone_status.DroneStatus.HALTED:
             if distance_squared <= acceptance_radius_squared:
