@@ -36,6 +36,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         self.acceptance_radius = acceptance_radius
         self.has_moved = False
+        self.current_position = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -63,24 +64,21 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        current_position = report.position
+        self.current_position = report.position
         acceptance_radius_squared = self.acceptance_radius * self.acceptance_radius
-
-        # Calculate squared distance to waypoint (avoiding expensive sqrt)
-        dx = self.waypoint.location_x - current_position.location_x
-        dy = self.waypoint.location_y - current_position.location_y
+        dx = self.waypoint.location_x - self.current_position.location_x
+        dy = self.waypoint.location_y - self.current_position.location_y
         distance_squared = dx * dx + dy * dy
 
         if report.status == drone_status.DroneStatus.HALTED:
             if distance_squared <= acceptance_radius_squared:
-                # We're close enough to the waypoint, land the drone
+
                 return commands.Command.create_land_command()
             if not self.has_moved:
-                # We haven't moved yet, send the move command
+
                 self.has_moved = True
                 return commands.Command.create_set_relative_destination_command(dx, dy)
 
-        # Return null command to advance the simulator
         return commands.Command.create_null_command()
 
         # ============

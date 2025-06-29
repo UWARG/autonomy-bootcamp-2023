@@ -41,6 +41,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         self.has_reached_waypoint = False
         self.closest_landing_pad = None
         self.has_moved_to_landing_pad = False
+        self.current_position = None
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -96,41 +97,41 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        current_position = report.position
+        self.current_position = report.position
         acceptance_radius_squared = self.acceptance_radius * self.acceptance_radius
 
-        if report.status == drone_status.DroneStatus.HALTED:
-            if not self.has_reached_waypoint:
-                distance_to_waypoint_squared = self.calculate_distance_squared(
-                    current_position, self.waypoint
+        if report.status != drone_status.DroneStatus.HALTED:
+            return commands.Command.create_null_command()
+
+        if not self.has_reached_waypoint:
+            distance_to_waypoint_squared = self.calculate_distance_squared(
+                self.current_position, self.waypoint
+            )
+
+            if distance_to_waypoint_squared <= acceptance_radius_squared:
+                self.has_reached_waypoint = True
+                self.closest_landing_pad = self.find_closest_landing_pad(
+                    self.waypoint, landing_pad_locations
                 )
+                print(f"Reached waypoint, closest landing pad: {self.closest_landing_pad}")
+            if not self.has_moved_to_waypoint:
+                dx = self.waypoint.location_x - self.current_position.location_x
+                dy = self.waypoint.location_y - self.current_position.location_y
+                self.has_moved_to_waypoint = True
+                return commands.Command.create_set_relative_destination_command(dx, dy)
 
-                if distance_to_waypoint_squared <= acceptance_radius_squared:
+        if self.has_reached_waypoint and self.closest_landing_pad is not None:
+            distance_to_landing_pad_squared = self.calculate_distance_squared(
+                self.current_position, self.closest_landing_pad
+            )
 
-                    self.has_reached_waypoint = True
-                    self.closest_landing_pad = self.find_closest_landing_pad(
-                        self.waypoint, landing_pad_locations
-                    )
-                    print(f"Reached waypoint, closest landing pad: {self.closest_landing_pad}")
-                if not self.has_moved_to_waypoint:
-
-                    dx = self.waypoint.location_x - current_position.location_x
-                    dy = self.waypoint.location_y - current_position.location_y
-                    self.has_moved_to_waypoint = True
-                    return commands.Command.create_set_relative_destination_command(dx, dy)
-
-            if self.has_reached_waypoint and self.closest_landing_pad is not None:
-                distance_to_landing_pad_squared = self.calculate_distance_squared(
-                    current_position, self.closest_landing_pad
-                )
-
-                if distance_to_landing_pad_squared <= acceptance_radius_squared:
-                    return commands.Command.create_land_command()
-                if not self.has_moved_to_landing_pad:
-                    dx = self.closest_landing_pad.location_x - current_position.location_x
-                    dy = self.closest_landing_pad.location_y - current_position.location_y
-                    self.has_moved_to_landing_pad = True
-                    return commands.Command.create_set_relative_destination_command(dx, dy)
+            if distance_to_landing_pad_squared <= acceptance_radius_squared:
+                return commands.Command.create_land_command()
+            if not self.has_moved_to_landing_pad:
+                dx = self.closest_landing_pad.location_x - self.current_position.location_x
+                dy = self.closest_landing_pad.location_y - self.current_position.location_y
+                self.has_moved_to_landing_pad = True
+                return commands.Command.create_set_relative_destination_command(dx, dy)
 
         return commands.Command.create_null_command()
 
