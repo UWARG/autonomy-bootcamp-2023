@@ -80,14 +80,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return (a.location_x - b.location_x) ** 2 + (a.location_y - b.location_y) ** 2
 
         # if landed
-        #if report.status == drone_status.DroneStatus.LANDED:
+        # if report.status == drone_status.DroneStatus.LANDED:
         #    return command
 
         # If halted
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.sent_to_waypoint:
                 dist_to_waypoint_sq = distance_squared(current, self.waypoint)
-                if dist_to_waypoint_sq <= self.acceptance_radius ** 2:
+                if dist_to_waypoint_sq <= self.acceptance_radius**2:
                     # reached waypoint
                     min_dist = float("inf")
                     for pad in landing_pad_locations:
@@ -109,7 +109,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
             elif not self.sent_to_pad:
                 dist_to_pad_sq = distance_squared(current, self.closest_pad)
-                if dist_to_pad_sq <= self.acceptance_radius ** 2:
+                if dist_to_pad_sq <= self.acceptance_radius**2:
                     command = commands.Command.create_land_command()
                     self.sent_to_pad = True
                     self.landed = True
@@ -127,7 +127,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif report.status == drone_status.DroneStatus.MOVING:
             target = self.closest_pad if self.sent_to_waypoint else self.waypoint
             dist_sq = distance_squared(current, target)
-            if dist_sq <= self.acceptance_radius ** 2:
+            if dist_sq <= self.acceptance_radius**2:
                 command = commands.Command.create_halt_command()
 
         # ============

@@ -71,19 +71,19 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         current = report.position
 
         # distance calculation
-        distance_sq = ((self.waypoint.location_x - current.location_x) ** 2
-                       + (self.waypoint.location_y - current.location_y) ** 2
-        )
+        distance_sq = (self.waypoint.location_x - current.location_x) ** 2 + (
+            self.waypoint.location_y - current.location_y
+        ) ** 2
 
-        if distance_sq <= self.acceptance_radius ** 2:
+        # if distance_sq <= self.acceptance_radius ** 2:
 
         # landed state
-        #if report.status == drone_status.DroneStatus.LANDED:
+        # if report.status == drone_status.DroneStatus.LANDED:
         #    return command
 
         # halted state
         if report.status == drone_status.DroneStatus.HALTED:
-            if distance <= self.acceptance_radius:
+            if distance_sq <= self.acceptance_radius**2:
                 command = commands.Command.create_land_command()
             elif not self.sent_initial_command:  # only send move command once
                 rel_x = self.waypoint.location_x - current.location_x
@@ -98,7 +98,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # moving state
         elif report.status == drone_status.DroneStatus.MOVING:
-            if distance <= self.acceptance_radius:
+            if distance_sq <= self.acceptance_radius**2:
                 command = commands.Command.create_halt_command()
 
         # ============
