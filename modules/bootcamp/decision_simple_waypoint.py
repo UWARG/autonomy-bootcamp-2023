@@ -71,14 +71,15 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         current = report.position
 
         # distance calculation
-        distance = (
-            (self.waypoint.location_x - current.location_x) ** 2
-            + (self.waypoint.location_y - current.location_y) ** 2
-        ) ** 0.5
+        distance_sq = ((self.waypoint.location_x - current.location_x) ** 2
+                       + (self.waypoint.location_y - current.location_y) ** 2
+        )
+
+        if distance_sq <= self.acceptance_radius ** 2:
 
         # landed state
-        if report.status == drone_status.DroneStatus.LANDED:
-            return command
+        #if report.status == drone_status.DroneStatus.LANDED:
+        #    return command
 
         # halted state
         if report.status == drone_status.DroneStatus.HALTED:
