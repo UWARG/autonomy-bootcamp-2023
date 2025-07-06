@@ -70,7 +70,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # L2 norm squared (Euclidean distance squared)
             delta_dx = p_1.location_x - p_2.location_x
             delta_dy = p_1.location_y - p_2.location_y
-            return delta_dx ** 2 + delta_dy ** 2
+            return delta_dx**2 + delta_dy**2
 
         position = report.position
         if report.status == drone_status.DroneStatus.HALTED:
