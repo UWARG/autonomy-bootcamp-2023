@@ -56,7 +56,10 @@ class DetectLandingPad:
         if not model_directory.is_dir():
             return False, None
 
-        model_path = pathlib.PurePosixPath(model_directory, cls.__MODEL_NAME,)
+        model_path = pathlib.PurePosixPath(
+            model_directory,
+            cls.__MODEL_NAME,
+        )
 
         try:
             model = ultralytics.YOLO(str(model_path))
