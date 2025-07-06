@@ -66,11 +66,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        def calculate_norm_squared(p_1: location.Location, p_2: location.Location):
+        def calculate_norm_squared(p_1: location.Location, p_2: location.Location) -> float:
             # L2 norm squared (Euclidean distance squared)
             delta_dx = p_1.location_x - p_2.location_x
             delta_dy = p_1.location_y - p_2.location_y
-            return delta_dx * delta_dx + delta_dy * delta_dy
+            return delta_dx ** 2 + delta_dy ** 2
 
         position = report.position
         if report.status == drone_status.DroneStatus.HALTED:
