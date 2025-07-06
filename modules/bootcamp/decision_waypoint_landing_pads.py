@@ -76,7 +76,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         if report.status == drone_status.DroneStatus.HALTED:
 
             if not self.landing_phase:
-                 # Moving toward waypoint
+                # Moving toward waypoint
                 delta_dx = self.waypoint.location_x - position.location_x
                 delta_dy = self.waypoint.location_y - position.location_y
 
@@ -84,8 +84,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     # Reached waypoint, now we find the nearest landing pad
                     self.landing_phase = True
                 else:
-                    relative_x = min(max(position.location_x + delta_dx, -60), 60) - position.location_x
-                    relative_y = min(max(position.location_y + delta_dy, -60), 60) - position.location_y
+                    relative_x = (
+                        min(max(position.location_x + delta_dx, -60), 60) - position.location_x
+                    )
+                    relative_y = (
+                        min(max(position.location_y + delta_dy, -60), 60) - position.location_y
+                    )
                     command = commands.Command.create_set_relative_destination_command(
                         relative_x, relative_y
                     )
