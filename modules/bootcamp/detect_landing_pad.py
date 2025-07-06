@@ -9,6 +9,7 @@ import pathlib
 import numpy as np
 import torch
 import ultralytics
+import ultralytics.models
 
 from .. import bounding_box
 
@@ -55,10 +56,7 @@ class DetectLandingPad:
         if not model_directory.is_dir():
             return False, None
 
-        model_path = pathlib.PurePosixPath(
-            model_directory,
-            cls.__MODEL_NAME,
-        )
+        model_path = pathlib.PurePosixPath(model_directory, cls.__MODEL_NAME,)
 
         try:
             model = ultralytics.YOLO(str(model_path))
@@ -89,7 +87,6 @@ class DetectLandingPad:
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -98,22 +95,24 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        predictions = self.__model.predict(
+            source=image, device=self.__DEVICE, conf=0.7, verbose=False
+        )
 
         # Get the Result object
-        prediction = ...
+        prediction = predictions[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(conf=True)
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
@@ -121,8 +120,16 @@ class DetectLandingPad:
         # for i in range(0, ...):
         #     # Create BoundingBox object and append to list
         #     result, box = ...
+        for i in range(0, np.shape(boxes_cpu)[0]):
 
-        return [], image_annotated
+            result, box = bounding_box.BoundingBox.create(boxes_cpu[i])
+
+            if result:
+                bounding_boxes.append(box)
+            else:
+                return [], image_annotated
+
+        return bounding_boxes, image_annotated
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
