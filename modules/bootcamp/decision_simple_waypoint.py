@@ -32,13 +32,11 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         print(f"Waypoint: {waypoint}")
 
         self.acceptance_radius = acceptance_radius
+        self.has_sent_landing_command = False
 
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
-        # Add your own
-
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -67,11 +65,33 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        drone_x = report.position.location_x
+        drone_y = report.position.location_y
 
-        # Do something based on the report and the state of this class...
+        waypoint_x = self.waypoint.location_x
+        waypoint_y = self.waypoint.location_y
 
+        # Calculate distance from drone to waypoint
+        distanceSquared = ((waypoint_x - drone_x) ** 2 + (waypoint_y - drone_y) ** 2)
+
+        # Booleann for acceptance radius
+        within_acceptance_radius = distanceSquared <= self.acceptance_radius ** 2
+
+        # If drone is halted and not landed yet
+        if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
+            print("Drone is halted.")
+            if within_acceptance_radius:
+                print("Within acceptance radius, sending landing command.")
+                command = commands.Command.create_land_command()
+                self.has_sent_landing_command = True
+            else:
+                print("Not within acceptance radius, sending waypoint command.")
+                command = commands.Command.create_set_relative_destination_command(
+                    self.waypoint.location_x - report.position.location_x,
+                    self.waypoint.location_y - report.position.location_y
+                )
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
         return command
+
