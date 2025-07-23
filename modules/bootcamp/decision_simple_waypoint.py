@@ -72,10 +72,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         waypoint_y = self.waypoint.location_y
 
         # Calculate distance from drone to waypoint
-        distanceSquared = ((waypoint_x - drone_x) ** 2 + (waypoint_y - drone_y) ** 2)
+        distance_squared = (waypoint_x - drone_x) ** 2 + (waypoint_y - drone_y) ** 2
 
-        # Booleann for acceptance radius
-        within_acceptance_radius = distanceSquared <= self.acceptance_radius ** 2
+        # Boolean for acceptance radius
+        within_acceptance_radius = distance_squared <= self.acceptance_radius**2
 
         # If drone is halted and not landed yet
         if report.status == drone_status.DroneStatus.HALTED and not self.has_sent_landing_command:
@@ -88,10 +88,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
                 print("Not within acceptance radius, sending waypoint command.")
                 command = commands.Command.create_set_relative_destination_command(
                     self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y
+                    self.waypoint.location_y - report.position.location_y,
                 )
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
         return command
-
