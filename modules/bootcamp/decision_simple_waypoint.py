@@ -87,8 +87,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
             else:
                 print("Not within acceptance radius, sending waypoint command.")
                 command = commands.Command.create_set_relative_destination_command(
-                    self.waypoint.location_x - report.position.location_x,
-                    self.waypoint.location_y - report.position.location_y,
+                    waypoint_x - drone_x,
+                    waypoint_y - drone_y,
                 )
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
