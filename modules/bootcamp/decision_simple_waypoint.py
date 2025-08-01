@@ -37,7 +37,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.landing_command_sent = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -69,6 +69,31 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # Calculate distance using pythagoreas theorem
+        distance = (
+            (self.waypoint.location_x - report.position.location_x) ** 2
+            + (self.waypoint.location_y - report.position.location_y) ** 2
+        ) ** 0.5
+
+        # Landed
+        if report.status == drone_status.DroneStatus.LANDED and self.landing_command_sent:
+            return command
+
+        # Halted Start
+        if report.status == drone_status.DroneStatus.HALTED:
+            if distance <= self.acceptance_radius:
+                command = commands.Command.create_land_command()
+                self.landing_command_sent = True
+            else:
+                x = self.waypoint.location_x - report.position.location_x
+                y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(x, y)
+
+        # Moving
+        elif report.status == drone_status.DroneStatus.MOVING:
+            if distance <= self.acceptance_radius:
+                command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
