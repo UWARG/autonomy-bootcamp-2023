@@ -75,13 +75,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
         # Calculate distance using pythagoreas theorem
-        distance = (
-            (self.waypoint.location_x - report.position.location_x) ** 2
-            + (self.waypoint.location_y - report.position.location_y) ** 2
-        ) ** 0.5
 
-        def dist(x1: float, x2: float, y1: float, y2: float) -> float:
-            return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+        def distance_squared(a: location.Location, b: location.Location) -> float:
+            return (a.location_x - b.location_x) ** 2 + (a.location_y - b.location_y) ** 2
+
+        distance_to_waypoint = distance_squared(self.waypoint, report.position)
 
         # Landed
         if report.status == drone_status.DroneStatus.LANDED:
@@ -90,23 +88,19 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Halted Start
         if report.status == drone_status.DroneStatus.HALTED:
             # If waypoint reached
-            if distance <= self.acceptance_radius and not self.reached_waypoint:
+            if distance_to_waypoint <= self.acceptance_radius**2 and not self.reached_waypoint:
                 # Find Closest Pad
                 for pad in landing_pad_locations:
                     if (
-                        dist(
-                            pad.location_x,
-                            report.position.location_x,
-                            pad.location_y,
-                            report.position.location_y,
+                        distance_squared(
+                            pad,
+                            report.position,
                         )
                         < self.dist_to_landing_pad
                     ):
-                        self.dist_to_landing_pad = dist(
-                            pad.location_x,
-                            report.position.location_x,
-                            pad.location_y,
-                            report.position.location_y,
+                        self.dist_to_landing_pad = distance_squared(
+                            pad,
+                            report.position,
                         )
                         self.closest_pad = pad
                 # Move to closest pad
@@ -117,13 +111,11 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             # Land if pad reached
             elif self.reached_waypoint:
                 if (
-                    dist(
-                        self.closest_pad.location_x,
-                        report.position.location_x,
-                        self.closest_pad.location_y,
-                        report.position.location_y,
+                    distance_squared(
+                        self.closest_pad,
+                        report.position,
                     )
-                    <= self.acceptance_radius
+                    <= self.acceptance_radius**2
                 ):
                     command = commands.Command.create_land_command()
             # Move towards waypoint
@@ -135,21 +127,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         elif report.status == drone_status.DroneStatus.MOVING:
             # Stop if waypoint reached
             if not self.reached_waypoint:
-                if distance <= self.acceptance_radius:
+                if distance_to_waypoint <= self.acceptance_radius**2:
                     command = commands.Command.create_halt_command()
             # Stop if pad reached
             else:
-                if self.closest_pad:
-                    if (
-                        dist(
-                            self.closest_pad.location_x,
-                            report.position.location_x,
-                            self.closest_pad.location_y,
-                            report.position.location_y,
-                        )
-                        <= self.acceptance_radius
-                    ):
-                        command = commands.Command.create_halt_command()
+                if (
+                    self.closest_pad
+                    and distance_squared(self.closest_pad, report.position)
+                    <= self.acceptance_radius**2
+                ):
+                    command = commands.Command.create_halt_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
