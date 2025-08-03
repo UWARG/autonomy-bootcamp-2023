@@ -74,16 +74,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        # Calculate distance using pythagoreas theorem
+        # Calculate distance
 
         def distance_squared(a: location.Location, b: location.Location) -> float:
             return (a.location_x - b.location_x) ** 2 + (a.location_y - b.location_y) ** 2
 
         distance_to_waypoint = distance_squared(self.waypoint, report.position)
-
-        # Landed
-        if report.status == drone_status.DroneStatus.LANDED:
-            return command
 
         # Halted Start
         if report.status == drone_status.DroneStatus.HALTED:
@@ -131,11 +127,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                     command = commands.Command.create_halt_command()
             # Stop if pad reached
             else:
-                if (
-                    self.closest_pad
-                    and distance_squared(self.closest_pad, report.position)
-                    <= self.acceptance_radius**2
-                ):
+                if distance_squared(self.closest_pad, report.position) <= self.acceptance_radius**2:
                     command = commands.Command.create_halt_command()
 
         # ============

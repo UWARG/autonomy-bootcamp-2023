@@ -70,11 +70,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
 
         # Do something based on the report and the state of this class...
 
-        # Calculate distance using pythagoreas theorem
-        dist_squared = (
-            (self.waypoint.location_x - report.position.location_x) ** 2
-            + (self.waypoint.location_y - report.position.location_y) ** 2
-        ) ** 0.5
+        # Calculate distance
+        dist_squared = (self.waypoint.location_x - report.position.location_x) ** 2 + (
+            self.waypoint.location_y - report.position.location_y
+        ) ** 2
 
         # Landed
         if report.status == drone_status.DroneStatus.LANDED and self.landing_command_sent:
