@@ -40,7 +40,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # Add your own
         self.waypoint_reached = False
 
-        # ============  
+        # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
@@ -70,14 +70,14 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
-        
+
         # Travel to waypoint
         if report.status == drone_status.DroneStatus.HALTED:
             if not self.waypoint_reached:
                 x = self.waypoint.location_x - report.position.location_x
                 y = self.waypoint.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(x, y)
-                if (x** 2 + y ** 2) < (self.acceptance_radius ** 2):
+                if (x**2 + y**2) < (self.acceptance_radius**2):
                     self.waypoint_reached = True
                     command = commands.Command.create_halt_command()
             else:
@@ -85,14 +85,16 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
                 min_dist = float("inf")
                 target = None
                 for i in landing_pad_locations:
-                    dist = (i.location_x - report.position.location_x) ** 2 + (i.location_y - report.position.location_y) ** 2
-                    if dist <min_dist:
+                    dist = (i.location_x - report.position.location_x) ** 2 + (
+                        i.location_y - report.position.location_y
+                    ) ** 2
+                    if dist < min_dist:
                         min_dist = dist
                         target = i
                 # Travel to nearest landing pad
                 x = target.location_x - report.position.location_x
                 y = target.location_y - report.position.location_y
-                if (x ** 2 + y ** 2) <= (self.acceptance_radius ** 2):
+                if (x**2 + y**2) <= (self.acceptance_radius**2):
                     # Land
                     command = commands.Command.create_land_command()
                 else:
