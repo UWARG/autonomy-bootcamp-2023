@@ -37,11 +37,23 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        # Add your own
+        self.at_waypoint = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
+
+    def _calculate_distance_to_waypoint(self, current_position: location.Location) -> float:
+        """
+        Calculate the distance from current position to the waypoint.
+        """
+
+        dx = self.waypoint.location_x - current_position.location_x
+        dy = self.waypoint.location_y - current_position.location_y
+
+        distance = (dx**2 + dy**2) ** 0.5
+
+        return distance
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -69,6 +81,27 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
 
         # Do something based on the report and the state of this class...
+
+        # Calculate distance to waypoint
+        distance = self._calculate_distance_to_waypoint(report.position)
+
+        # Check if we're close enough to the waypoint
+        if distance <= self.acceptance_radius:
+            self.at_waypoint = True
+
+        if report.status == drone_status.DroneStatus.HALTED:
+            if self.at_waypoint:
+                # At waypoint and halted. Time to land
+                command = commands.Command.create_land_command()
+            else:
+                # Not at waypoint yet. Calculate movement toward it
+                relative_x = self.waypoint.location_x - report.position.location_x
+                relative_y = self.waypoint.location_y - report.position.location_y
+                command = commands.Command.create_set_relative_destination_command(
+                    relative_x, relative_y
+                )
+
+        # If status is MOVING or LANDED, method returns null command
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
