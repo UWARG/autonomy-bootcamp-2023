@@ -43,7 +43,7 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def _calculate_distance_to_waypoint(self, current_position: location.Location) -> float:
+    def _calculate_squared_distance_to_waypoint(self, current_position: location.Location) -> float:
         """
         Calculate the distance from current position to the waypoint.
         """
@@ -51,9 +51,9 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         dx = self.waypoint.location_x - current_position.location_x
         dy = self.waypoint.location_y - current_position.location_y
 
-        distance = (dx**2 + dy**2) ** 0.5
+        distance_squared = dx**2 + dy**2
 
-        return distance
+        return distance_squared
 
     def run(
         self, report: drone_report.DroneReport, landing_pad_locations: "list[location.Location]"
@@ -83,10 +83,10 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # Do something based on the report and the state of this class...
 
         # Calculate distance to waypoint
-        distance = self._calculate_distance_to_waypoint(report.position)
+        distance_squared = self._calculate_squared_distance_to_waypoint(report.position)
 
         # Check if we're close enough to the waypoint
-        if distance <= self.acceptance_radius:
+        if distance_squared <= self.acceptance_radius**2:
             self.at_waypoint = True
 
         if report.status == drone_status.DroneStatus.HALTED:

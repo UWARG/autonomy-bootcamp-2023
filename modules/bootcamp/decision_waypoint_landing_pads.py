@@ -46,7 +46,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
 
-    def _calculate_distance(
+    def _calculate_squared_distance(
         self, location1: location.Location, location2: location.Location
     ) -> float:
         """
@@ -54,8 +54,8 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         """
         dx = location1.location_x - location2.location_x
         dy = location1.location_y - location2.location_y
-        distance = (dx**2 + dy**2) ** 0.5
-        return distance
+        distance_squared = dx**2 + dy**2
+        return distance_squared
 
     def _find_closest_landing_pad(
         self, landing_pad_locations: "list[location.Location]"
@@ -67,12 +67,12 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
             return None
 
         closest_pad = None
-        closest_distance = float("inf")  # Start with infinity
+        closest_distance_squared = float("inf")  # Start with infinity
 
         for pad in landing_pad_locations:
-            distance = self._calculate_distance(self.waypoint, pad)
-            if distance < closest_distance:
-                closest_distance = distance
+            distance_squared = self._calculate_squared_distance(self.waypoint, pad)
+            if distance_squared < closest_distance_squared:
+                closest_distance_squared = distance_squared
                 closest_pad = pad
 
         return closest_pad
@@ -102,39 +102,44 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
 
-        if not self.at_waypoint:
-            distance_to_waypoint = self._calculate_distance(report.position, self.waypoint)
-
-            if distance_to_waypoint <= self.acceptance_radius:
-                self.at_waypoint = True
-                print("Reached waypoint! Now searching for landing pads...")
-            elif report.status == drone_status.DroneStatus.HALTED:
+        if report.status == drone_status.DroneStatus.HALTED:
+            if not self.at_waypoint:
                 relative_x = self.waypoint.location_x - report.position.location_x
                 relative_y = self.waypoint.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
-
-        elif self.at_waypoint and self.closest_landing_pad is None:
-            self.closest_landing_pad = self._find_closest_landing_pad(landing_pad_locations)
-            if self.closest_landing_pad:
-                print(f"Found closest landing pad at: {self.closest_landing_pad}")
-
-        elif self.closest_landing_pad and not self.at_landing_pad:
-            distance_to_pad = self._calculate_distance(report.position, self.closest_landing_pad)
-
-            if distance_to_pad <= self.acceptance_radius:
-                self.at_landing_pad = True
-            elif report.status == drone_status.DroneStatus.HALTED:
+            elif self.at_waypoint and self.closest_landing_pad is None:
+                self.closest_landing_pad = self._find_closest_landing_pad(landing_pad_locations)
+                if self.closest_landing_pad:
+                    print(f"Found closest landing pad at: {self.closest_landing_pad}")
+            elif self.closest_landing_pad and not self.at_landing_pad:
                 relative_x = self.closest_landing_pad.location_x - report.position.location_x
                 relative_y = self.closest_landing_pad.location_y - report.position.location_y
                 command = commands.Command.create_set_relative_destination_command(
                     relative_x, relative_y
                 )
+            elif self.at_landing_pad:
+                command = commands.Command.create_land_command()
+                print("Landing on the landing pad!")
 
-        elif self.at_landing_pad and report.status == drone_status.DroneStatus.HALTED:
-            command = commands.Command.create_land_command()
-            print("Landing on the landing pad!")
+        if not self.at_waypoint:
+            distance_to_waypoint_squared = self._calculate_squared_distance(
+                report.position, self.waypoint
+            )
+
+            if distance_to_waypoint_squared <= self.acceptance_radius**2:
+                self.at_waypoint = True
+                print("Reached waypoint! Now searching for landing pads...")
+
+        elif self.closest_landing_pad and not self.at_landing_pad:
+            distance_to_pad_squared = self._calculate_squared_distance(
+                report.position, self.closest_landing_pad
+            )
+
+            if distance_to_pad_squared <= self.acceptance_radius**2:
+                self.at_landing_pad = True
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
