@@ -12,14 +12,12 @@ import ultralytics
 
 from .. import bounding_box
 
-
 # ============
 # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
 # ============
-# Bootcampers remove the following lines:
-# Allow linters and formatters to pass for bootcamp maintainers
-# No enable
-# pylint: disable=unused-argument,unused-private-member,unused-variable
+
+# (nothing here anymore)
+
 # ============
 # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
 # ============
@@ -89,7 +87,7 @@ class DetectLandingPad:
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
+       
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -98,31 +96,52 @@ class DetectLandingPad:
         # * conf
         # * device
         # * verbose
-        predictions = ...
+        results = self.__model.predict(
+            source=image,
+            conf=0.25,
+            device="cpu",
+            verbose=False,
+        )
+        
 
         # Get the Result object
-        prediction = ...
+        prediction = results[0]
 
         # Plot the annotated image from the Result object
         # Include the confidence value
-        image_annotated = ...
+        image_annotated = prediction.plot(
+            conf=True, show=False)
+        
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes_xyxy = prediction.boxes.xyxy
 
         # Detach the xyxy boxes to make a copy,
         # move the copy into CPU space,
         # and convert to a numpy array
-        boxes_cpu = ...
+        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
 
         # Loop over the boxes list and create a list of bounding boxes
-        bounding_boxes = []
+        bounding_boxes: list[bounding_box.BoundingBox] = []
         # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
+        for row in boxes_xyxy:
+            x1, y1, x2, y2 = [float(v) for v in row]
+            ok, box = bounding_box.BoundingBox.create(
+                np.array([float(x1), float(y1), float(x2), float(y2)], dtype=float
+                )
+            )
+            # Create BoundingBox object and append to list
+            
         #     # Create BoundingBox object and append to list
         #     result, box = ...
+        
+            bounding_boxes.append(box)
+        #     # Create BoundingBox object and append to list
+        #     bounding_boxes.append(...)
 
-        return [], image_annotated
+
+        return bounding_boxes, image_annotated
+    
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
