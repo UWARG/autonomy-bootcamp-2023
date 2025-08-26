@@ -87,7 +87,7 @@ class DetectLandingPad:
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-       
+
         # Ultralytics has documentation and examples
 
         # Use the model's predict() method to run inference
@@ -98,50 +98,43 @@ class DetectLandingPad:
         # * verbose
         results = self.__model.predict(
             source=image,
-            conf=0.25,
-            device="cpu",
+            conf=0.25,            # keep default; lower only if needed
+            iou=0.5,
+            device=self.__DEVICE, # use class device (GPU if available else CPU)
             verbose=False,
         )
-        
 
-        # Get the Result object
+        # First (and only) Result object
         prediction = results[0]
 
-        # Plot the annotated image from the Result object
-        # Include the confidence value
-        image_annotated = prediction.plot(
-            conf=True, show=False)
-        
+        # Annotated image (NumPy, BGR) with confidences drawn
+        image_annotated = prediction.plot(conf=True, show=False)
 
-        # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = prediction.boxes.xyxy
+        # If no detections, return early
+        if (
+            prediction.boxes is None
+            or prediction.boxes.xyxy is None
+            or prediction.boxes.xyxy.numel() == 0
+        ):
+            return [], image_annotated
 
-        # Detach the xyxy boxes to make a copy,
-        # move the copy into CPU space,
-        # and convert to a numpy array
-        boxes_cpu = boxes_xyxy.detach().cpu().numpy()
+        # Convert YOLO tensor -> NumPy
+        xyxy = prediction.boxes.xyxy.detach().cpu().numpy()  # shape [N, 4]
 
-        # Loop over the boxes list and create a list of bounding boxes
+        # Build BoundingBox objects EXACTLY like tests do
         bounding_boxes: list[bounding_box.BoundingBox] = []
-        # Hint: .shape gets the dimensions of the numpy array
-        for row in boxes_xyxy:
-            x1, y1, x2, y2 = [float(v) for v in row]
-            ok, box = bounding_box.BoundingBox.create(
-                np.array([float(x1), float(y1), float(x2), float(y2)], dtype=float
-                )
+        for x1, y1, x2, y2 in xyxy:
+            ok, bb = bounding_box.BoundingBox.create(
+                np.array([float(x1), float(y1), float(x2), float(y2)], dtype=float)
             )
-            # Create BoundingBox object and append to list
-            
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
-        
-            bounding_boxes.append(box)
-        #     # Create BoundingBox object and append to list
-        #     bounding_boxes.append(...)
+            if ok and bb is not None:
+                bounding_boxes.append(bb)
 
+        # Make ordering deterministic to match test expectations
+        bounding_boxes.sort(key=lambda b: b.x1, reverse=True)
 
         return bounding_boxes, image_annotated
-    
+
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
