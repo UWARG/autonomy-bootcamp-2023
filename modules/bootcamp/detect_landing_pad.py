@@ -98,9 +98,9 @@ class DetectLandingPad:
         # * verbose
         results = self.__model.predict(
             source=image,
-            conf=0.25,            # keep default; lower only if needed
+            conf=0.25,  # keep default; lower only if needed
             iou=0.5,
-            device=self.__DEVICE, # use class device (GPU if available else CPU)
+            device=self.__DEVICE,  # use class device (GPU if available else CPU)
             verbose=False,
         )
 

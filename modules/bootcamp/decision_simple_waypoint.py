@@ -1,5 +1,5 @@
-
 """Decision logic to fly the drone to a waypoint and land when within the acceptance radius."""
+
 from .. import commands
 from .. import drone_report
 
