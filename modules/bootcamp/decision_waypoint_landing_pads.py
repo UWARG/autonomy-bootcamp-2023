@@ -38,7 +38,7 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
 
         # Add your own
-
+        self.has_landed = False
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
@@ -67,7 +67,24 @@ class DecisionWaypointLandingPads(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        dx = self.waypoint.location_x - report.position.location_x
+        dy = self.waypoint.location_y - report.position.location_y
+        dist = (dx**2 + dy**2) ** 0.5
 
+        if self.has_landed:
+            return command
+
+        # Do something based on the report and the state of this class...
+        if report.status.name == "LANDED":
+            self.has_landed = True
+            return command
+
+        if dist > self.acceptance_radius:
+            if report.status.name == "HALTED":
+                command = commands.Command.create_set_relative_destination_command(dx, dy)
+        else:
+            if report.status.name == "HALTED":
+                command = commands.Command.create_land_command()
         # Do something based on the report and the state of this class...
 
         # ============
