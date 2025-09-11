@@ -86,43 +86,40 @@ class DetectLandingPad:
         Return: A tuple of (list of bounding boxes, annotated image) .
             The list of bounding boxes can be empty.
         """
-        # ============
-        # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
-        # ============
+        # Run inference using the model's predict method
+        # Set confidence threshold to 0.7, use the correct device, and suppress verbose output
+        predictions = self.__model.predict(
+            source=image,
+            conf=0.7,
+            device=self.__DEVICE,
+            verbose=False,
+        )
 
-        # Ultralytics has documentation and examples
+        # Get the first (and only) Result object
+        prediction = predictions[0]
 
-        # Use the model's predict() method to run inference
-        # Parameters of interest:
-        # * source
-        # * conf
-        # * device
-        # * verbose
-        predictions = ...
-
-        # Get the Result object
-        prediction = ...
-
-        # Plot the annotated image from the Result object
-        # Include the confidence value
-        image_annotated = ...
+        # Plot the annotated image from the Result object (includes confidence values)
+        image_annotated = prediction.plot()
 
         # Get the xyxy boxes list from the Boxes object in the Result object
-        boxes_xyxy = ...
+        boxes = prediction.boxes
+        if boxes is not None and boxes.xyxy is not None:
+            boxes_xyxy = boxes.xyxy
+        else:
+            boxes_xyxy = []
 
-        # Detach the xyxy boxes to make a copy,
-        # move the copy into CPU space,
-        # and convert to a numpy array
-        boxes_cpu = ...
+        # Detach the xyxy boxes to make a copy, move to CPU, and convert to numpy array
+        if hasattr(boxes_xyxy, "cpu"):
+            boxes_cpu = boxes_xyxy.cpu().numpy()
+        else:
+            boxes_cpu = np.array(boxes_xyxy)
 
         # Loop over the boxes list and create a list of bounding boxes
         bounding_boxes = []
-        # Hint: .shape gets the dimensions of the numpy array
-        # for i in range(0, ...):
-        #     # Create BoundingBox object and append to list
-        #     result, box = ...
+        for i in range(boxes_cpu.shape[0]):
+            bounds = boxes_cpu[i]
+            result, box = bounding_box.BoundingBox.create(bounds)
+            if result and box is not None:
+                bounding_boxes.append(box)
 
-        return [], image_annotated
-        # ============
-        # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
-        # ============
+        return bounding_boxes, image_annotated

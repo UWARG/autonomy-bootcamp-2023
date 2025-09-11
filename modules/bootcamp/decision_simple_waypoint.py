@@ -36,8 +36,8 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
-
         # Add your own
+        self.has_landed = False
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
@@ -67,11 +67,26 @@ class DecisionSimpleWaypoint(base_decision.BaseDecision):
         # ============
         # ↓ BOOTCAMPERS MODIFY BELOW THIS COMMENT ↓
         # ============
+        # Calculate distance to waypoint
+        delta_x = self.waypoint.location_x - report.position.location_x
+        delta_y = self.waypoint.location_y - report.position.location_y
+        dist = (delta_x**2 + delta_y**2) ** 0.5
 
-        # Do something based on the report and the state of this class...
+        if self.has_landed:
+            return command
+
+        if report.status.name == "LANDED":
+            self.has_landed = True
+            return command
+
+        if dist > self.acceptance_radius:
+            if report.status.name == "HALTED":
+                command = commands.Command.create_set_relative_destination_command(delta_x, delta_y)
+        else:
+            if report.status.name == "HALTED":
+                command = commands.Command.create_land_command()
 
         # ============
         # ↑ BOOTCAMPERS MODIFY ABOVE THIS COMMENT ↑
         # ============
-
         return command
